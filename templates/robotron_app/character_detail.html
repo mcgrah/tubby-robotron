@@ -1,0 +1,58 @@
+{% extends "base.html"%}
+{% block title %}{{ character.batch.project.name }}: {{ character.name }}{% endblock %}
+{% block content %}
+    <div aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ character.batch.project.get_absolute_url }}">{{ character.batch.project.name }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ character.batch.get_absolute_url }}">{{ character.batch.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ character.name }}</li>
+        </ol>
+    </div>
+    <div class="row">
+        <div class="col">
+        <h4>Character Details:</h4>
+        <table class="table table-sm">
+        <tbody>
+            <tr><th scope="row">Batch: </th><td>{{ character.batch.name }}</td></tr>
+            <tr><th scope="row">Character: </th><td>{{ character.name }}</td></tr>
+            <tr><th scope="row">Actor: </th><td>{{ character.actor.name }}</td></tr>
+            <tr><th scope="row">Files: </th><td>{{ character.files_count }}</td></tr>
+            <tr><th scope="row">Delivery Date: </th><td>{{ character.delivery_date|date:"Y-m-d" }} {{ character.delivery_time|time:"H:i" }}</td></tr>
+        </tbody>
+        </table>
+        </div>
+        <div class="col"></div>
+    </div>
+{#    <div class="row">#}
+    <h4>Character Sessions:</h4>
+    {% if session_list %}
+        <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Day</th>
+                <th>Hour</th>
+                <th>Duration</th>
+                <th>Director</th>
+                <th>Translator</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for session in session_list %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ session.day|date:"d-m-Y"}}</td>
+                <td>{{ session.hour|time:"H:i" }}</td>
+                <td>{{ session.duration }}</td>
+                <td>{{ session.director.name }}</td>
+                <td>{{ session.translator.name }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+    {% else %}
+       <div class="alert alert-info">This character has currently no sessions.</div>
+    {% endif %}
+{#    </div>#}
+
+{% endblock %}

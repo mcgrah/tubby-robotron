@@ -1,0 +1,14 @@
+{% extends "base.html"%}
+{% block title %}Studios{% endblock %}
+{% block content %}
+    <h1>StudioList</h1>
+    {% if studio_list %}
+        <div class="list-group">
+          {% for studio in studio_list %}
+              <a href="{{ studio.get_absolute_url }}" class="list-group-item list-group-item-action">{{ studio.name }} ( {{ studio.email }})</a>
+          {% endfor %}
+        </div>
+    {% else %}
+       <div class="alert alert-info">There are no studios in the database.</div>
+    {% endif %}
+{% endblock %}runserver

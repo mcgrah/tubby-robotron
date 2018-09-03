@@ -1,0 +1,229 @@
+{% extends "base.html"%}
+{#{% load staticfiles %}#}
+{% block pageScript %}
+{% endblock %}
+{% block title %}{{ batch.project.name }}: {{ batch.name }}{% endblock %}
+{% block page_alerts %}
+    {% if errors %}
+        <div class="alert alert-danger">
+            <p>{{  errors }}</p>
+        </div>
+        {% elif success %}
+        <div class="alert alert-success">
+            <p>{{ success }}</p>
+        </div>
+
+    {% endif %}
+
+{% endblock %}
+{% block content %}
+    <div aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ batch.project.get_absolute_url }}">{{ batch.project.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ batch.name }}</li>
+        </ol>
+    </div>
+
+    <div class="modal fade text-center" id="theModal" role="dialog">
+     <div class="modal-dialog">
+      <div class="modal-content">
+      </div>
+     </div>
+    </div>
+
+
+    <h2>{{ batch.project.name }}: {{ batch.name }} Details</h2>
+    <hr>
+    <h4>Characters Overview</h4>
+    <div class="btn-group">
+        <button type="button" class="btn btn-outline-primary" data-toggle="collapse" data-target="#charForm" aria-pressed="false" aria-expanded="false">Add New</button>
+        <button type="button" class="btn btn-outline-primary" id="csv_test">Import CSV</button>
+        <a role="button" class="btn btn-outline-primary" href="{% url "upload_csv_modal" last_batch_id=batch.id %}" data-target="#theModal" data-toggle="modal">Import CSV #2</a>
+        <button type="button" class="btn btn-outline-primary" onclick="generate_new_sessions()">Generate Sessions</button>
+        <button type="button" class="btn btn-outline-primary" onclick="nuke_empty_sessions()">NUKE Sessions</button>
+    </div>
+
+    <div class="card collapse" id="csvForm">
+    <div class="card-body">
+        <form enctype="multipart/form-data" method="POST">
+            {% csrf_token %}
+{#            {{ file_form }}#}
+        </form>
+    </div>
+    </div>
+
+    <div class="card collapse" id="charForm">
+    <div class="card-body">
+        {% load i18n widget_tweaks %}
+        <form action="" method="POST">
+            {% csrf_token %}
+            <div class="form-row">
+                 {% for field in form %}
+                     {% if field.errors %}
+                    <div class="form-group has-error col-md-2">
+                        <label class="control-label" for="id_{{ field.name }}">{{ field.label }}</label>
+                        {{ field|attr:"class:form-control" }}
+                        <div class="alert alert-danger">
+                            {% for error in  field.errors %}{{ error }}{% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="form-group col-md-2">
+                        <label class="control-label" for="id_{{ field.name }}">{{ field.label }}</label>
+                        {{ field|attr:"class:form-control" }}
+                    </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            <div class="form-row">
+                <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
+            </div>
+        </form>
+    </div>
+    </div>
+
+    {% if character_list %}
+        <table class="table table-borderless table-sm table-hover">
+            <tbody>
+            <tr>
+                <th scope="col">Character</th>
+                <th scope="col">Actor</th>
+                <th scope="col">Files</th>
+                <th scope="col">Delivery Date</th>
+                <th scope="col">Delivery Time</th>
+                <th scope="col" colspan="2">Num. of Sessions</th>
+            </tr>
+            {% for char in character_list %}
+                <tr>
+                <td>{{ char.name }}</td>
+{#                <td>{{ char.actor.surname }} {{ char.actor.name }}</td>#}
+                <td>{{ char.actor.name }}</td>
+                <td>{{ char.files_count }}</td>
+                <td>{{ char.delivery_date|date:"Y-m-d" }}</td>
+                <td>{{ char.delivery_time|time:"H:i"  }}</td>
+                <td>{{ char.session_count }}</td>
+                <td><a href="{{ char.get_absolute_url }}">Manage</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+       <div class="alert alert-info">No characters added to the current batch.</div>
+    {% endif %}
+    <hr>
+{#    <h4>[VIEW EXAMPLE #1] Sessions Overview</h4>#}
+{#    {% if session_list %}#}
+{#        <table class="table table-sm table-borderless">#}
+{#        <tr>#}
+{#                <th>#</th>#}
+{#                <th>Day</th>#}
+{#                <th>Hour</th>#}
+{#                <th>Duration</th>#}
+{#                <th>Director</th>#}
+{#                <th>Translator</th>#}
+{#        </tr>#}
+{#        {% regroup session_list by character as char_sessions %}#}
+{#        {% for character in char_sessions %}#}
+{#            <table class="table table-sm">#}
+{#                <thead class="thead-light">#}
+{#                <tr class="accordion-toggle" data-toggle="collapse" data-target="#collapse{{ forloop.counter }}">#}
+{#                    <th scope="col" colspan="6">{{ character.grouper.name }} {{ character.grouper.actor.name }}) &lt;click to show/hide&gt;</th>#}
+{#                </tr>#}
+{#                </thead>#}
+{#            </table>#}
+{#            </table>#}
+{##}
+{#            <div id="collapse{{ forloop.counter }}" class="collapse show">#}
+{#            <table class="table table-sm table-borderless">#}
+{#                {% for session in character.list %}#}
+{#                    <tr>#}
+{#                        <td>{{ forloop.counter }}</td>#}
+{#                        <td>{{ session.day|date:"Y-m-d"}}</td>#}
+{#                        <td>{{ session.hour|time:"H:i" }}</td>#}
+{#                        <td>{{ session.duration }}</td>#}
+{#                        <td>{{ session.director.name }}</td>#}
+{#                        <td>{{ session.translator.name }}</td>#}
+{#                    </tr>#}
+{#                {% endfor %}#}
+{#            </table>#}
+{#            </div>#}
+{#        {% endfor %}#}
+{#    {% else %}#}
+{#       <div class="alert alert-info">No sessions found in the current batch.</div>#}
+{#    {% endif %}#}
+{#    <br><br>#}
+    <h4>Sessions Overview</h4>
+    {% if session_list %}
+        <table class="table table-borderless table-sm table-hover" id="sessions2">
+        <thead>
+            <tr>
+                <th>Character</th>
+                <th>Actor</th>
+                <th>Day</th>
+                <th>Hour</th>
+                <th>Duration</th>
+                <th>Director</th>
+                <th>Translator</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for session in session_list %}
+            <tr>
+                <td>{{ session.character.name }}</td>
+                <td>{{ session.character.actor.name }}</td>
+                <td>{{ session.day|date:"d-m-Y"}}</td>
+                <td>{{ session.hour|time:"H:i" }}</td>
+                <td>{{ session.duration|default_if_none:'' }}</td>
+                <td>{{ session.director.name }}</td>
+                <td>{{ session.translator.name }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+    {% else %}
+       <div class="alert alert-info">No sessions found in the current batch.</div>
+    {% endif %}
+
+{% endblock %}
+{% block custom_script_end %}
+{#    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>#}
+{#    {{ form.media }}#}
+
+    <script type="text/javascript">
+        $(window).on('load',function(){
+            $('#csv_test').on('click', function(){
+                console.log('csv1 test clicked');
+                $('.modal-content').load('{% url "upload_csv_modal" last_batch_id=batch.id %}',function(){
+                    $('#theModal').modal({show:true});
+                })
+            })
+        });
+
+        function generate_new_sessions(){
+            console.log('button clicked');
+            $.ajax({
+                url:"{% url "generate_new_sessions" batch_id=batch.id %}",
+                success:function(){
+                    console.log('call successful');
+                    window.location.reload();
+                },
+            })
+        }
+
+        function nuke_empty_sessions(){
+            console.log('nuke button clicked');
+            $.ajax({
+                url:"{% url "nuke_empty_sessions" %}",
+                success:function(){
+                    console.log('nuke call successful');
+                    window.location.reload();
+                },
+            })
+        }
+
+        $(document).ready( function () {
+            $('#sessions2').DataTable();
+        } );
+    </script>
+
+{% endblock %}

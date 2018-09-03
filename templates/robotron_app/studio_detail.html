@@ -1,0 +1,28 @@
+{% extends "base.html"%}
+{% block title %}Studio: {{ studio.name }}{% endblock %}
+{% block content %}
+    <h1>{{ studio.name }}</h1>
+    <table class="table table-striped">
+        <tbody>
+        <tr><th scope="row">Address: </th><td>{{ studio.address }}</td></tr>
+        <tr><th scope="row">Telephone: </th><td>{{ studio.telephone }}</td></tr>
+        <tr><th scope="row">E-Mail: </th><td>{{ studio.email }}</td></tr>
+        <tr><th scope="row">Note: </th><td>{{ studio.note }}</td></tr>
+        </tbody>
+    </table>
+    <h2>Assigned Projects:</h2>
+    {% if project_list %}
+        <div class="list-group">
+          {% for project in project_list %}
+              <a href="{{ project.get_absolute_url }}" class="list-group-item list-group-item-action">{{ project.name }}</a>
+          {% endfor %}
+        </div>
+    {% else %}
+       <div class="alert alert-info">This studio has no associated projects.</div>
+    {% endif %}
+    <h2>Users:</h2>
+    {% if user_list %}
+    {% else %}
+       <div class="alert alert-info">No users added to this account.</div>
+    {% endif %}
+{% endblock %}
