@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 from django.views import generic
 from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
 from django.db.models import Sum, Q
 from django.http import HttpResponseRedirect, HttpResponse
 from robotron_app.models import Studio, Project, Batch, Session, Character, Actor
@@ -259,7 +260,8 @@ def upload_csv_modal(request, last_batch_id):
 
                     Character.objects.bulk_create(bulk_chars)
 
-                    return batch_detail_view(request,last_batch_id)
+                    # return batch_detail_view(request,last_batch_id)
+                    return HttpResponseRedirect(reverse('batch', kwargs={'pk':last_batch_id}))
 
             except Exception as e:
                 error_msg = e

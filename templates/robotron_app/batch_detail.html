@@ -1,5 +1,6 @@
 {% extends "base.html"%}
-{#{% load staticfiles %}#}
+{% load static %}
+
 {% block pageScript %}
 {% endblock %}
 {% block title %}{{ batch.project.name }}: {{ batch.name }}{% endblock %}
@@ -38,19 +39,19 @@
     <div class="btn-group">
         <button type="button" class="btn btn-outline-primary" data-toggle="collapse" data-target="#charForm" aria-pressed="false" aria-expanded="false">Add New</button>
         <button type="button" class="btn btn-outline-primary" id="csv_test">Import CSV</button>
-        <a role="button" class="btn btn-outline-primary" href="{% url "upload_csv_modal" last_batch_id=batch.id %}" data-target="#theModal" data-toggle="modal">Import CSV #2</a>
+{#        <a role="button" class="btn btn-outline-primary" href="{% url "upload_csv_modal" last_batch_id=batch.id %}" data-target="#theModal" data-toggle="modal">Import CSV #2</a>#}
         <button type="button" class="btn btn-outline-primary" onclick="generate_new_sessions()">Generate Sessions</button>
         <button type="button" class="btn btn-outline-primary" onclick="nuke_empty_sessions()">NUKE Sessions</button>
     </div>
 
-    <div class="card collapse" id="csvForm">
-    <div class="card-body">
-        <form enctype="multipart/form-data" method="POST">
-            {% csrf_token %}
+{#    <div class="card collapse" id="csvForm">#}
+{#    <div class="card-body">#}
+{#        <form enctype="multipart/form-data" method="POST">#}
+{#            {% csrf_token %}#}
 {#            {{ file_form }}#}
-        </form>
-    </div>
-    </div>
+{#        </form>#}
+{#    </div>#}
+{#    </div>#}
 
     <div class="card collapse" id="charForm">
     <div class="card-body">
@@ -187,8 +188,9 @@
 {% endblock %}
 {% block custom_script_end %}
 {#    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>#}
-{#    {{ form.media }}#}
-
+    {{ form.media }}
+    <script type="text/javascript" src="{% static "DataTables/datatables.min.js" %}"></script>
+{#    <script type="text/javascript" src="/robotron_app/static/DataTables/datatables.min.js"></script>#}
     <script type="text/javascript">
         $(window).on('load',function(){
             $('#csv_test').on('click', function(){
