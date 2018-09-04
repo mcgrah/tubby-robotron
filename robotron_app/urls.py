@@ -11,12 +11,11 @@ urlpatterns = [
     # path('batch/<int:pk>', views.BatchDetailView.as_view(), name='batch'),
     path('batch/<int:pk>', views.batch_detail_view, name='batch'),
     path('character/<int:pk>', views.CharacterDetailView.as_view(), name='character'),
-    path('upload_csv_modal/<int:last_batch_id>', views.upload_csv_modal, name='upload_csv_modal'),
-
 ]
 # functions only:
 urlpatterns += [
     path('nuke_empty_sessions/', views.nuke_empty_sessions, name='nuke_empty_sessions'),
     path('generate_sessions/<int:batch_id>', views.generate_new_sessions, name='generate_new_sessions'),
+    path('delete_selected_chars/', views.delete_selected_chars, name='delete_selected_chars'),
 
 ]

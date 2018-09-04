@@ -3,8 +3,11 @@
 
 {% block pageScript %}
 {% endblock %}
+
 {% block title %}{{ batch.project.name }}: {{ batch.name }}{% endblock %}
+
 {% block page_alerts %}
+
     {% if errors %}
         <div class="alert alert-danger">
             <p>{{  errors }}</p>
@@ -13,10 +16,10 @@
         <div class="alert alert-success">
             <p>{{ success }}</p>
         </div>
-
     {% endif %}
 
 {% endblock %}
+
 {% block content %}
     <div aria-label="breadcrumb">
         <ol class="breadcrumb">
@@ -34,59 +37,92 @@
 
 
     <h2>{{ batch.project.name }}: {{ batch.name }} Details</h2>
-    <hr>
     <h4>Characters Overview</h4>
-    <div class="btn-group">
-        <button type="button" class="btn btn-outline-primary" data-toggle="collapse" data-target="#charForm" aria-pressed="false" aria-expanded="false">Add New</button>
-        <button type="button" class="btn btn-outline-primary" id="csv_test">Import CSV</button>
-{#        <a role="button" class="btn btn-outline-primary" href="{% url "upload_csv_modal" last_batch_id=batch.id %}" data-target="#theModal" data-toggle="modal">Import CSV #2</a>#}
-        <button type="button" class="btn btn-outline-primary" onclick="generate_new_sessions()">Generate Sessions</button>
-        <button type="button" class="btn btn-outline-primary" onclick="nuke_empty_sessions()">NUKE Sessions</button>
-    </div>
+    <div id="two-form">
+    {% load i18n widget_tweaks %}
 
-{#    <div class="card collapse" id="csvForm">#}
-{#    <div class="card-body">#}
-{#        <form enctype="multipart/form-data" method="POST">#}
-{#            {% csrf_token %}#}
-{#            {{ file_form }}#}
-{#        </form>#}
-{#    </div>#}
-{#    </div>#}
+        <div class="container">
+            <div class="btn-group">
+                <button class="btn btn-outline-primary" type="button" data-toggle="collapse" data-target="#target1" aria-expanded="false">
+                    Add Single
+                </button>
+                <button class="btn btn-outline-primary" type="button" data-parent="#two-form" data-toggle="collapse" data-target="#target2" aria-expanded="false">
+                    Import CSV
+                </button>
+                <button type="button" class="btn btn-outline-primary" onclick="generate_new_sessions()">Generate Sessions</button>
+                <button type="button" class="btn btn-outline-primary" onclick="nuke_empty_sessions()">NUKE Sessions</button>
+                <button type="button" class="btn btn-outline-primary invisible" onclick="delete_selected_chars()" id="delete-char-btn">Delete Selected</button>
+            </div>
+        </div>
 
-    <div class="card collapse" id="charForm">
-    <div class="card-body">
-        {% load i18n widget_tweaks %}
         <form action="" method="POST">
             {% csrf_token %}
-            <div class="form-row">
-                 {% for field in form %}
-                     {% if field.errors %}
-                    <div class="form-group has-error col-md-2">
-                        <label class="control-label" for="id_{{ field.name }}">{{ field.label }}</label>
-                        {{ field|attr:"class:form-control" }}
-                        <div class="alert alert-danger">
+            {% if form.errors %}
+                <div class="panel">
+                    <div class="card card-body">
+                        {{ form.errors }}
+                        {% for field in form %}
                             {% for error in  field.errors %}{{ error }}{% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="panel">
+                    <div class="collapse" id="target1" data-parent="#two-form">
+                        <div class="card card-body">
+                            <div class="form-row">
+                                {% for field in form %}
+                                    <div class="form-group col-md-2">
+                                        <label class="control-label" for="id_{{ field.name }}">{{ field.label }}</label>
+                                        {{ field|attr:"class:form-control" }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-row">
+                                <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
+                                <input type="text" name="single_form" value="1" class="invisible">
+                            </div>
                         </div>
                     </div>
-                {% else %}
-                    <div class="form-group col-md-2">
-                        <label class="control-label" for="id_{{ field.name }}">{{ field.label }}</label>
-                        {{ field|attr:"class:form-control" }}
+                </div>
+            {% endif %}
+        </form>
+
+        <form enctype="multipart/form-data" method="POST">
+            {% csrf_token %}
+            {% if file_form.errors %}
+                <div class="panel">
+                    <div class="card card-body">
+                        {{ file_form.errors }}
+                        {% for field in file_form %}
+                            {% for error in  field.errors %}{{ error }}{% endfor %}
+                        {% endfor %}
                     </div>
-                {% endif %}
-                {% endfor %}
-            </div>
-            <div class="form-row">
-                <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
-            </div>
+                </div>
+            {% else %}
+                <div class="panel">
+                    <div class="collapse" id="target2" data-parent="#two-form">
+                        <div class="card card-body">
+                            <div class="form-row">
+                            {{ file_form }}
+                            </div>
+                            <div class="form-row">
+                                <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
+                                <input type="text" name="csv_import_form" value="1" class="invisible">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         </form>
     </div>
-    </div>
+    <hr>
 
     {% if character_list %}
-        <table class="table table-borderless table-sm table-hover">
+        <table class="table table-borderless table-sm table-hover" id="character-table">
             <tbody>
             <tr>
+                <th></th>
                 <th scope="col">Character</th>
                 <th scope="col">Actor</th>
                 <th scope="col">Files</th>
@@ -96,6 +132,11 @@
             </tr>
             {% for char in character_list %}
                 <tr>
+                {% if char.session_count == 0 %}
+                    <td><input type="checkbox" aria-label="delete_mark" class="delete-char-box" id="{{ char.id }}"></td>
+                {% else %}
+                    <td></td>
+                {% endif %}
                 <td>{{ char.name }}</td>
 {#                <td>{{ char.actor.surname }} {{ char.actor.name }}</td>#}
                 <td>{{ char.actor.name }}</td>
@@ -111,48 +152,9 @@
     {% else %}
        <div class="alert alert-info">No characters added to the current batch.</div>
     {% endif %}
+
     <hr>
-{#    <h4>[VIEW EXAMPLE #1] Sessions Overview</h4>#}
-{#    {% if session_list %}#}
-{#        <table class="table table-sm table-borderless">#}
-{#        <tr>#}
-{#                <th>#</th>#}
-{#                <th>Day</th>#}
-{#                <th>Hour</th>#}
-{#                <th>Duration</th>#}
-{#                <th>Director</th>#}
-{#                <th>Translator</th>#}
-{#        </tr>#}
-{#        {% regroup session_list by character as char_sessions %}#}
-{#        {% for character in char_sessions %}#}
-{#            <table class="table table-sm">#}
-{#                <thead class="thead-light">#}
-{#                <tr class="accordion-toggle" data-toggle="collapse" data-target="#collapse{{ forloop.counter }}">#}
-{#                    <th scope="col" colspan="6">{{ character.grouper.name }} {{ character.grouper.actor.name }}) &lt;click to show/hide&gt;</th>#}
-{#                </tr>#}
-{#                </thead>#}
-{#            </table>#}
-{#            </table>#}
-{##}
-{#            <div id="collapse{{ forloop.counter }}" class="collapse show">#}
-{#            <table class="table table-sm table-borderless">#}
-{#                {% for session in character.list %}#}
-{#                    <tr>#}
-{#                        <td>{{ forloop.counter }}</td>#}
-{#                        <td>{{ session.day|date:"Y-m-d"}}</td>#}
-{#                        <td>{{ session.hour|time:"H:i" }}</td>#}
-{#                        <td>{{ session.duration }}</td>#}
-{#                        <td>{{ session.director.name }}</td>#}
-{#                        <td>{{ session.translator.name }}</td>#}
-{#                    </tr>#}
-{#                {% endfor %}#}
-{#            </table>#}
-{#            </div>#}
-{#        {% endfor %}#}
-{#    {% else %}#}
-{#       <div class="alert alert-info">No sessions found in the current batch.</div>#}
-{#    {% endif %}#}
-{#    <br><br>#}
+
     <h4>Sessions Overview</h4>
     {% if session_list %}
         <table class="table table-borderless table-sm table-hover" id="sessions2">
@@ -186,25 +188,33 @@
     {% endif %}
 
 {% endblock %}
+
 {% block custom_script_end %}
-{#    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>#}
+
     {{ form.media }}
     <script type="text/javascript" src="{% static "DataTables/datatables.min.js" %}"></script>
-{#    <script type="text/javascript" src="/robotron_app/static/DataTables/datatables.min.js"></script>#}
+
     <script type="text/javascript">
-        $(window).on('load',function(){
-            $('#csv_test').on('click', function(){
-                console.log('csv1 test clicked');
-                $('.modal-content').load('{% url "upload_csv_modal" last_batch_id=batch.id %}',function(){
-                    $('#theModal').modal({show:true});
-                })
-            })
-        });
+        var timeOutHandler;
 
         function generate_new_sessions(){
             console.log('button clicked');
             $.ajax({
                 url:"{% url "generate_new_sessions" batch_id=batch.id %}",
+                beforeSend: function(){
+                    timeOutHandler = setTimeout(function(){
+                        $("#loadMe").modal({
+                          backdrop: "static", //remove ability to close modal with click
+                          keyboard: false, //remove option to close with keyboard
+                          show: true //Display loader!
+                        });
+                    },1000);
+
+                },
+                complete: function(){
+                    clearTimeout(timeOutHander);
+                    $("#loadMe").modal("hide");
+                },
                 success:function(){
                     console.log('call successful');
                     window.location.reload();
@@ -216,6 +226,20 @@
             console.log('nuke button clicked');
             $.ajax({
                 url:"{% url "nuke_empty_sessions" %}",
+                beforeSend: function(){
+                    timeOutHandler = setTimeout(function(){
+                        $("#loadMe").modal({
+                          backdrop: "static", //remove ability to close modal with click
+                          keyboard: false, //remove option to close with keyboard
+                          show: true //Display loader!
+                        });
+                    },1000);
+
+                },
+                complete: function(){
+                    clearTimeout(timeOutHander);
+                    $("#loadMe").modal("hide");
+                },
                 success:function(){
                     console.log('nuke call successful');
                     window.location.reload();
@@ -223,9 +247,78 @@
             })
         }
 
-        $(document).ready( function () {
-            $('#sessions2').DataTable();
-        } );
-    </script>
+        function delete_selected_chars(){
+            console.log('delete chars clicked');
+            // retrieve ids from checked boxes
+            var ids_for_del = '';
+            {#//var view_url = "{% url "delete_selected_chars" %}";#}
+            //console.log('base url: ',view_url);
 
+            $('#character-table input:checkbox:checked').each(function(){
+               console.log('char_id_for_del:', $(this).attr('id'));
+                  if(ids_for_del === '') {
+                      ids_for_del = '?ids='+$(this).attr('id')
+                  } else {
+                      ids_for_del = ids_for_del+','+$(this).attr('id')
+                  }
+            });
+            //view_url.searchParams.append('ids',$(this).attr('id'))
+            //pass ids to view?
+            console.log(ids_for_del);
+            tmpurl ="{% url "delete_selected_chars" %}"+ids_for_del;
+            console.log(tmpurl);
+
+            $.ajax({
+              url:tmpurl,
+                cache:false,
+                beforeSend: function(){
+                    timeOutHandler = setTimeout(function(){
+                        $("#loadMe").modal({
+                          backdrop: "static", //remove ability to close modal with click
+                          keyboard: false, //remove option to close with keyboard
+                          show: true //Display loader!
+                        });
+                    },500);
+
+                },
+                complete: function(){
+                    clearTimeout(timeOutHander);
+                    $("#loadMe").modal("hide");
+                },
+                success:function(){
+                    console.log('del call successful');
+                    window.location.reload();
+                },
+            })
+        }
+
+        $(document).ready(function() {
+
+            $("#just_load_please").on("click", function (e) {
+                console.log('dbg_btn_clicked');
+                e.preventDefault();
+                $("#loadMe").modal({
+                    backdrop: "static", //remove ability to close modal with click
+                    keyboard: false, //remove option to close with keyboard
+                    show: true //Display loader!
+                });
+                setTimeout(function () {
+                    $("#loadMe").modal("hide");
+                }, 3500);
+            });
+
+            $('#sessions2').DataTable();
+
+            $(document).on('change','#character-table input:checkbox', function(){
+                if($('#character-table input:checkbox:checked').length > 0){
+                    console.log('cbox checked');
+                    $('#delete-char-btn').removeClass('invisible')
+                } else {
+                    console.log('all cboxes unchecked');
+                    $('#delete-char-btn').addClass('invisible')
+                }
+            });
+        });
+
+    </script>
 {% endblock %}

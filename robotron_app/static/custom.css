@@ -31,11 +31,20 @@ body {
 }
 
 #spin{
-    background-image:url('./squares.gif');
+    background-image:url('./robotron.gif');
     background-repeat: no-repeat;
     background-position: center;
 }
 
 #nospin{
     background: #8bc34a;
+}
+
+.modal-content {
+  border-radius: 0;
+  box-shadow: 0 0 20px 8px rgba(0, 0, 0, 0.7);
+}
+
+.modal-backdrop.show {
+  opacity: 0.75;
 }

@@ -97,36 +97,117 @@ class BatchDetailView(generic.DetailView):
 
 def batch_detail_view(request, pk):
     batch = get_object_or_404(Batch, pk=pk)
+    error_msg = ''
 
     #     form handling for adding single character
     if request.method == 'POST':
-        new_char_form = AddCharacterForm(request.POST)
-        if new_char_form.is_valid():
-            Character.objects.create(
-                batch=batch,
-                name=new_char_form.cleaned_data['new_char_name'],
-                files_count=new_char_form.cleaned_data['new_char_files_count'],
-                delivery_date=new_char_form.cleaned_data['new_char_delivery_date'],
-                delivery_time=new_char_form.cleaned_data['new_char_delivery_time'],
-                actor=new_char_form.cleaned_data['new_char_actor']
-            )
+        if 'single_form' in request.POST:
+            print('single_form_key called')
+            file_form = UploadCSVForm() # clearing file form
+            new_char_form = AddCharacterForm(request.POST)
+            if new_char_form.is_valid():
+                Character.objects.create(
+                    batch=batch,
+                    name=new_char_form.cleaned_data['new_char_name'],
+                    files_count=new_char_form.cleaned_data['new_char_files_count'],
+                    delivery_date=new_char_form.cleaned_data['new_char_delivery_date'],
+                    delivery_time=new_char_form.cleaned_data['new_char_delivery_time'],
+                    actor=new_char_form.cleaned_data['new_char_actor']
+                )
+                return HttpResponseRedirect(request.path_info)
+        elif 'csv_import_form' in request.POST:
+            print('csv_form_key_called')
+            new_char_form = AddCharacterForm() #clearing single form
+            file_form = UploadCSVForm(request.POST, request.FILES)
+            if file_form.is_valid():
+                try:
+                    file = request.FILES['file']
+                    if not file.name.endswith('.csv'):
+                        error_msg = 'file is not CSV type'
+
+                    if file.multiple_chunks():
+                        error_msg = 'file is too large'
+
+                    if error_msg != '':
+                        print(error_msg)
+                        raise ValueError(error_msg)
+                    else:
+                        file_data = file.read().decode('utf-8')
+                        lines = file_data.split("\n")
+
+                        tmp_actor_list = []
+                        char_list = OrderedDict()
+
+                        for l in lines:
+                            fields = l.split(",")
+                            # 1 field for char only, 2 fields for char + actor
+                            # anything alse is invalid
+                            if 0 < len(fields) < 3:
+                                if len(fields) == 2:
+                                    #file with actors
+                                    tmp_actor = fields[1].strip()
+                                    if tmp_actor not in tmp_actor_list:
+                                        tmp_actor_list.append(tmp_actor)
+                                    char_list[(fields[0].strip())] = tmp_actor
+                                else:
+                                    # file with chars only
+                                    char_list[(fields[0].strip())] = ''
+                            else:
+                                error_msg = 'wrong number of fields in csv'
+                                raise ValueError(error_msg)
+
+                        bulk_chars = []
+                        bulk_actors = []
+
+                        # validate actors if present
+                        for c in tmp_actor_list:
+                            try:
+                                if Actor.objects.get(name=c):
+                                    print('actor found: ', c)
+                            except ObjectDoesNotExist:
+                                tmp_actor = Actor(name=c)
+                                print('actor will be created: ', tmp_actor)
+                                bulk_actors.append(tmp_actor)
+
+                        # create new actors before dependant characters
+                        if len(bulk_actors) > 0:
+                            Actor.objects.bulk_create(bulk_actors)
+
+                        # create new characters
+                        for c in char_list:
+                            if char_list[c] != '':
+                                new_actor = Actor.objects.get(name=char_list[c])
+                                new_char = Character(name=c, batch=batch, actor=new_actor)
+                            else:
+                                new_char = Character(name=c, batch=batch)
+                            bulk_chars.append(new_char)
+
+                        if len(bulk_chars) > 0:
+                            Character.objects.bulk_create(bulk_chars)
+
+                except Exception as e:
+                    print(e)
+
             return HttpResponseRedirect(request.path_info)
     else:
         new_char_form = AddCharacterForm()
+        file_form = UploadCSVForm()
 
     context = {
         'batch': batch,
         'session_list': Session.objects.filter(batch=batch),
         'character_list': Character.objects.filter(batch=batch),
-        'form': new_char_form
+        'form': new_char_form,
+        'file_form':file_form,
     }
+    if error_msg != '':
+        context['errors'] = error_msg
 
     for c in context['character_list']:
         session_count = Session.objects.filter(character=c).count()
         setattr(c, 'session_count', session_count)
 
     return render(request, 'robotron_app/batch_detail.html', context=context)
-
 
 class CharacterDetailView(generic.DetailView):
     model = Character
@@ -184,112 +265,19 @@ def nuke_empty_sessions(request):
     response.write('ok')
     return response
 
+def delete_selected_chars(request):
+    # get list of ids from url and del all char records
+    ids =  request.GET.get('ids','')
+    id_list = ids.split(',')
+    print(id_list)
+    marked_for_del = Character.objects.filter(id__in=id_list)
+    for m in marked_for_del:
+        # call delete
+        try:
+            m.delete()
+        except Exception as e:
+            print(e)
+            pass
 
-def upload_csv_modal(request, last_batch_id):
-    response = HttpResponse(content_type="text/html")
-    print('upload_csv_called')
-    print(last_batch_id)
-    error_msg = ''
-    context = {
-        'last_batch_id':last_batch_id
-    }
-    if request.method == 'POST':
-        form = UploadCSVForm(request.POST, request.FILES)
-        print('entering post')
-        if form.is_valid():
-            print('form is valid')
-            #do something with the file
-            try:
-                file = request.FILES['file']
-                if not file.name.endswith('.csv'):
-                    error_msg = 'file is not CSV type'
+    return HttpResponse()
 
-                if file.multiple_chunks():
-                    error_msg = 'file is too large'
-
-                if error_msg != '':
-                    context['errors'] = error_msg
-                    print(error_msg)
-                    response.write(error_msg)
-                    return response
-                else:
-                    file_data = file.read().decode('utf-8')
-                    lines = file_data.split("\n")
-
-                    bulk_chars = []
-                    bulk_actors = []
-
-                    char_list = OrderedDict()
-                    tmp_actor_list = []
-
-                    batch = Batch.objects.get(id=last_batch_id)
-                    # parse lines
-                    for l in lines:
-                        fields = l.split(",")
-                        if len(fields) > 2:
-                            error_msg = 'too many fields in csv'
-                            response.write(error_msg)
-                            return response
-                        tmp_tmp_actor = fields[1].strip()
-                        char_list[(fields[0].strip())] = tmp_tmp_actor
-                        if tmp_tmp_actor not in tmp_actor_list:
-                            tmp_actor_list.append(tmp_tmp_actor)
-
-                    # validate actors
-                    for c in tmp_actor_list:
-                        # tmp_actor = char_list[c]
-                        # print(tmp_actor)
-                        try:
-                            if Actor.objects.get(name=c):
-                                print('actor found: ', c)
-
-                        except ObjectDoesNotExist as e:
-                            tmp_tmp_actor = Actor(name=c)
-                            print('actor will be created: ', tmp_tmp_actor)
-                            bulk_actors.append(tmp_tmp_actor)
-
-                    if len(bulk_actors) > 0:
-                        Actor.objects.bulk_create(bulk_actors)
-
-                    # create new chars
-                    for c in char_list:
-                         tmp_actor = char_list[c]
-                         fresh_actor = Actor.objects.get(name=tmp_actor)
-                         new_char = Character(name=c, batch=batch, actor=fresh_actor)
-                         bulk_chars.append(new_char)
-
-                    Character.objects.bulk_create(bulk_chars)
-
-                    # return batch_detail_view(request,last_batch_id)
-                    return HttpResponseRedirect(reverse('batch', kwargs={'pk':last_batch_id}))
-
-            except Exception as e:
-                error_msg = e
-                print(e)
-
-            # handle_csv_file(file)
-            # return to main or the same?
-            if error_msg != '':
-                context['errors'] = error_msg
-
-            print(error_msg)
-            response.write(error_msg)
-        else:
-            error_msg = 'invalid form'
-    else:
-        form = UploadCSVForm()
-
-    context['form'] = form
-
-    if error_msg != '':
-        context['errors'] = error_msg
-    else:
-        context['success'] = "upload successful"
-
-    return render(request, 'upload_modal.html', context=context)
-
-
-def handle_csv_file(f):
-    # do something funny
-    # parse on the fly, no saving to disk
-    pass
