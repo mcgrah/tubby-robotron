@@ -19,7 +19,7 @@ from django.conf.urls import include, url
 from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
-from robotron_app.views import ActorAutocomplete
+from robotron_app.views import ActorAutocomplete, DirectorAutocomplete, TranslatorAutocomplete, StudioAutocomplete
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,7 +29,23 @@ urlpatterns = [
             r'^actor-autocomplete/$',
             ActorAutocomplete.as_view(create_field='name'),
             name='actor-autocomplete',
-        ),
+    ),
+    url(
+            r'^director-autocomplete/$',
+            DirectorAutocomplete.as_view(create_field='name'),
+            name='director-autocomplete',
+    ),
+    url(
+            r'^translator-autocomplete/$',
+            TranslatorAutocomplete.as_view(create_field='name'),
+            name='translator-autocomplete',
+    ),
+url(
+            r'^studio-autocomplete/$',
+            StudioAutocomplete.as_view(),
+            name='studio-autocomplete',
+    ),
+
     path('', RedirectView.as_view(url='/robotron/', permanent=True)),
 ]
 

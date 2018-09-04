@@ -4,13 +4,15 @@ from robotron_app import views
 urlpatterns = [
     path('', views.index, name='index'),
     path('studios/', views.StudioListView.as_view(), {}, name='studios'),
-    path('projects/', views.ProjectListView.as_view(), {}, name='projects'),
     path('studio/<int:pk>', views.StudioDetailView.as_view(), name='studio'),
+    path('studio/create_studio/', views.studio_create_view, name='create_studio'),
+    path('projects/', views.ProjectListView.as_view(), {}, name='projects'),
     # path('project/<int:pk>', views.ProjectDetailView.as_view(), name='project'),
     path('project/<int:pk>', views.project_detail_view, name='project'),
     # path('batch/<int:pk>', views.BatchDetailView.as_view(), name='batch'),
     path('batch/<int:pk>', views.batch_detail_view, name='batch'),
     path('character/<int:pk>', views.CharacterDetailView.as_view(), name='character'),
+
 ]
 # functions only:
 urlpatterns += [

@@ -1,0 +1,22 @@
+{% extends "base_scripted.html"%}
+{% block title %}Create New Studio{% endblock %}
+{% block content %}
+
+    <div aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url "studios" %}">Studios</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Create New Studio</li>
+        </ol>
+    </div>
+
+    <div class="container">
+        <h3>Create New Studio</h3>
+        <hr>
+        <div>
+            <form action="" method="POST">
+                {% load i18n widget_tweaks %}
+
+            </form>
+        </div>
+    </div>
+{% endblock %}

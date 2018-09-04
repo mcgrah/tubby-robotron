@@ -1,8 +1,9 @@
 import datetime
 from django import forms
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _
-from robotron_app.models import Actor
+from robotron_app.models import Actor, Studio, Director, Translator
 
 from dal import autocomplete
 
@@ -41,5 +42,38 @@ class AddCharacterForm(forms.Form):
         queryset=Actor.objects.all(),
         widget=autocomplete.ModelSelect2(url='actor-autocomplete'),
         label='Actor',
+        required=False
+    )
+
+
+class AddStudioForm(forms.Form):
+    new_studio_name = forms.CharField(min_length=1, max_length=128, required=True, label='Name')
+    new_studio_address = forms.CharField(required=False, label='Address')
+    new_studio_telephone = forms.CharField(
+        required=False, label='Telephone',
+        validators=[RegexValidator(r'^[0-9]+$', 'Enter a valid phone number.')],
+    )
+    new_studio_email = forms.EmailField(required=False, label='E-mail')
+    new_studio_note = forms.CharField(required=False, label='Note')
+
+
+class AddProjectForm(forms.Form):
+    new_project_name = forms.CharField(min_length=1, max_length=64, required=True, label='Name')
+    new_project_actor_count = forms.IntegerField(min_value=0, initial=0, required=False, label='Actors')
+    new_project_batch_count = forms.IntegerField(min_value=0, initial=0, required=False, label='Batches')
+    new_project_files_count = forms.IntegerField(min_value=0, initial=0, required=False, label='Files')
+    new_project_word_count = forms.IntegerField(min_value=0, initial=0, required=False, label='Words')
+    new_project_char_count = forms.IntegerField(min_value=0, initial=0, required=False, label='Characters')
+    new_project_sfx_note = forms.CharField(required=False, label='SFX Note')
+    new_project_tc_note = forms.CharField(required=False, label='TC Note')
+    new_project_studio = forms.ModelChoiceField(
+        queryset=Studio.objects.all(),
+        widget=autocomplete.ModelSelect2(url='studio-autocomplete'),
+        label='Studio'
+    )
+    new_project_director = forms.ModelChoiceField(
+        queryset=Director.objects.all(),
+        widget=autocomplete.ModelSelect2(url='director-autocomplete'),
+        label='Director',
         required=False
     )

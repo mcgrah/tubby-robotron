@@ -7,8 +7,8 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.db.models import Sum, Q
 from django.http import HttpResponseRedirect, HttpResponse
-from robotron_app.models import Studio, Project, Batch, Session, Character, Actor
-from robotron_app.forms import AddBatchForm, AddCharacterForm, UploadCSVForm
+from robotron_app.models import *
+from robotron_app.forms import *
 # autocomplete
 from dal import autocomplete
 
@@ -21,6 +21,19 @@ def index(request):
 class StudioListView(generic.ListView):
     model = Studio
     paginate_by = 50
+
+
+def studio_create_view(request):
+    if request.method == 'POST':
+        form = AddStudioForm(request.POST)
+    else:
+        form = AddStudioForm()
+
+    context = {
+        'form':form,
+    }
+
+    return render(request, 'create_studio.html', context=context)
 
 
 class ProjectListView(generic.ListView):
@@ -62,7 +75,7 @@ def project_detail_view(request, pk):
                 files_count=new_batch_form.cleaned_data['new_batch_files_count'],
                 word_count=new_batch_form.cleaned_data['new_batch_word_count'],
                 char_count=new_batch_form.cleaned_data['new_batch_char_count']
-            )    #
+            )
             return HttpResponseRedirect(request.path_info)
 
     else:
@@ -144,7 +157,7 @@ def batch_detail_view(request, pk):
                             # anything alse is invalid
                             if 0 < len(fields) < 3:
                                 if len(fields) == 2:
-                                    #file with actors
+                                    # file with actors
                                     tmp_actor = fields[1].strip()
                                     if tmp_actor not in tmp_actor_list:
                                         tmp_actor_list.append(tmp_actor)
@@ -222,6 +235,45 @@ class ActorAutocomplete(autocomplete.Select2QuerySetView):
 
     def get_queryset(self):
         qs = Actor.objects.all()
+
+        if self.q:
+            qs = qs.filter(
+                Q(name__icontains=self.q)
+            )
+
+        return qs
+
+
+class DirectorAutocomplete(autocomplete.Select2QuerySetView):
+
+    def get_queryset(self):
+        qs = Director.objects.all()
+
+        if self.q:
+            qs = qs.filter(
+                Q(name__icontains=self.q)
+            )
+
+        return qs
+
+
+class TranslatorAutocomplete(autocomplete.Select2QuerySetView):
+
+    def get_queryset(self):
+        qs = Translator.objects.all()
+
+        if self.q:
+            qs = qs.filter(
+                Q(name__icontains=self.q)
+            )
+
+        return qs
+
+
+class StudioAutocomplete(autocomplete.Select2QuerySetView):
+
+    def get_queryset(self):
+        qs = Studio.objects.all()
 
         if self.q:
             qs = qs.filter(
