@@ -7,6 +7,13 @@ from robotron_app.models import Actor, Studio, Director, Translator
 
 from dal import autocomplete
 
+class DateInput(forms.DateInput):
+    input_type = 'date'
+
+
+class TimeInput(forms.TimeInput):
+    input_type = 'time'
+
 
 class UploadCSVForm(forms.Form):
     file = forms.FileField()
@@ -16,8 +23,8 @@ class AddBatchForm(forms.Form):
     new_batch_name = forms.CharField(min_length=1, required=True, label='Name')
     # project assigned automatically form project detail page
     # new_batch_project =
-    new_batch_start_date = forms.DateField(initial=datetime.date.today, required=False, label='Start Date')
-    new_batch_deadline = forms.DateField(required=False, label='Deadline')
+    new_batch_start_date = forms.DateField(initial=datetime.date.today, required=False, label='Start Date', widget=DateInput())
+    new_batch_deadline = forms.DateField(required=False, label='Deadline', widget=DateInput())
     new_batch_files_count = forms.IntegerField(min_value=0, initial=0,  required=False, label='Files')
     new_batch_word_count = forms.IntegerField(min_value=0, initial=0, required=False, label='Words')
     new_batch_char_count = forms.IntegerField(min_value=0, initial=0, required=False, label='Characters')
@@ -35,8 +42,8 @@ class AddCharacterForm(forms.Form):
     new_char_name = forms.CharField(min_length=1, required=True, label='Name')
     # batch assigned automatically from batch detail page
     new_char_files_count = forms.IntegerField(min_value=0, initial=0,  required=False, label='Files')
-    new_char_delivery_date = forms.DateField(required=False, label='Delivery Date')
-    new_char_delivery_time = forms.DateField(required=False, label='Delivery Time')
+    new_char_delivery_date = forms.DateField(required=False, label='Delivery Date', widget=DateInput())
+    new_char_delivery_time = forms.TimeField(required=False, label='Delivery Time', widget=TimeInput())
     # actor needs to be chosen or created from scratch if not found
     new_char_actor = forms.ModelChoiceField(
         queryset=Actor.objects.all(),

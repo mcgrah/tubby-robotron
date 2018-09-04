@@ -58,6 +58,7 @@
         {% endfor %}
         <div class="form-group col-md-2">
                 <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
+                <a class="btn btn-primary" href="{{ project.get_absolute_url }}" role="button">Clear</a>
         </div>
         </div>
     </form>

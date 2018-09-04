@@ -49,63 +49,75 @@
 
         <form action="" method="POST">
             {% csrf_token %}
-            {% if form.errors %}
                 <div class="panel">
-                    <div class="card card-body">
-                        {{ form.errors }}
-                        {% for field in form %}
-                            {% for error in  field.errors %}{{ error }}{% endfor %}
-                        {% endfor %}
-                    </div>
-                </div>
-            {% else %}
-                <div class="panel">
-                    <div class="collapse" id="target1" data-parent="#two-form">
+                    {% if form.errors %}
+                        <div class="collapse show" id="target1" data-parent="#two-form">
+                    {% else %}
+                        <div class="collapse" id="target1" data-parent="#two-form">
+                    {% endif %}
                         <div class="card card-body">
+                        {% if form.non_field_errors %}
+                          <div class="alert alert-danger" role="alert">
+                            {% for error in form.non_field_errors %}
+                              {{ error }}
+                            {% endfor %}
+                          </div>
+                        {% endif %}
                             <div class="form-row">
                                 {% for field in form %}
                                     <div class="form-group col-md-2">
                                         <label class="control-label" for="id_{{ field.name }}">{{ field.label }}</label>
                                         {{ field|attr:"class:form-control" }}
+                                        {% if field.errors %}
+                                            {% for error in field.errors %}
+                                                <div class="alert alert-danger">
+                                                {{ error }}
+                                                </div>
+                                            {% endfor %}
+                                        {% endif %}
                                     </div>
                                 {% endfor %}
                             </div>
                             <div class="form-row">
                                 <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
+                                <a class="btn btn-primary" href="{{ batch.get_absolute_url }}" role="button">Clear</a>
                                 <input type="text" name="single_form" value="1" class="invisible">
                             </div>
                         </div>
                     </div>
                 </div>
-            {% endif %}
+{#            {% endif %}#}
         </form>
 
         <form enctype="multipart/form-data" method="POST">
             {% csrf_token %}
-            {% if file_form.errors %}
+
                 <div class="panel">
-                    <div class="card card-body">
-                        {{ file_form.errors }}
-                        {% for field in file_form %}
-                            {% for error in  field.errors %}{{ error }}{% endfor %}
-                        {% endfor %}
-                    </div>
-                </div>
-            {% else %}
-                <div class="panel">
-                    <div class="collapse" id="target2" data-parent="#two-form">
+                    {% if file_form.errors %}
+                        <div class="collapse show" id="target2" data-parent="#two-form">
+                    {% else %}
+                        <div class="collapse" id="target2" data-parent="#two-form">
+                    {% endif %}
                         <div class="card card-body">
+                            {% if file_form.non_field_errors %}
+                              <div class="alert alert-danger" role="alert">
+                                {% for error in file_form.non_field_errors %}
+                                  {{ error }}
+                                {% endfor %}
+                              </div>
+                            {% endif %}
                             <div class="form-row">
                             {{ file_form }}
                             </div>
                             <div class="form-row">
                                 <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
+                                <a class="btn btn-primary" href="{{ batch.get_absolute_url }}" role="button">Clear</a>
                                 <input type="text" name="csv_import_form" value="1" class="invisible">
                             </div>
                         </div>
                     </div>
                 </div>
-            {% endif %}
+
         </form>
     </div>
     <hr>
@@ -182,7 +194,6 @@
 {% endblock %}
 
 {% block custom_script_end %}
-
     {{ form.media }}
     <script type="text/javascript" src="{% static "DataTables/datatables.min.js" %}"></script>
 
@@ -313,4 +324,7 @@
         });
 
     </script>
+{% endblock %}
+{% block after_bootstrap %}
+
 {% endblock %}
