@@ -1,6 +1,12 @@
 {% extends "base_scripted.html"%}
 
 {% block title %}Project: {{ project.name }}{% endblock %}
+
+{% block minicrumbs %}
+<li class="breadcrumb-item"><a href="{% url "projects" %}">Projects</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ project.name }}</li>
+{% endblock %}
+
 {% block page_alerts %}
     <div class="alert alert-warning">
     {% if  project.batch_count != batch_list.count  %}
@@ -12,7 +18,16 @@
     </div>
 {% endblock %}
 {% block content %}
-    <h1>{{ project.name }}</h1>
+
+    <div class="row align-items-center">
+        <div class="col-md-auto">
+            <h4>{{ project.name }}</h4>
+        </div>
+        <div class="col">
+            <a role=button class="btn btn-outline-primary" href="{% url "update_project" pk=project.id %}">Edit</a>
+        </div>
+    </div>
+    <hr>
     <div class="row">
     <div class="col">
     <table class="table table-striped table-sm">
@@ -31,7 +46,8 @@
     </div>
         <div class="col"></div>
     </div>
-    <h2>Batches:</h2>
+    <hr>
+    <h4>Batches:</h4>
     <div class="btn-group">
         <button type="button" class="btn btn-outline-primary" data-toggle="collapse" data-target="#batchForm" aria-pressed="false" aria-expanded="false">Add New</button>
 {#        <button>Import CSV</button>#}
@@ -39,7 +55,11 @@
     {% load i18n widget_tweaks %}
     <form action="" method="POST" id="batch-form">
         {% csrf_token %}
+        {% if form.errors %}
+        <div class="form-row collapse show" id="batchForm">
+        {% else %}
         <div class="form-row collapse" id="batchForm">
+        {% endif %}
             {% for field in form %}
             {% if field.errors %}
                 <div class="form-group has-error col-md-2">
@@ -91,20 +111,4 @@
     {% else %}
        <div class="alert alert-info">No batches added.</div>
     {% endif %}
-{% endblock %}
-{% block custom_script_end %}
-    <!--
-    <script type="text/javascript">
-        // batch form submit
-        $('#batch-form').on('submit', function(event){
-            event.preventDefault();
-            console.log("form submitted!");// sanity check
-            create_batch();
-        });
-
-        function create_batch() {
-            console.log('create batch fired');
-        }
-    </script>
-    !-->
 {% endblock %}

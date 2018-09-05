@@ -1,13 +1,13 @@
 {% extends "base_scripted.html"%}
 {% block title %}{{ character.batch.project.name }}: {{ character.name }}{% endblock %}
+
+{% block minicrumbs %}
+<li class="breadcrumb-item"><a href="{{ character.batch.project.get_absolute_url }}">{{ character.batch.project.name }}</a></li>
+<li class="breadcrumb-item"><a href="{{ character.batch.get_absolute_url }}">{{ character.batch.name }}</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ character.name }}</li>
+{% endblock %}
+
 {% block content %}
-    <div aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ character.batch.project.get_absolute_url }}">{{ character.batch.project.name }}</a></li>
-            <li class="breadcrumb-item"><a href="{{ character.batch.get_absolute_url }}">{{ character.batch.name }}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ character.name }}</li>
-        </ol>
-    </div>
     <div class="row">
         <div class="col">
         <h4>Character Details:</h4>

@@ -3,15 +3,21 @@ from collections import OrderedDict
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 from django.views import generic
+from django.views.generic.edit import UpdateView
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Count
 from django.http import HttpResponseRedirect, HttpResponse
 from robotron_app.models import *
 from robotron_app.forms import *
 # autocomplete
 from dal import autocomplete
 
+from django.forms.models import modelform_factory
+
+class ModelFormWidgetMixin(object):
+    def get_form_class(self):
+        return modelform_factory(self.model, fields=self.fields, widgets=self.widgets)
 
 # Create your views here.
 def index(request):
@@ -22,10 +28,21 @@ class StudioListView(generic.ListView):
     model = Studio
     paginate_by = 50
 
+    queryset = Studio.objects.annotate(num_projects = Count('project'))
+
 
 def studio_create_view(request):
     if request.method == 'POST':
         form = AddStudioForm(request.POST)
+        if form.is_valid():
+            Studio.objects.create(
+                name=form.cleaned_data['new_studio_name'],
+                address=form.cleaned_data['new_studio_address'],
+                telephone=form.cleaned_data['new_studio_telephone'],
+                email=form.cleaned_data['new_studio_email'],
+                note=form.cleaned_data['new_studio_note']
+            )
+            return HttpResponseRedirect(reverse('studios'))
     else:
         form = AddStudioForm()
 
@@ -36,9 +53,32 @@ def studio_create_view(request):
     return render(request, 'create_studio.html', context=context)
 
 
+class ProjectCreateView(ModelFormWidgetMixin, generic.CreateView):
+    model=Project
+    template_name_suffix = '_create'
+    fields = [
+        'name',
+        'director',
+        'studio',
+        'batch_count',
+        'files_count',
+        'word_count',
+        'char_count',
+        'actor_count',
+        'sfx_note',
+        'tc_note'
+    ]
+    widgets = {
+        'director': autocomplete.ModelSelect2(url='director-autocomplete'),
+        'studio': autocomplete.ModelSelect2(url='studio-autocomplete')
+    }
+
+
 class ProjectListView(generic.ListView):
     model = Project
     paginate_by = 50
+
+    queryset = Project.objects.annotate(num_batches=Count('batch'))
 
 
 class StudioDetailView(generic.DetailView):
@@ -48,6 +88,39 @@ class StudioDetailView(generic.DetailView):
         context = super(StudioDetailView, self).get_context_data(**kwargs)
         context['project_list'] = Project.objects.filter(studio=context['studio'])
         return context
+
+
+class StudioUpdateView(UpdateView):
+    model = Studio
+    template_name_suffix = '_update'
+    fields = [
+        'name',
+        'address',
+        'telephone',
+        'email',
+        'note'
+    ]
+
+
+class ProjectUpdateView(ModelFormWidgetMixin, UpdateView):
+    model = Project
+    template_name_suffix = '_update'
+    fields = [
+        'name',
+        'director',
+        'studio',
+        'batch_count',
+        'files_count',
+        'word_count',
+        'char_count',
+        'actor_count',
+        'sfx_note',
+        'tc_note'
+    ]
+    widgets = {
+        'director': autocomplete.ModelSelect2(url='director-autocomplete'),
+        'studio': autocomplete.ModelSelect2(url='studio-autocomplete')
+    }
 
 
 class ProjectDetailView(generic.DetailView):
@@ -83,11 +156,12 @@ def project_detail_view(request, pk):
         new_batch_form = AddBatchForm()
 
     batch_list = Batch.objects.filter(project=project)
+
     context = {
         'project': project,
         'batch_list': batch_list,
         'form': new_batch_form,
-        'total_chars': batch_list.aggregate(total_chars=Sum('char_count'))['total_chars']
+        'total_chars': batch_list.aggregate(total_chars=Sum('char_count'))['total_chars'],
     }
     return render(request, 'robotron_app/project_detail.html', context=context)
 
@@ -112,11 +186,11 @@ def batch_detail_view(request, pk):
     batch = get_object_or_404(Batch, pk=pk)
     error_msg = ''
 
-    #     form handling for adding single character
+    # form handling for adding single character
     if request.method == 'POST':
         if 'single_form' in request.POST:
             print('single_form_key called')
-            file_form = UploadCSVForm() # clearing file form
+            file_form = UploadCSVForm()  #  clearing file form
             new_char_form = AddCharacterForm(request.POST)
             if new_char_form.is_valid():
                 Character.objects.create(
@@ -130,7 +204,7 @@ def batch_detail_view(request, pk):
                 return HttpResponseRedirect(request.path_info)
         elif 'csv_import_form' in request.POST:
             print('csv_form_key_called')
-            new_char_form = AddCharacterForm() #clearing single form
+            # new_char_form = AddCharacterForm()  #  clearing single form
             file_form = UploadCSVForm(request.POST, request.FILES)
             if file_form.is_valid():
                 try:
@@ -154,7 +228,7 @@ def batch_detail_view(request, pk):
                         for l in lines:
                             fields = l.split(",")
                             # 1 field for char only, 2 fields for char + actor
-                            # anything alse is invalid
+                            # anything else is invalid
                             if 0 < len(fields) < 3:
                                 if len(fields) == 2:
                                     # file with actors
@@ -221,6 +295,7 @@ def batch_detail_view(request, pk):
         setattr(c, 'session_count', session_count)
 
     return render(request, 'robotron_app/batch_detail.html', context=context)
+
 
 class CharacterDetailView(generic.DetailView):
     model = Character
@@ -317,9 +392,10 @@ def nuke_empty_sessions(request):
     response.write('ok')
     return response
 
+
 def delete_selected_chars(request):
     # get list of ids from url and del all char records
-    ids =  request.GET.get('ids','')
+    ids = request.GET.get('ids', '')
     id_list = ids.split(',')
     print(id_list)
     marked_for_del = Character.objects.filter(id__in=id_list)
@@ -333,3 +409,24 @@ def delete_selected_chars(request):
 
     return HttpResponse()
 
+
+def delete_studio(request, pk):
+    marked = Studio.objects.get(id=pk)
+    try:
+        marked.delete()
+    except Exception as e:
+        print(e)
+        pass
+
+    return HttpResponseRedirect(reverse('studios'))
+
+
+def delete_project(request, pk):
+    marked = Project.objects.get(id=pk)
+    try:
+        marked.delete()
+    except Exception as e:
+        print(e)
+        pass
+
+    return HttpResponseRedirect(reverse('projects'))

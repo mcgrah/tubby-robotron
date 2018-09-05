@@ -6,6 +6,12 @@
 
 {% block title %}{{ batch.project.name }}: {{ batch.name }}{% endblock %}
 
+
+{% block minicrumbs %}
+<li class="breadcrumb-item"><a href="{{ batch.project.get_absolute_url }}">{{ batch.project.name }}</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ batch.name }}</li>
+{% endblock %}
+
 {% block page_alerts %}
 
     {% if errors %}
@@ -21,13 +27,6 @@
 {% endblock %}
 
 {% block content %}
-    <div aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ batch.project.get_absolute_url }}">{{ batch.project.name }}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ batch.name }}</li>
-        </ol>
-    </div>
-
     <h2>{{ batch.project.name }}: {{ batch.name }} Details</h2>
     <h4>Characters Overview</h4>
     <div id="two-form">

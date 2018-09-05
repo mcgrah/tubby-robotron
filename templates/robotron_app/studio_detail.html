@@ -1,7 +1,23 @@
 {% extends "base_scripted.html"%}
 {% block title %}Studio: {{ studio.name }}{% endblock %}
+
+{% block minicrumbs %}
+    <li class="breadcrumb-item"><a href="{% url "studios" %}">Studios</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ studio.name }}</li>
+{% endblock %}
+
 {% block content %}
-    <h1>{{ studio.name }}</h1>
+    <div class="row align-items-center">
+        <div class="col-md-auto">
+            <h4>{{ studio.name }}</h4>
+        </div>
+        <div class="col">
+            <a role=button class="btn btn-outline-primary" href="{% url "update_studio" pk=studio.id %}">Edit</a>
+        </div>
+    </div>
+    <hr>
+    <div class="row align-items-center">
+    <div class="col">
     <table class="table table-striped">
         <tbody>
         <tr><th scope="row">Address: </th><td>{{ studio.address }}</td></tr>
@@ -10,7 +26,11 @@
         <tr><th scope="row">Note: </th><td>{{ studio.note }}</td></tr>
         </tbody>
     </table>
-    <h2>Assigned Projects:</h2>
+        </div>
+        <div class="col"></div>
+    </div>
+    <hr>
+    <h4>Assigned Projects:</h4>
     {% if project_list %}
         <div class="list-group">
           {% for project in project_list %}
@@ -20,7 +40,8 @@
     {% else %}
        <div class="alert alert-info">This studio has no associated projects.</div>
     {% endif %}
-    <h2>Users:</h2>
+    <hr>
+    <h4>Users:</h4>
     {% if user_list %}
     {% else %}
        <div class="alert alert-info">No users added to this account.</div>

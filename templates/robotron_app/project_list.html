@@ -1,11 +1,46 @@
 {% extends "base_scripted.html"%}
 {% block title %}Projects{% endblock %}
+
+{% block minicrumbs %}
+<li class="breadcrumb-item active" aria-current="page">Projects</li>
+{% endblock %}
+
 {% block content %}
-    <h1>ProjectList</h1>
+    <div class="row align-items-center">
+    <div class="col-md-auto">
+    <h2>Projects</h2>
+    </div>
+    <div class="col-sm">
+        <a role=button class="btn btn-outline-primary" href="{% url "create_project" %}">Add New</a>
+    </div>
+    </div>
     {% if project_list %}
         <div class="list-group">
           {% for project in project_list %}
-              <a href="{{ project.get_absolute_url }}" class="list-group-item list-group-item-action">{{ project.name }} ( {{ project.studio.name }})</a>
+              <div class="row align-items-center">
+                  <div class="col-sm-8">
+                    <a href="{{ project.get_absolute_url }}" class="list-group-item list-group-item-action">
+                        {% if project.num_batches > 0 %}
+                          <span class="badge badge-primary">{{ project.num_batches }}</span>
+                        {% else %}
+                          <span class="badge badge-secondary">{{ project.num_batches }}</span>
+                        {% endif %}
+                        {{ project.name }} ( {{ project.studio.name }})
+                    </a>
+                  </div>
+
+                  <div class="col-sm">
+                      <div class="btn-group" role="group">
+                          <a role=button class="btn btn-outline-primary" href="{% url "update_project" pk=project.id %}">Edit</a>
+                          {% if project.num_batches > 0 %}
+                              <button type="button" class="btn btn-outline-secondary" disabled>Archive</button>
+                          {% else %}
+                              <a role=button class="btn btn-outline-primary" href="{% url "delete_project" pk=project.id %}">Delete</a>
+                          {% endif %}
+                      </div>
+                  </div>
+              </div>
+
           {% endfor %}
         </div>
     {% else %}

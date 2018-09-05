@@ -32,8 +32,10 @@ class AddBatchForm(forms.Form):
     # deadline should be after start_date
     def clean_new_batch_deadline(self):
         data = self.cleaned_data['new_batch_deadline']
-        if data < self.cleaned_data['new_batch_start_date']:
-            raise ValidationError(_('Invalid date - deadline set before start_date'))
+        # dates not required, validate only if actually put
+        if type(data) == datetime.date and type(self.cleaned_data['new_batch_start_date']) == datetime.date:
+            if data < self.cleaned_data['new_batch_start_date']:
+                raise ValidationError(_('Invalid date - deadline set before start_date'))
 
         return data
 
@@ -55,13 +57,13 @@ class AddCharacterForm(forms.Form):
 
 class AddStudioForm(forms.Form):
     new_studio_name = forms.CharField(min_length=1, max_length=128, required=True, label='Name')
-    new_studio_address = forms.CharField(required=False, label='Address')
+    new_studio_address = forms.CharField(required=False, label='Address',widget=forms.Textarea)
     new_studio_telephone = forms.CharField(
         required=False, label='Telephone',
         validators=[RegexValidator(r'^[0-9]+$', 'Enter a valid phone number.')],
     )
-    new_studio_email = forms.EmailField(required=False, label='E-mail')
-    new_studio_note = forms.CharField(required=False, label='Note')
+    new_studio_email = forms.EmailField(required=False, label='E-mail', widget=forms.EmailInput)
+    new_studio_note = forms.CharField(required=False, label='Note',widget=forms.Textarea)
 
 
 class AddProjectForm(forms.Form):

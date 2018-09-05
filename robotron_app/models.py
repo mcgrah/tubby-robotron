@@ -84,7 +84,7 @@ class Studio(models.Model):
         return reverse('studio', args=[str(self.id)])
 
     def __str__(self):
-        return f'{self.name} {self.email} {self.address} {self.telephone} {self.note}'
+        return f'{self.name} ({self.email})'
 
 
 class Project(models.Model):
