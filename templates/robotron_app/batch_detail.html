@@ -11,12 +11,16 @@
             });
         } );
     </script>
+        {{ form.media }}
+        {{ file_form.media }}
+        {{ session_form.media }}
 {% endblock %}
 
 {% block title %}{{ batch.project.name }}: {{ batch.name }}{% endblock %}
 
 
 {% block minicrumbs %}
+<li class="breadcrumb-item"><a href="{% url "projects" %}">Projects</a></li>
 <li class="breadcrumb-item"><a href="{{ batch.project.get_absolute_url }}">{{ batch.project.name }}</a></li>
 <li class="breadcrumb-item active" aria-current="page">{{ batch.name }}</li>
 {% endblock %}
@@ -42,7 +46,7 @@
             <h4>{{ batch.project.name }}: {{ batch.name }} Details</h4>
         </div>
         <div class="col">
-            <a role=button class="btn btn-outline-primary" href="#">Edit</a>
+            <a role=button class="btn btn-outline-primary disabled" href="#">Edit</a>
         </div>
     </div>
     <hr>
@@ -66,7 +70,7 @@
     <hr>
     <h4>Characters Overview</h4>
     <div id="two-form">
-    {% load i18n widget_tweaks %}
+        {% load i18n widget_tweaks %}
 
         <div class="container">
             <div class="btn-group">
@@ -76,9 +80,12 @@
                 <button class="btn btn-outline-primary" type="button" data-parent="#two-form" data-toggle="collapse" data-target="#target2" aria-expanded="false">
                     Import CSV
                 </button>
-                <button type="button" class="btn btn-outline-primary" onclick="generate_new_sessions()">Generate Sessions</button>
+                <button type="button" class="btn btn-outline-primary" onclick="generate_new_sessions()">Gen. Init Sessions</button>
                 <button type="button" class="btn btn-outline-primary" onclick="nuke_empty_sessions()">NUKE Sessions</button>
-                <button type="button" class="btn btn-outline-primary invisible" onclick="delete_selected_chars()" id="delete-char-btn">Delete Selected</button>
+                <button disabled id="create-sessions-btn" class="btn btn-outline-primary" type="button" data-parent="#two-form" data-toggle="collapse" data-target="#target3" aria-expanded="false">
+                    Generate (Selected)
+                </button>
+                <button disabled type="button" class="btn btn-outline-danger" onclick="delete_selected_chars()" id="delete-char-btn">Delete Selected</button>
             </div>
         </div>
 
@@ -158,12 +165,136 @@
                 </div>
 
         </form>
+        <!-- MANUAL FORM PLACEMENT !-->
+        <form action="" method="POST" id="session_defaults">
+            {% csrf_token %}
+            <div class="panel">
+                {% if session_form.errors %}
+                <div class="collapse show" id="target3" data-parent="#two-form">
+                {% else %}
+                <div class="collapse" id="target3" data-parent="#two-form">
+                {% endif %}
+                    <div class="card card-body">
+                        {% if session_form.non_field_errors %}
+                          <div class="alert alert-danger" role="alert">
+                            {% for error in session_form.non_field_errors %}
+                              {{ error }}
+                            {% endfor %}
+                          </div>
+                        {% endif %}
+                        <div class="form-row">
+                            <div class="container">
+                                <div class="row align-items-center">
+                                    <p><strong>Set default values for new sessions (optional)</strong></p>
+                                </div>
+                                <div class="row align-items-center">
+                                    <div class="col-5">
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text" id="basic-addon2">{{ session_form.new_session_director.label }}</span>
+                                            </div>
+                                            {{ session_form.new_session_director|attr:"class:form-control"|attr:"aria-describedby:basic-addon2" }}
+                                        </div>
+                                    </div>
+                                    <div class="col-5">
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text" id="basic-addon3">{{ session_form.new_session_translator.label }}</span>
+                                            </div>
+                                            {{ session_form.new_session_translator|attr:"class:form-control"|attr:"aria-describedby:basic-addon3" }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        {% if session_form.new_session_translator.errors %}
+                                            {% for error in  session_form.new_session_translator.errors %}{{ error }}{% endfor %}
+                                        {% endif %}
+                                    </div>
+                                    <div class="col">
+                                        {% if session_form.new_session_translator.errors %}
+                                            {% for error in  session_form.new_session_translator.errors %}{{ error }}{% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="row align-items-center">
+                                    <div class="col-2">
+                                        <div class="row">
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">{{ session_form.new_session_day.label }}</span>
+                                                </div>
+                                                {{ session_form.new_session_day|attr:"class:form-control"}}
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            {% if session_form.new_session_day.errors %}
+                                                {% for error in  session_form.new_session_day.errors %}{{ error }}{% endfor %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-2">
+                                        <div class="row">
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">{{ session_form.new_session_hour.label }}</span>
+                                                </div>
+                                                {{ session_form.new_session_hour|attr:"class:form-control"}}
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            {% if session_form.new_session_hour.errors %}
+                                                {% for error in  session_form.new_session_hour.errors %}{{ error }}{% endfor %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-2">
+                                        <div class="row">
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">{{ session_form.new_session_duration.label }}</span>
+                                                </div>
+                                                {{ session_form.new_session_duration|attr:"class:form-control"}}
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            {% if session_form.new_session_duration.errors %}
+                                                {% for error in  session_form.new_session_duration.errors %}{{ error }}{% endfor %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- AUTO FORM PLACEMENT !-->
+{#                            {% for field in session_form %}#}
+{#                                <div class="form-group">#}
+{#                                    <label class="control-label" for="id_{{ field.name }}">{{ field.label }}</label>#}
+{#                                        {{ field|attr:"class:form-control p-0" }}#}
+{#                                    {% if field.errors %}#}
+{#                                        {% for error in field.errors %}#}
+{#                                            <div class="alert alert-danger">#}
+{#                                            {{ error }}#}
+{#                                            </div>#}
+{#                                        {% endfor %}#}
+{#                                    {% endif %}#}
+{#                                </div>#}
+{#                            {% endfor %}#}
+                        </div>
+                        <div class="form-row">
+                            <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
+                            <a class="btn btn-primary" href="{{ batch.get_absolute_url }}" role="button">Clear</a>
+                            <input type="text" name="session_char_ids" value="-1" id="session_char_ids" class="invisible">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
     <hr>
 
     {% if character_list %}
         <table class="table table-borderless table-sm table-hover" id="character-table">
-            <tbody>
+            <thead>
             <tr>
                 <th></th>
                 <th scope="col">Character</th>
@@ -173,14 +304,16 @@
                 <th scope="col">Delivery Time</th>
                 <th scope="col">Sessions</th>
             </tr>
+        </thead>
+            <tbody>
             {% for char in character_list %}
                 <tr>
                 <td>
-                {% if char.session_count == 0 %}
+{#                {% if char.session_count == 0 %}#}
                     <input type="checkbox" aria-label="delete_mark" class="delete-char-box" id="{{ char.id }}">
-                {% else %}
-                    <input type="checkbox" disabled>
-                {% endif %}
+{#                {% else %}#}
+{#                    <input type="checkbox" disabled>#}
+{#                {% endif %}#}
                 </td>
                 <td>{{ char.name }}</td>
 {#                <td>{{ char.actor.surname }} {{ char.actor.name }}</td>#}
@@ -211,9 +344,12 @@
 
     <h4>Sessions Overview</h4>
     {% if session_list %}
+        <button disabled type="button" class="btn btn-outline-danger" onclick="delete_selected_sessions()" id="delete-session-btn">Delete selected sessions</button>
+        <hr>
         <table class="table table-borderless table-sm table-hover" id="sessions2">
         <thead>
             <tr>
+                <th></th>
                 <th>Character</th>
                 <th>Actor</th>
                 <th>Day</th>
@@ -226,6 +362,7 @@
         <tbody>
         {% for session in session_list %}
             <tr>
+                <td><input type="checkbox" aria-label="delete_mark_sess" class="delete-session-box" id="{{ session.id }}"></td>
                 <td>{{ session.character.name }}</td>
                 <td>{{ session.character.actor.name }}</td>
                 <td>{{ session.day|date:"d-m-Y"}}</td>
@@ -244,7 +381,6 @@
 {% endblock %}
 
 {% block custom_script_end %}
-    {{ form.media }}
     <script type="text/javascript" src="{% static "DataTables/datatables.min.js" %}"></script>
 
     <script type="text/javascript">
@@ -300,6 +436,18 @@
             })
         }
 
+        function prep_sessions_ids(){
+            console.log('gen select refresh');
+            var ids_for_create = '-1';
+
+            $('#character-table input:checkbox:checked').each(function(){
+               console.log('ids_for_create:', $(this).attr('id'));
+                ids_for_create = ids_for_create+','+$(this).attr('id')
+            });
+            //session_char_ids
+            $('#session_char_ids').val(ids_for_create);
+        }
+
         function delete_selected_chars(){
             console.log('delete chars clicked');
             // retrieve ids from checked boxes
@@ -345,7 +493,50 @@
             })
         }
 
+        function delete_selected_sessions(){
+            console.log('delete sessions clicked');
+            // retrieve ids from checked boxes
+            var ids_for_del = '';
+            $('#sessions2 input:checkbox:checked').each(function(){
+               console.log('char_id_for_del:', $(this).attr('id'));
+                  if(ids_for_del === '') {
+                      ids_for_del = '?ids='+$(this).attr('id')
+                  } else {
+                      ids_for_del = ids_for_del+','+$(this).attr('id')
+                  }
+            });
+            console.log(ids_for_del);
+            tmpurl ="{% url "delete_selected_sessions" %}"+ids_for_del;
+            console.log(tmpurl);
+
+            $.ajax({
+              url:tmpurl,
+                cache:false,
+                beforeSend: function(){
+                    timeOutHandler = setTimeout(function(){
+                        $("#loadMe").modal({
+                          backdrop: "static", //remove ability to close modal with click
+                          keyboard: false, //remove option to close with keyboard
+                          show: true //Display loader!
+                        });
+                    },500);
+
+                },
+                complete: function(){
+                    clearTimeout(timeOutHander);
+                    $("#loadMe").modal("hide");
+                },
+                success:function(){
+                    console.log('del call successful');
+                    window.location.reload();
+                },
+            })
+        }
+
         $(document).ready(function() {
+
+            $('#sessions2').DataTable();
+            $('#character-table').DataTable();
 
             $("#just_load_please").on("click", function (e) {
                 console.log('dbg_btn_clicked');
@@ -360,15 +551,31 @@
                 }, 3500);
             });
 
-            $('#sessions2').DataTable();
-
             $(document).on('change','#character-table input:checkbox', function(){
+                prep_sessions_ids();
                 if($('#character-table input:checkbox:checked').length > 0){
                     console.log('cbox checked');
-                    $('#delete-char-btn').removeClass('invisible')
+                    //$('#delete-char-btn').removeClass('invisible')
+                    $('#delete-char-btn').prop('disabled',false);
+                    $('#create-sessions-btn').prop('disabled',false);
                 } else {
                     console.log('all cboxes unchecked');
-                    $('#delete-char-btn').addClass('invisible')
+                    //$('#delete-char-btn').addClass('invisible')
+                    $('#delete-char-btn').prop('disabled',true);
+                    $('#create-sessions-btn').prop('disabled',true);
+                    $('#session_char_ids').val('');
+                }
+            });
+
+            $(document).on('change','#sessions2 input:checkbox', function(){
+                if($('#sessions2 input:checkbox:checked').length > 0){
+                    console.log('sbox checked');
+                    //$('#delete-char-btn').removeClass('invisible')
+                    $('#delete-session-btn').prop('disabled',false);
+                } else {
+                    console.log('all sboxes unchecked');
+                    //$('#delete-char-btn').addClass('invisible')
+                    $('#delete-session-btn').prop('disabled',true);
                 }
             });
         });
@@ -376,4 +583,13 @@
     </script>
 {% endblock %}
 {% block after_bootstrap %}
+    <script>
+        $( function() {
+            $( "#id_new_session_day" ).datepicker();
+            $( "#id_new_session_hour" ).timepicker({
+                'timeFormat':'H:i',
+                'scrollDefault':'now'
+            });
+        } );
+    </script>
 {% endblock %}

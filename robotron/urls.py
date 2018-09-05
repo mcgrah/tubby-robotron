@@ -40,7 +40,7 @@ urlpatterns = [
             TranslatorAutocomplete.as_view(create_field='name'),
             name='translator-autocomplete',
     ),
-url(
+    url(
             r'^studio-autocomplete/$',
             StudioAutocomplete.as_view(),
             name='studio-autocomplete',

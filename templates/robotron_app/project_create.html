@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block content %}
-    {{ form.media }}
+{#    {{ form.media }}#}
     <form method="post">
     {% csrf_token %}
         {% load i18n widget_tweaks %}
@@ -42,4 +42,7 @@
             <a class="btn btn-primary" href="." role="button">Reset Changes</a>
         </div>
     </form>
+{% endblock %}
+{% block after_bootstrap %}
+{{ form.media }}
 {% endblock %}

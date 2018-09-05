@@ -20,25 +20,6 @@ class ModelFormWidgetMixin(object):
         return modelform_factory(self.model, fields=self.fields, widgets=self.widgets)
 
 
-class AuthRequiredMiddleware(object):
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        # Code to be executed for each request before
-        # the view (and later middleware) are called.
-
-        if not request.user.is_authenticated:
-            return HttpResponseRedirect('login')
-
-        response = self.get_response(request)
-
-        # Code to be executed for each request/response after
-        # the view is called.
-
-        return response
-
-
 # Create your views here.
 def index(request):
     return render(request, 'index.html')
@@ -208,6 +189,11 @@ def batch_detail_view(request, pk):
     batch = get_object_or_404(Batch, pk=pk)
     error_msg = ''
 
+    # init forms
+    new_char_form = AddCharacterForm()
+    file_form = UploadCSVForm()
+    session_form = AddSessionForm(initial={'new_session_director':Director.objects.get(id=batch.project.director_id)})
+
     # form handling for adding single character
     if request.method == 'POST':
         if 'single_form' in request.POST:
@@ -224,9 +210,32 @@ def batch_detail_view(request, pk):
                     actor=new_char_form.cleaned_data['new_char_actor']
                 )
                 return HttpResponseRedirect(request.path_info)
+        # form handling for session generation
+        elif 'session_char_ids' in request.POST:
+            session_form = AddSessionForm(request.POST)
+            print('sessions called')
+            if session_form.is_valid():
+                char_ids = request.POST['session_char_ids'].split(',')
+                print('RECEIVED: ', char_ids)
+                bulk_sessions = []
+                for char in char_ids:
+                    if int(char) >= 0:
+                        tmp_session = Session(
+                            batch=batch,
+                            character=Character.objects.get(id=char),
+                            day=session_form.cleaned_data['new_session_day'],
+                            hour=session_form.cleaned_data['new_session_hour'],
+                            duration=session_form.cleaned_data['new_session_duration'],
+                            director=session_form.cleaned_data['new_session_director'],
+                            translator=session_form.cleaned_data['new_session_translator'],
+                        )
+                        bulk_sessions.append(tmp_session)
+                Session.objects.bulk_create(bulk_sessions)
+            return HttpResponseRedirect(request.path_info)
+
+        # form handling for csv import
         elif 'csv_import_form' in request.POST:
             print('csv_form_key_called')
-            # new_char_form = AddCharacterForm()  #  clearing single form
             file_form = UploadCSVForm(request.POST, request.FILES)
             if file_form.is_valid():
                 try:
@@ -298,9 +307,6 @@ def batch_detail_view(request, pk):
                     print(e)
 
             return HttpResponseRedirect(request.path_info)
-    else:
-        new_char_form = AddCharacterForm()
-        file_form = UploadCSVForm()
 
     context = {
         'batch': batch,
@@ -308,6 +314,7 @@ def batch_detail_view(request, pk):
         'character_list': Character.objects.filter(batch=batch),
         'form': new_char_form,
         'file_form':file_form,
+        'session_form':session_form
     }
     if error_msg != '':
         context['errors'] = error_msg
@@ -445,6 +452,23 @@ def delete_selected_chars(request):
     id_list = ids.split(',')
     print(id_list)
     marked_for_del = Character.objects.filter(id__in=id_list)
+    for m in marked_for_del:
+        # call delete
+        try:
+            m.delete()
+        except Exception as e:
+            print(e)
+            pass
+
+    return HttpResponse()
+
+
+def delete_selected_sessions(request):
+    # get list of ids from url and del all char records
+    ids = request.GET.get('ids', '')
+    id_list = ids.split(',')
+    print(id_list)
+    marked_for_del = Session.objects.filter(id__in=id_list)
     for m in marked_for_del:
         # call delete
         try:

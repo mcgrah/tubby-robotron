@@ -57,6 +57,11 @@
                     </div>
                 </li>
                 <li class="nav-item"><button type="button" class="btn btn-outline-secondary" id="just_load_please">DEBUG Loader</button></li>
+                {% if request.user.is_staff %}
+                <li class="nav-item"><button type="button" class="btn btn-outline-success" id="staff">STAFF: ACTIVE</button></li>
+                {% else %}
+                    <li class="nav-item"><button type="button" class="btn btn-outline-danger" id="staff">STAFF: INACTIVE</button></li>
+                {% endif %}
             </ul>
          </div>
     </nav>

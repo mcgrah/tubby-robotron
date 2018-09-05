@@ -3,7 +3,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _
-from robotron_app.models import Actor, Studio, Director, Translator, Batch
+from robotron_app.models import Actor, Studio, Director, Translator, Batch, Character
 
 from dal import autocomplete
 
@@ -89,5 +89,29 @@ class AddProjectForm(forms.Form):
         queryset=Director.objects.all(),
         widget=autocomplete.ModelSelect2(url='director-autocomplete'),
         label='Director',
+        required=False
+    )
+
+
+class AddSessionForm(forms.Form):
+    # batch assigned automatically
+    # char assigned automatically
+    # new_session_char = forms.ModelChoiceField(queryset=Character.objects.all())
+    new_session_day = forms.DateField(required=False, label='Date',
+                                         widget=forms.DateInput(attrs={'class': 'datepicker'}))
+    new_session_hour = forms.TimeField(required=False, label='Time',
+                                         widget=forms.TimeInput())
+    new_session_duration = forms.IntegerField(min_value=0, initial=0, required=False, label='Duration (hr)')
+    # auto as well?
+    new_session_director = forms.ModelChoiceField(
+        queryset=Director.objects.all(),
+        widget=autocomplete.ModelSelect2(url='director-autocomplete'),
+        label='Director',
+        required=False
+    )
+    new_session_translator = forms.ModelChoiceField(
+        queryset=Translator.objects.all(),
+        widget=autocomplete.ModelSelect2(url='translator-autocomplete'),
+        label='Translator',
         required=False
     )
