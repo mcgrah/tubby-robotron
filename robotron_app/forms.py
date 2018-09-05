@@ -3,7 +3,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _
-from robotron_app.models import Actor, Studio, Director, Translator
+from robotron_app.models import Actor, Studio, Director, Translator, Batch
 
 from dal import autocomplete
 
@@ -23,8 +23,11 @@ class AddBatchForm(forms.Form):
     new_batch_name = forms.CharField(min_length=1, required=True, label='Name')
     # project assigned automatically form project detail page
     # new_batch_project =
-    new_batch_start_date = forms.DateField(initial=datetime.date.today, required=False, label='Start Date', widget=DateInput())
-    new_batch_deadline = forms.DateField(required=False, label='Deadline', widget=DateInput())
+    # new_batch_start_date = forms.DateField(initial=datetime.date.today, required=False, label='Start Date', widget=DateInput())
+    new_batch_start_date = forms.DateField(initial=datetime.date.today, required=False, label='Start Date',
+                                           widget=forms.DateInput(attrs={'class': 'datepicker'}))
+    new_batch_deadline = forms.DateField(required=False, label='Deadline',
+                                         widget=forms.DateInput(attrs={'class': 'datepicker'}))
     new_batch_files_count = forms.IntegerField(min_value=0, initial=0,  required=False, label='Files')
     new_batch_word_count = forms.IntegerField(min_value=0, initial=0, required=False, label='Words')
     new_batch_char_count = forms.IntegerField(min_value=0, initial=0, required=False, label='Characters')
@@ -44,8 +47,10 @@ class AddCharacterForm(forms.Form):
     new_char_name = forms.CharField(min_length=1, required=True, label='Name')
     # batch assigned automatically from batch detail page
     new_char_files_count = forms.IntegerField(min_value=0, initial=0,  required=False, label='Files')
-    new_char_delivery_date = forms.DateField(required=False, label='Delivery Date', widget=DateInput())
-    new_char_delivery_time = forms.TimeField(required=False, label='Delivery Time', widget=TimeInput())
+    new_char_delivery_date = forms.DateField(required=False, label='Delivery Date',
+                                             widget=forms.DateInput(attrs={'class': 'datepicker'}))
+    new_char_delivery_time = forms.TimeField(required=False, label='Delivery Time',
+                                             widget=forms.DateInput())
     # actor needs to be chosen or created from scratch if not found
     new_char_actor = forms.ModelChoiceField(
         queryset=Actor.objects.all(),
@@ -57,13 +62,13 @@ class AddCharacterForm(forms.Form):
 
 class AddStudioForm(forms.Form):
     new_studio_name = forms.CharField(min_length=1, max_length=128, required=True, label='Name')
-    new_studio_address = forms.CharField(required=False, label='Address',widget=forms.Textarea)
+    new_studio_address = forms.CharField(required=False, label='Address', widget=forms.Textarea)
     new_studio_telephone = forms.CharField(
         required=False, label='Telephone',
         validators=[RegexValidator(r'^[0-9]+$', 'Enter a valid phone number.')],
     )
     new_studio_email = forms.EmailField(required=False, label='E-mail', widget=forms.EmailInput)
-    new_studio_note = forms.CharField(required=False, label='Note',widget=forms.Textarea)
+    new_studio_note = forms.CharField(required=False, label='Note', widget=forms.Textarea)
 
 
 class AddProjectForm(forms.Form):

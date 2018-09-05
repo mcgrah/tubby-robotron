@@ -10,7 +10,15 @@
 {% block content %}
     <div class="row">
         <div class="col">
-        <h4>Character Details:</h4>
+        <div class="row align-items-center">
+            <div class="col-md-auto">
+                <h4>Character Details</h4>
+            </div>
+            <div class="col">
+                <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="collapse"
+                   data-target="#updateForm" aria-pressed="false" href="#">Edit</button>
+            </div>
+        </div>
         <table class="table table-sm">
         <tbody>
             <tr><th scope="row">Batch: </th><td>{{ character.batch.name }}</td></tr>
@@ -21,9 +29,80 @@
         </tbody>
         </table>
         </div>
+        <div class="col">
+            {# make this one container for editable form? #}
+            {% if form %}
+                {{ form.media }}
+                {% load i18n widget_tweaks %}
+                <form method="POST" action=".">
+                {% csrf_token %}
+                {% if form.errors %}
+                    <div class="row align-items-center collapse show no-transition" id="updateForm">
+                {% else %}
+                    <div class="row align-items-center collapse no-transition" id="updateForm">
+                {% endif %}
+                    <table class="table table-sm table-borderless m-1" >
+                        <!-- MANUAL FORM PLACEMENT !-->
+                        <tr class="invisible"><td class="p-0">.</td></tr>
+                        <tr>
+                            <td colspan="2"><button type="submit" class="btn btn-outline-primary btn-sm">{% trans "Update" %}</button></td>
+                        </tr>
+                        <tr>
+                            <td class="p-0" colspan="2">{{ form.name|attr:"class:form-control form-control-sm" }}</td>
+                            <td>
+                            {% if form.name.errors %}
+                                {% for error in  form.name.errors %}{{ error }}{% endfor %}
+                            {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="p-0" colspan="2">{{ form.actor|attr:"class:form-control form-control-sm" }}</td>
+                            <td>
+                            {% if form.actor.errors %}
+                                {% for error in  form.actor.errors %}{{ error }}{% endfor %}
+                            {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="p-0" colspan="2">{{ form.files_count|attr:"class:form-control form-control-sm" }}</td>
+                            <td>
+                            {% if form.files_count.errors %}
+                                {% for error in  form.files_count.errors %}{{ error }}{% endfor %}
+                            {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="p-0">{{ form.delivery_date|attr:"class:form-control form-control-sm" }}</td>
+                            <td class="p-0">{{ form.delivery_time|attr:"class:form-control form-control-sm" }}</td>
+                            <td>
+                            {% if form.delivery_date.errors %}
+                                {% for error in  form.delivery_date.errors %}{{ error }}{% endfor %}
+                            {% endif %}
+                            </td>
+                        <td>
+                            {% if form.delivery_time.errors %}
+                                {% for error in  form.delivery_time.errors %}{{ error }}{% endfor %}
+                            {% endif %}
+                            </td>
+                        </tr>
+                        <!-- AUTO FORM PLACEMENT !-->
+{#                        {% for field in form %}#}
+{#                            <tr>#}
+{#                                <td>{{ field|attr:"class:form-control form-control-sm" }}</td>#}
+{#                                <td>#}
+{#                                {% if field.errors %}#}
+{#                                    {% for error in  field.errors %}{{ error }}{% endfor %}#}
+{#                                {% endif %}#}
+{#                                </td>#}
+{#                            </tr>#}
+{#                        {% endfor %}#}
+                    </table>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
         <div class="col"></div>
     </div>
-{#    <div class="row">#}
     <h4>Character Sessions:</h4>
     {% if session_list %}
         <table class="table">
@@ -53,6 +132,15 @@
     {% else %}
        <div class="alert alert-info">This character has currently no sessions.</div>
     {% endif %}
-{#    </div>#}
-
+{% endblock %}
+{% block after_bootstrap %}
+    <script>
+        $( function() {
+            $( "#id_delivery_date" ).datepicker();
+            $( "#id_delivery_time" ).timepicker({
+                'timeFormat':'H:i',
+                'scrollDefault':'now'
+            });
+        } );
+    </script>
 {% endblock %}

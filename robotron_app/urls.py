@@ -15,7 +15,8 @@ urlpatterns = [
     path('project/<int:pk>/update/', views.ProjectUpdateView.as_view(), name='update_project'),
     # path('batch/<int:pk>', views.BatchDetailView.as_view(), name='batch'),
     path('batch/<int:pk>/', views.batch_detail_view, name='batch'),
-    path('character/<int:pk>/', views.CharacterDetailView.as_view(), name='character'),
+    # path('character/<int:pk>/', views.CharacterDetailView.as_view(), name='character'),
+    path('character/<int:pk>/', views.CharacterDetailUpdateView.as_view(), name='character'),
 
 ]
 # functions only:
@@ -23,6 +24,7 @@ urlpatterns += [
     path('nuke_empty_sessions/', views.nuke_empty_sessions, name='nuke_empty_sessions'),
     path('generate_sessions/<int:batch_id>', views.generate_new_sessions, name='generate_new_sessions'),
     path('delete_selected_chars/', views.delete_selected_chars, name='delete_selected_chars'),
+    path('delete_selected_batches/', views.delete_selected_batches, name='delete_selected_batches'),
     path('studio/<int:pk>/delete/', views.delete_studio, name='delete_studio'),
     path('project/<int:pk>/delete/', views.delete_project, name='delete_project'),
 ]

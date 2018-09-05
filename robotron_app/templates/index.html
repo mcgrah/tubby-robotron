@@ -13,4 +13,29 @@
     <div class="alert alert-success" role="alert">
         RobotrON!
     </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Demo Cheatsheet</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-xs-4 col-md-4">
+                          <a href="{% url "studios" %}" class="btn btn-danger btn-lg d-flex align-items-center justify-content-center" role="button">Studios</a>
+                        </div>
+                        <div class="col-xs-4 col-md-4">
+                          <a href="{% url "projects" %}" class="btn btn-warning btn-lg d-flex align-items-center justify-content-center" role="button">Projects</a>
+                        </div>
+                        <div class="col-xs-4 col-md-4">
+                            <a href="#" class="btn btn-info btn-lg d-flex align-items-center justify-content-center" role="button">Calendar</a>
+                        </div>
+                    </div>
+{#                    <a href="http://www.jquery2dotnet.com/" class="btn btn-success btn-lg btn-block" role="button"><span class="glyphicon glyphicon-globe"></span> Website</a>#}
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}

@@ -19,6 +19,26 @@ class ModelFormWidgetMixin(object):
     def get_form_class(self):
         return modelform_factory(self.model, fields=self.fields, widgets=self.widgets)
 
+
+class AuthRequiredMiddleware(object):
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Code to be executed for each request before
+        # the view (and later middleware) are called.
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect('login')
+
+        response = self.get_response(request)
+
+        # Code to be executed for each request/response after
+        # the view is called.
+
+        return response
+
+
 # Create your views here.
 def index(request):
     return render(request, 'index.html')
@@ -134,6 +154,10 @@ class ProjectDetailView(generic.DetailView):
 
 def project_detail_view(request, pk):
     project = get_object_or_404(Project, pk=pk)
+    batch_list = Batch.objects.annotate(real_chars=Count('character')).filter(project=project)
+    # batch_list = Batch.objects.filter(project=project)
+    # get existing batch number for auto-naming
+    last_batch = 'Batch '+str(len(batch_list) + 1)
 
     # form handling for adding new batch
     if request.method == 'POST':
@@ -153,9 +177,7 @@ def project_detail_view(request, pk):
 
     else:
         # default form goes here
-        new_batch_form = AddBatchForm()
-
-    batch_list = Batch.objects.filter(project=project)
+        new_batch_form = AddBatchForm(initial={'new_batch_name':last_batch})
 
     context = {
         'project': project,
@@ -306,6 +328,30 @@ class CharacterDetailView(generic.DetailView):
         return context
 
 
+class CharacterDetailUpdateView(UpdateView):
+    model = Character
+    template_name = 'robotron_app/character_detail.html'
+
+    fields = [
+        'name',
+        'actor',
+        'files_count',
+        'delivery_date',
+        'delivery_time'
+    ]
+
+    widgets = {
+        'actor': autocomplete.ModelSelect2(url='actor-autocomplete'),
+        'delivety_date': forms.DateInput(attrs={'class': 'datepicker'}),
+        'delivety_time': forms.DateInput(),
+    }
+
+    def get_context_data(self, **kwargs):
+        context = super(CharacterDetailUpdateView, self).get_context_data(**kwargs)
+        context['session_list'] = Session.objects.filter(character=context['character'])
+        return context
+
+
 class ActorAutocomplete(autocomplete.Select2QuerySetView):
 
     def get_queryset(self):
@@ -399,6 +445,23 @@ def delete_selected_chars(request):
     id_list = ids.split(',')
     print(id_list)
     marked_for_del = Character.objects.filter(id__in=id_list)
+    for m in marked_for_del:
+        # call delete
+        try:
+            m.delete()
+        except Exception as e:
+            print(e)
+            pass
+
+    return HttpResponse()
+
+
+def delete_selected_batches(request):
+    # get list of ids from url and del all char records
+    ids = request.GET.get('ids', '')
+    id_list = ids.split(',')
+    print(id_list)
+    marked_for_del = Batch.objects.filter(id__in=id_list)
     for m in marked_for_del:
         # call delete
         try:

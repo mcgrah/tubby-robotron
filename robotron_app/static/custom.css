@@ -48,3 +48,17 @@ body {
 .modal-backdrop.show {
   opacity: 0.75;
 }
+
+.no-transition {
+  -webkit-transition: height 0.01s;
+  -moz-transition: height 0.01s;
+  -ms-transition: height 0.01s;
+  -o-transition: height 0.01s;
+  transition: height 0.01s;
+}
+
+.panel-body .btn:not(.btn-block) {
+    width:220px;
+    height:220px;
+    margin-bottom:10px;
+}

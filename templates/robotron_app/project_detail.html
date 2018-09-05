@@ -1,4 +1,15 @@
-{% extends "base_scripted.html"%}
+{% extends "base.html"%}
+{% load static %}
+
+
+{% block pageScript %}
+    <script>
+        $( function() {
+            $( "#id_new_batch_start_date" ).datepicker();
+            $( "#id_new_batch_deadline" ).datepicker();
+        } );
+    </script>
+{% endblock %}
 
 {% block title %}Project: {{ project.name }}{% endblock %}
 
@@ -50,9 +61,10 @@
     <h4>Batches:</h4>
     <div class="btn-group">
         <button type="button" class="btn btn-outline-primary" data-toggle="collapse" data-target="#batchForm" aria-pressed="false" aria-expanded="false">Add New</button>
-{#        <button>Import CSV</button>#}
+        <button type="button" class="btn btn-outline-primary invisible" onclick="delete_selected_batches()" id="delete-batch-btn">Delete Selected</button>
     </div>
     {% load i18n widget_tweaks %}
+    {{ form.media }}
     <form action="" method="POST" id="batch-form">
         {% csrf_token %}
         {% if form.errors %}
@@ -64,7 +76,7 @@
             {% if field.errors %}
                 <div class="form-group has-error col-md-2">
                     <label class="control-label" for="id_{{ field.name }}">{{ field.label }}</label>
-                    {{ field|attr:"class:form-control" }}
+                        {{ field|attr:"class:form-control" }}
                     <div class="alert alert-danger">
                         {% for error in  field.errors %}{{ error }}{% endfor %}
                     </div>
@@ -72,7 +84,7 @@
             {% else %}
                 <div class="form-group col-md-2">
                     <label class="control-label" for="id_{{ field.name }}">{{ field.label }}</label>
-                    {{ field|attr:"class:form-control" }}
+                        {{ field|attr:"class:form-control" }}
                 </div>
             {% endif %}
         {% endfor %}
@@ -83,8 +95,10 @@
         </div>
     </form>
     {% if batch_list %}
-        <table class="table table-borderless table-sm table-hover">
+        <table class="table table-borderless table-sm table-hover" id="batch-table">
+            <tbody>
             <tr>
+                <th></th>
                 <th scope="col">#</th>
                 <th scope="col">Name</th>
                 <th scope="col">Start Date</th>
@@ -94,21 +108,105 @@
                 <th scope="col">Characters</th>
                 <th scope="col">Sessions</th>
             </tr>
+
         {% for batch in batch_list %}
             <tr>
+                <td>
+                {% if batch.real_chars == 0 %}
+                    <input type="checkbox" aria-label="delete_mark" class="delete-batch-box" id="{{ batch.id }}">
+                {% else %}
+                    <input type="checkbox" disabled>
+                {% endif %}
+                </td>
                 <td>{{ forloop.counter }}</td>
                 <td>{{ batch.name }}</td>
-                <td>{{ batch.start_date }}</td>
-                <td>{{ batch.deadline }}</td>
+                <td>{{ batch.start_date|date:"Y-m-d" }}</td>
+                <td>{{ batch.deadline|date:"Y-m-d" }}</td>
                 <td>{{ batch.files_count }}</td>
                 <td>{{ batch.word_count }}</td>
-                <td>{{ batch.char_count }}</td>
+                <td>{{ batch.real_chars }} / {{ batch.char_count }}</td>
                 <td><a href="{{ batch.get_absolute_url }}">View Details</a></td>
             </tr>
         {% endfor %}
-
+        </tbody>
         </table>
     {% else %}
        <div class="alert alert-info">No batches added.</div>
     {% endif %}
+{% endblock %}
+{% block custom_script_end %}
+    <script type="text/javascript">
+        var timeOutHandler;
+
+
+        function delete_selected_batches(){
+            console.log('delete batches clicked');
+            // retrieve ids from checked boxes
+            var ids_for_del = '';
+            $('#batch-table input:checkbox:checked').each(function(){
+               console.log('batch_id_for_del:', $(this).attr('id'));
+                  if(ids_for_del === '') {
+                      ids_for_del = '?ids='+$(this).attr('id')
+                  } else {
+                      ids_for_del = ids_for_del+','+$(this).attr('id')
+                  }
+            });
+            console.log(ids_for_del);
+            tmpurl ="{% url "delete_selected_batches" %}"+ids_for_del;
+            console.log(tmpurl);
+
+            $.ajax({
+              url:tmpurl,
+                cache:false,
+                beforeSend: function(){
+                    timeOutHandler = setTimeout(function(){
+                        $("#loadMe").modal({
+                          backdrop: "static", //remove ability to close modal with click
+                          keyboard: false, //remove option to close with keyboard
+                          show: true //Display loader!
+                        });
+                    },500);
+
+                },
+                complete: function(){
+                    clearTimeout(timeOutHander);
+                    $("#loadMe").modal("hide");
+                },
+                success:function(){
+                    console.log('del call successful');
+                    window.location.reload();
+                },
+            })
+        }
+
+        $(document).ready(function() {
+
+            $("#just_load_please").on("click", function (e) {
+                console.log('dbg_btn_clicked');
+                e.preventDefault();
+                $("#loadMe").modal({
+                    backdrop: "static", //remove ability to close modal with click
+                    keyboard: false, //remove option to close with keyboard
+                    show: true //Display loader!
+                });
+                setTimeout(function () {
+                    $("#loadMe").modal("hide");
+                }, 3500);
+            });
+
+            $(document).on('change','#batch-table input:checkbox', function(){
+                if($('#batch-table input:checkbox:checked').length > 0){
+                    console.log('cbox checked');
+                    $('#delete-batch-btn').removeClass('invisible')
+                } else {
+                    console.log('all cboxes unchecked');
+                    $('#delete-batch-btn').addClass('invisible')
+                }
+            });
+
+        });
+
+    </script>
+{% endblock %}
+{% block after_bootstrap %}
 {% endblock %}

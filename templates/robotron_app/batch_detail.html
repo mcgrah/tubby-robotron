@@ -2,6 +2,15 @@
 {% load static %}
 
 {% block pageScript %}
+    <script>
+        $( function() {
+            $( "#id_new_char_delivery_date" ).datepicker();
+            $( "#id_new_char_delivery_time" ).timepicker({
+                'timeFormat':'H:i',
+                'scrollDefault':'now'
+            });
+        } );
+    </script>
 {% endblock %}
 
 {% block title %}{{ batch.project.name }}: {{ batch.name }}{% endblock %}
@@ -27,7 +36,34 @@
 {% endblock %}
 
 {% block content %}
-    <h2>{{ batch.project.name }}: {{ batch.name }} Details</h2>
+
+    <div class="row align-items-center">
+        <div class="col-md-auto">
+            <h4>{{ batch.project.name }}: {{ batch.name }} Details</h4>
+        </div>
+        <div class="col">
+            <a role=button class="btn btn-outline-primary" href="#">Edit</a>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col">
+            <table class="table table-striped table-sm">
+                <tbody>
+                    <tr><th scope="row">Name: </th><td>{{ batch.name }}</td></tr>
+                    <tr><th scope="row">Start Date: </th><td>{{ batch.start_date }}</td></tr>
+                    <tr><th scope="row">Deadline: </th><td>{{ batch.deadline }}</td></tr>
+                    <tr><th scope="row">Files: </th><td>{{ batch.files_count }}</td></tr>
+                    <tr><th scope="row">Wordcount: </th><td>{{ batch.word_count }}</td></tr>
+                    <tr><th scope="row">Characters: </th><td>{{ batch.char_count }}</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col"></div>
+        <div class="col"></div>
+    </div>
+
+    <hr>
     <h4>Characters Overview</h4>
     <div id="two-form">
     {% load i18n widget_tweaks %}
@@ -66,7 +102,7 @@
                                 {% for field in form %}
                                     <div class="form-group col-md-2">
                                         <label class="control-label" for="id_{{ field.name }}">{{ field.label }}</label>
-                                        {{ field|attr:"class:form-control" }}
+                                            {{ field|attr:"class:form-control" }}
                                         {% if field.errors %}
                                             {% for error in field.errors %}
                                                 <div class="alert alert-danger">
@@ -105,8 +141,12 @@
                                 {% endfor %}
                               </div>
                             {% endif %}
-                            <div class="form-row">
-                            {{ file_form }}
+                            <div class="form-row align-items-center">
+                            {% for ffield in file_form %}
+                                <div class="col-auto pb-2 align-items-center">
+                                {{ ffield|attr:"class:form-control" }}
+                                </div>
+                            {% endfor %}
                             </div>
                             <div class="form-row">
                                 <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
@@ -131,23 +171,34 @@
                 <th scope="col">Files</th>
                 <th scope="col">Delivery Date</th>
                 <th scope="col">Delivery Time</th>
-                <th scope="col" colspan="2">Num. of Sessions</th>
+                <th scope="col">Sessions</th>
             </tr>
             {% for char in character_list %}
                 <tr>
+                <td>
                 {% if char.session_count == 0 %}
-                    <td><input type="checkbox" aria-label="delete_mark" class="delete-char-box" id="{{ char.id }}"></td>
+                    <input type="checkbox" aria-label="delete_mark" class="delete-char-box" id="{{ char.id }}">
                 {% else %}
-                    <td></td>
+                    <input type="checkbox" disabled>
                 {% endif %}
+                </td>
                 <td>{{ char.name }}</td>
 {#                <td>{{ char.actor.surname }} {{ char.actor.name }}</td>#}
                 <td>{{ char.actor.name }}</td>
                 <td>{{ char.files_count }}</td>
                 <td>{{ char.delivery_date|date:"Y-m-d" }}</td>
                 <td>{{ char.delivery_time|time:"H:i"  }}</td>
-                <td>{{ char.session_count }}</td>
-                <td><a href="{{ char.get_absolute_url }}">Manage</a></td>
+                <td>
+                    <a href="{{ char.get_absolute_url }}">
+                        {% if char.session_count > 0 %}
+                            <span class="badge badge-primary">
+                        {% else %}
+                            <span class="badge badge-secondary">
+                        {% endif %}
+                        {{ char.session_count }}</span>
+                        Manage
+                    </a>
+                </td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -325,5 +376,4 @@
     </script>
 {% endblock %}
 {% block after_bootstrap %}
-
 {% endblock %}
