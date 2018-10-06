@@ -35,7 +35,7 @@
                           {% if studio.num_projects > 0 %}
                               <button type="button" class="btn btn-outline-secondary" disabled>Archive</button>
                           {% else %}
-                              <a role=button class="btn btn-outline-primary" href="{% url "delete_studio" pk=studio.id %}">Delete</a>
+                              <a role=button class="btn btn-outline-danger" href="{% url "delete_studio" pk=studio.id %}">Delete</a>
                           {% endif %}
                       </div>
                   </div>

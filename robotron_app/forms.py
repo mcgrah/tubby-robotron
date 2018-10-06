@@ -101,7 +101,7 @@ class AddSessionForm(forms.Form):
                                          widget=forms.DateInput(attrs={'class': 'datepicker'}))
     new_session_hour = forms.TimeField(required=False, label='Time',
                                          widget=forms.TimeInput())
-    new_session_duration = forms.IntegerField(min_value=0, initial=0, required=False, label='Duration (hr)')
+    new_session_duration = forms.IntegerField(min_value=0, initial=0, required=False, label='Duration')
     # auto as well?
     new_session_director = forms.ModelChoiceField(
         queryset=Director.objects.all(),

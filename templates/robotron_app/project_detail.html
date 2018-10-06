@@ -58,10 +58,14 @@
         <div class="col"></div>
     </div>
     <hr>
-    <h4>Batches:</h4>
-    <div class="btn-group">
-        <button type="button" class="btn btn-outline-primary" data-toggle="collapse" data-target="#batchForm" aria-pressed="false" aria-expanded="false">Add New</button>
-        <button type="button" class="btn btn-outline-primary invisible" onclick="delete_selected_batches()" id="delete-batch-btn">Delete Selected</button>
+    <div class="row align-items-center">
+        <div class="col-md-auto">
+            <h4>Batches</h4>
+        </div>
+        <div class="col btn-group">
+            <button type="button" class="btn btn-outline-primary" data-toggle="collapse" data-target="#batchForm" aria-pressed="false" aria-expanded="false">Add New</button>
+            <button type="button" class="btn btn-outline-danger disabled" onclick="delete_selected_batches()" id="delete-batch-btn">Delete Selected</button>
+        </div>
     </div>
     {% load i18n widget_tweaks %}
     {{ form.media }}
@@ -88,10 +92,10 @@
                 </div>
             {% endif %}
         {% endfor %}
-        <div class="form-group col-md-2">
-                <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
-                <a class="btn btn-primary" href="{{ project.get_absolute_url }}" role="button">Clear</a>
-        </div>
+            <div class="form-group col-md-12">
+                <button type="submit" class="btn btn-primary "  style="float: right">{% trans "Add" %}</button>
+                <a class="btn btn-secondary mr-1" href="{{ project.get_absolute_url }}" role="button"  style="float: right">Cancel</a>
+            </div>
         </div>
     </form>
     {% if batch_list %}
@@ -140,9 +144,13 @@
 
 
         function delete_selected_batches(){
+            if($('#batch-table input:checkbox:checked').length > 0){        
             console.log('delete batches clicked');
+
+
             // retrieve ids from checked boxes
             var ids_for_del = '';
+            
             $('#batch-table input:checkbox:checked').each(function(){
                console.log('batch_id_for_del:', $(this).attr('id'));
                   if(ids_for_del === '') {
@@ -178,9 +186,9 @@
                 },
             })
         }
+        }
 
         $(document).ready(function() {
-
             $("#just_load_please").on("click", function (e) {
                 console.log('dbg_btn_clicked');
                 e.preventDefault();
@@ -197,13 +205,12 @@
             $(document).on('change','#batch-table input:checkbox', function(){
                 if($('#batch-table input:checkbox:checked').length > 0){
                     console.log('cbox checked');
-                    $('#delete-batch-btn').removeClass('invisible')
+                    $('#delete-batch-btn').removeClass('disabled')
                 } else {
                     console.log('all cboxes unchecked');
-                    $('#delete-batch-btn').addClass('invisible')
+                    $('#delete-batch-btn').addClass('disabled')
                 }
             });
-
         });
 
     </script>

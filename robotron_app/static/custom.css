@@ -62,3 +62,9 @@ body {
     height:220px;
     margin-bottom:10px;
 }
+
+
+.select2-selection--single {
+  min-height: 38px;
+}
+
