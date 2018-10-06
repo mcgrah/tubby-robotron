@@ -37,9 +37,9 @@
                         {% endif %}
                     </div>
                 {% endfor %}
-            <div class="form-row">
-                <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
-                <a class="btn btn-primary" href="{% url "create_studio" %}" role="button">Clear</a>
+            <div class="form-group col-md-10">
+                <button type="submit" class="btn btn-primary" style="float: right">{% trans "Create New Studio" %}</button>
+                <a class="btn btn-secondary mr-1" href="{% url "create_studio" %}" role="button" style="float: right">Cancel</a>
             </div>
             </form>
         </div>

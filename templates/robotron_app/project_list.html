@@ -9,11 +9,13 @@
     <div class="row align-items-center">
     <div class="col-md-auto">
     <h2>Projects</h2>
+
     </div>
     <div class="col-sm">
         <a role=button class="btn btn-outline-primary" href="{% url "create_project" %}">Add New</a>
     </div>
     </div>
+    <hr>
     {% if project_list %}
         <div class="list-group">
           {% for project in project_list %}
@@ -34,7 +36,7 @@
                           <a role=button class="btn btn-outline-primary" href="{% url "update_project" pk=project.id %}">Edit</a>
                           {% if project.num_batches > 0 %}
                               <button type="button" class="btn btn-outline-secondary" disabled>Archive</button>
-                          {% else %}
+                               {% else %}
                               <a role=button class="btn btn-outline-primary" href="{% url "delete_project" pk=project.id %}">Delete</a>
                           {% endif %}
                       </div>

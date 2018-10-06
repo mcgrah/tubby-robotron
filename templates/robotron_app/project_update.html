@@ -19,6 +19,11 @@
             {% endfor %}
           </div>
         {% endif %}
+        
+        <h4>
+        Update Project details
+        <hr>
+        </h4>
          {% for field in form %}
             <div class="form-group row">
                 <label class="col-sm-2 col-form-label" for="id_{{ field.name }}">{{ field.label }}</label>
@@ -38,9 +43,9 @@
                 {% endif %}
             </div>
         {% endfor %}
-        <div class="form-row">
-            <button type="submit" class="btn btn-primary">{% trans "Update" %}</button>
-            <a class="btn btn-primary" href="." role="button">Reset Changes</a>
+        <div class="form-group col-md-10">
+            <button type="submit" class="btn btn-primary"   style="float: right">{% trans "Update" %}</button>
+            <a class="btn btn-secondary mr-1" href="." role="button"   style="float: right">Undo Changes</a>
         </div>
     </form>
 {% endblock %}

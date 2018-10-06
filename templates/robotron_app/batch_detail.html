@@ -64,31 +64,40 @@
             </table>
         </div>
         <div class="col"></div>
-        <div class="col"></div>
     </div>
 
-    <hr>
-    <h4>Characters Overview</h4>
-    <div id="two-form">
+<hr style="height:2px;border:none;color:#333;background-color:#333;">
+<div class="row align-items-center">   
+    <div class="col-md-auto">
+        <h4>Characters</h4>
+    </div>
+    <div class="btn-group">
+        <button class="btn btn-outline-primary" type="button" data-toggle="collapse" data-target="#target1" aria-expanded="false">
+            Add Character
+        </button>
+            <button class="btn btn-outline-primary" type="button" data-parent="#two-form" data-toggle="collapse" data-target="#target2" aria-expanded="false">
+                Import Characters (CSV)
+            </button>
+        <button disabled type="button" class="btn btn-outline-danger" onclick="delete_selected_chars()" id="delete-char-btn">Delete selected</button>          
         {% load i18n widget_tweaks %}
+    </div>
 
-        <div class="container">
+    <div class="container">
+        <hr>
+    <div class="row align-items-center">
+        <div class="col-md-auto">
+            <h5>Create Session</h5>
+        </div>
             <div class="btn-group">
-                <button class="btn btn-outline-primary" type="button" data-toggle="collapse" data-target="#target1" aria-expanded="false">
-                    Add Single
-                </button>
-                <button class="btn btn-outline-primary" type="button" data-parent="#two-form" data-toggle="collapse" data-target="#target2" aria-expanded="false">
-                    Import CSV
-                </button>
-                <button type="button" class="btn btn-outline-primary" onclick="generate_new_sessions()">Gen. Init Sessions</button>
-                <button type="button" class="btn btn-outline-primary" onclick="nuke_empty_sessions()">NUKE Sessions</button>
-                <button disabled id="create-sessions-btn" class="btn btn-outline-primary" type="button" data-parent="#two-form" data-toggle="collapse" data-target="#target3" aria-expanded="false">
-                    Generate (Selected)
-                </button>
-                <button disabled type="button" class="btn btn-outline-danger" onclick="delete_selected_chars()" id="delete-char-btn">Delete Selected</button>
+                <button type="button" class="btn btn-outline-primary" onclick="generate_new_sessions()">for all Characters with assigned Actors</button>
+                <button disabled id="create-sessions-btn" class="btn btn-outline-primary" type="button" data-parent="#two-form" data-toggle="collapse" data-target="#target3" aria-expanded="false">for selected Characters only</button>
+                <button type="button" class="btn btn-outline-primary" onclick="nuke_empty_sessions()">NUKE Sessions - DEBUG</button>
             </div>
         </div>
-
+    </div>
+</div>
+    
+    <div id="two-form">
         <form action="" method="POST">
             {% csrf_token %}
                 <div class="panel">
@@ -105,24 +114,25 @@
                             {% endfor %}
                           </div>
                         {% endif %}
+                        <h6>Add Single Character</h6>
                             <div class="form-row">
                                 {% for field in form %}
-                                    <div class="form-group col-md-2">
+                                <div class="form-group col-md-2">
                                         <label class="control-label" for="id_{{ field.name }}">{{ field.label }}</label>
                                             {{ field|attr:"class:form-control" }}
                                         {% if field.errors %}
                                             {% for error in field.errors %}
-                                                <div class="alert alert-danger">
+                                            <div class="alert alert-danger">
                                                 {{ error }}
-                                                </div>
+                                             </div>
                                             {% endfor %}
                                         {% endif %}
                                     </div>
                                 {% endfor %}
                             </div>
-                            <div class="form-row">
-                                <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
-                                <a class="btn btn-primary" href="{{ batch.get_absolute_url }}" role="button">Clear</a>
+                            <div class="form-group col-md-12" style="float: right">
+                                <button type="submit" class="btn btn-primary" style="float: right">{% trans "Add" %}</button>
+                                <a class="btn btn-secondary mr-1" href="{{ batch.get_absolute_url }}" role="button" style="float: right">Cancel</a>
                                 <input type="text" name="single_form" value="1" class="invisible">
                             </div>
                         </div>
@@ -148,16 +158,17 @@
                                 {% endfor %}
                               </div>
                             {% endif %}
-                            <div class="form-row align-items-center">
+                            <h6>Import Multiple Characters from CSV File</h6>
+                            <div>
                             {% for ffield in file_form %}
                                 <div class="col-auto pb-2 align-items-center">
                                 {{ ffield|attr:"class:form-control" }}
                                 </div>
                             {% endfor %}
                             </div>
-                            <div class="form-row">
-                                <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
-                                <a class="btn btn-primary" href="{{ batch.get_absolute_url }}" role="button">Clear</a>
+                            <div class="form-group col-md-12" style="float: right">
+                                <button type="submit" class="btn btn-primary" style="float: right">{% trans "Import" %}</button>
+                                <a class="btn btn-secondary mr-1" href="{{ batch.get_absolute_url }}" role="button" style="float: right">Cancel</a>
                                 <input type="text" name="csv_import_form" value="1" class="invisible">
                             </div>
                         </div>
@@ -185,86 +196,35 @@
                         <div class="form-row">
                             <div class="container">
                                 <div class="row align-items-center">
-                                    <p><strong>Set default values for new sessions (optional)</strong></p>
+                                    <h6>Set default values for new sessions (optional)</h6>
                                 </div>
-                                <div class="row align-items-center">
-                                    <div class="col-5">
-                                        <div class="input-group mb-3">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text" id="basic-addon2">{{ session_form.new_session_director.label }}</span>
-                                            </div>
-                                            {{ session_form.new_session_director|attr:"class:form-control"|attr:"aria-describedby:basic-addon2" }}
-                                        </div>
+                                
+
+                            
+                                <div class="form-row mr-1">
+                                    <div class="form-group col-md-4">
+                                      <label for="inputState">{{ session_form.new_session_director.label }}</label>
+                                      <br>{{ session_form.new_session_director|attr:"class:form-control"|attr:"aria-describedby:basic-addon2" }}
                                     </div>
-                                    <div class="col-5">
-                                        <div class="input-group mb-3">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text" id="basic-addon3">{{ session_form.new_session_translator.label }}</span>
-                                            </div>
-                                            {{ session_form.new_session_translator|attr:"class:form-control"|attr:"aria-describedby:basic-addon3" }}
-                                        </div>
-                                    </div>
+                                    <div class="form-group col-md-4">
+                                      <label for="inputState">{{ session_form.new_session_translator.label }}</label>
+                                     <br>{{ session_form.new_session_translator|attr:"class:form-control"|attr:"aria-describedby:basic-addon3" }}
                                 </div>
-                                <div class="row align-items-center">
-                                    <div class="col">
-                                        {% if session_form.new_session_translator.errors %}
-                                            {% for error in  session_form.new_session_translator.errors %}{{ error }}{% endfor %}
-                                        {% endif %}
-                                    </div>
-                                    <div class="col">
-                                        {% if session_form.new_session_translator.errors %}
-                                            {% for error in  session_form.new_session_translator.errors %}{{ error }}{% endfor %}
-                                        {% endif %}
-                                    </div>
+                                    <div class="form-group col-md-2">
+                                      <label for="inputState">{{ session_form.new_session_day.label }}</label>
+                                    <br>{{ session_form.new_session_day|attr:"class:form-control"}}
                                 </div>
-                                <div class="row align-items-center">
-                                    <div class="col-2">
-                                        <div class="row">
-                                            <div class="input-group mb-3">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text">{{ session_form.new_session_day.label }}</span>
-                                                </div>
-                                                {{ session_form.new_session_day|attr:"class:form-control"}}
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            {% if session_form.new_session_day.errors %}
-                                                {% for error in  session_form.new_session_day.errors %}{{ error }}{% endfor %}
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                    <div class="col-2">
-                                        <div class="row">
-                                            <div class="input-group mb-3">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text">{{ session_form.new_session_hour.label }}</span>
-                                                </div>
-                                                {{ session_form.new_session_hour|attr:"class:form-control"}}
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            {% if session_form.new_session_hour.errors %}
-                                                {% for error in  session_form.new_session_hour.errors %}{{ error }}{% endfor %}
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                    <div class="col-2">
-                                        <div class="row">
-                                            <div class="input-group mb-3">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text">{{ session_form.new_session_duration.label }}</span>
-                                                </div>
-                                                {{ session_form.new_session_duration|attr:"class:form-control"}}
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            {% if session_form.new_session_duration.errors %}
-                                                {% for error in  session_form.new_session_duration.errors %}{{ error }}{% endfor %}
-                                            {% endif %}
-                                        </div>
-                                    </div>
+                                    <div class="form-group col-md-1">
+                                      <label for="inputState">{{ session_form.new_session_hour.label }}</label>
+                                <br>{{ session_form.new_session_hour|attr:"class:form-control"}}
                                 </div>
-                            </div>
+                                        <div class="form-group col-md-1">
+                                      <label for="inputState">{{ session_form.new_session_duration.label }}</label>
+                                <br>{{ session_form.new_session_duration|attr:"class:form-control"}}    </div>   
+                                </div>
+
+
+
                             <!-- AUTO FORM PLACEMENT !-->
 {#                            {% for field in session_form %}#}
 {#                                <div class="form-group">#}
@@ -279,10 +239,10 @@
 {#                                    {% endif %}#}
 {#                                </div>#}
 {#                            {% endfor %}#}
-                        </div>
-                        <div class="form-row">
-                            <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
-                            <a class="btn btn-primary" href="{{ batch.get_absolute_url }}" role="button">Clear</a>
+</div>                        
+                        <div class="form-group col-md-12" style="float: right">
+                            <button type="submit" class="btn btn-primary"  style="float: right">{% trans "Create Session" %}</button>
+                            <a class="btn btn-secondary mr-1" href="{{ batch.get_absolute_url }}" role="button"  style="float: right">Cancel</a>
                             <input type="text" name="session_char_ids" value="-1" id="session_char_ids" class="invisible">
                         </div>
                     </div>
@@ -302,7 +262,7 @@
                 <th scope="col">Files</th>
                 <th scope="col">Delivery Date</th>
                 <th scope="col">Delivery Time</th>
-                <th scope="col">Sessions</th>
+                <th scope="col">Assigned Sessions</th>
             </tr>
         </thead>
             <tbody>
@@ -322,13 +282,13 @@
                 <td>{{ char.delivery_date|date:"Y-m-d" }}</td>
                 <td>{{ char.delivery_time|time:"H:i"  }}</td>
                 <td>
-                    <a href="{{ char.get_absolute_url }}">
                         {% if char.session_count > 0 %}
                             <span class="badge badge-primary">
                         {% else %}
                             <span class="badge badge-secondary">
                         {% endif %}
-                        {{ char.session_count }}</span>
+                        &nbsp{{ char.session_count }}&nbsp</span>
+                    <a href="{{ char.get_absolute_url }}">
                         Manage
                     </a>
                 </td>
@@ -340,11 +300,14 @@
        <div class="alert alert-info">No characters added to the current batch.</div>
     {% endif %}
 
-    <hr>
-
-    <h4>Sessions Overview</h4>
+    <hr style="height:2px;border:none;color:#333;background-color:#333;">
     {% if session_list %}
-        <button disabled type="button" class="btn btn-outline-danger" onclick="delete_selected_sessions()" id="delete-session-btn">Delete selected sessions</button>
+    <div class="row align-items-center"> 
+        <div class="col-md-auto">
+    <h4>Sessions</h4>
+        </div>
+    <button disabled type="button" class="btn btn-outline-danger" onclick="delete_selected_sessions()" id="delete-session-btn">Delete selected</button>
+    </div>
         <hr>
         <table class="table table-borderless table-sm table-hover" id="sessions2">
         <thead>

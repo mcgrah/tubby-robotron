@@ -38,9 +38,9 @@
                 {% endif %}
             </div>
         {% endfor %}
-        <div class="form-row">
-            <button type="submit" class="btn btn-primary">{% trans "Update" %}</button>
-            <a class="btn btn-primary" href="." role="button">Reset Changes</a>
+        <div class="form-group col-md-10">
+            <button type="submit" class="btn btn-primary" style="float: right">{% trans "Update Data" %}</button>
+            <a class="btn btn-secondary mr-1" href="." role="button" style="float: right">Cancel</a>
         </div>
     </form>
 {% endblock %}
