@@ -25,6 +25,10 @@ def index(request):
     return render(request, 'index.html')
 
 
+def calendar_view(request):
+    return render(request, 'calendar.html')
+
+
 class StudioListView(generic.ListView):
     model = Studio
     paginate_by = 50

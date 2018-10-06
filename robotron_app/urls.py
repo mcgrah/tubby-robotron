@@ -17,6 +17,7 @@ urlpatterns = [
     path('batch/<int:pk>/', views.batch_detail_view, name='batch'),
     # path('character/<int:pk>/', views.CharacterDetailView.as_view(), name='character'),
     path('character/<int:pk>/', views.CharacterDetailUpdateView.as_view(), name='character'),
+    path('calendar/', views.calendar_view, name='calendar'),
 
 ]
 # functions only:
