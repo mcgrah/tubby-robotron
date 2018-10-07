@@ -25,14 +25,6 @@
 
     <title>{% block title %}{% endblock %}</title>
 
-<style>
-    body {
-        background-image: url("/static/bgimage.png");
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-    }
-</style>
-
 </head>
 <body>
 
@@ -108,19 +100,19 @@
 
     {% if user.is_authenticated %}
 
-    {% block page_alerts %}
-    {% endblock %}
+        {% block page_alerts %}
+        {% endblock %}
 
-    {% block content %}
-    {% endblock %}
+        {% block content %}
+        {% endblock %}
     {% else %}
         {% block login_prompt %}
-        <div class="jumbotron jumbotron-fluid">
-          <div class="container">
-            <h4>Not Authorised</h4>
-            <p class="lead">You need to be logged in: <a href="{% url "login" %}">LOGIN</a></p>
-          </div>
-        </div>
+            <div class="jumbotron jumbotron-fluid">
+              <div class="container">
+                <h4>Not Authorised</h4>
+                <p class="lead">You need to be logged in: <a href="{% url "login" %}">LOGIN</a></p>
+              </div>
+            </div>
         {% endblock %}
     {% endif %}
     {% block pagination %}

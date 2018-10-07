@@ -15,8 +15,21 @@ class TimeInput(forms.TimeInput):
     input_type = 'time'
 
 
+def validate_csv(file):
+    if not file.name.endswith('.csv'):
+        error_msg = 'file is not CSV type'
+        print(error_msg)
+        raise ValidationError(error_msg)
+
+    if file.multiple_chunks():
+        error_msg = 'file is too large'
+        print(error_msg)
+        raise ValidationError(error_msg)
+
+
+
 class UploadCSVForm(forms.Form):
-    file = forms.FileField()
+    file = forms.FileField(validators=[validate_csv])
 
 
 class AddBatchForm(forms.Form):

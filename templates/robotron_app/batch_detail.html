@@ -66,7 +66,7 @@
         <div class="col"></div>
     </div>
 
-<hr style="height:2px;border:none;color:#333;background-color:#333;">
+<hr class="fat-hr">
 <div class="row align-items-center">   
     <div class="col-md-auto">
         <h4>Characters</h4>
@@ -75,25 +75,15 @@
         <button class="btn btn-outline-primary" type="button" data-toggle="collapse" data-target="#target1" aria-expanded="false">
             Add Character
         </button>
-            <button class="btn btn-outline-primary" type="button" data-parent="#two-form" data-toggle="collapse" data-target="#target2" aria-expanded="false">
-                Import Characters (CSV)
-            </button>
-        <button disabled type="button" class="btn btn-outline-danger" onclick="delete_selected_chars()" id="delete-char-btn">Delete selected</button>          
+        <button class="btn btn-outline-primary" type="button" data-parent="#two-form" data-toggle="collapse" data-target="#target2" aria-expanded="false">
+            Import Characters (CSV)
+        </button>
+        <button disabled id="create-sessions-btn" class="btn btn-outline-primary" type="button" data-parent="#two-form" data-toggle="collapse" data-target="#target3" aria-expanded="false">
+            Create Sessions for selected Characters
+        </button>
+        <button disabled type="button" class="btn btn-outline-danger" onclick="delete_selected_chars()" id="delete-char-btn">Delete selected</button>
+        <button type="button" class="btn btn-outline-danger" onclick="nuke_chars()" id="nuke-char-btn">NUKE Actors - DEBUG</button>
         {% load i18n widget_tweaks %}
-    </div>
-
-    <div class="container">
-        <hr>
-    <div class="row align-items-center">
-        <div class="col-md-auto">
-            <h5>Create Session</h5>
-        </div>
-            <div class="btn-group">
-                <button type="button" class="btn btn-outline-primary" onclick="generate_new_sessions()">for all Characters with assigned Actors</button>
-                <button disabled id="create-sessions-btn" class="btn btn-outline-primary" type="button" data-parent="#two-form" data-toggle="collapse" data-target="#target3" aria-expanded="false">for selected Characters only</button>
-                <button type="button" class="btn btn-outline-primary" onclick="nuke_empty_sessions()">NUKE Sessions - DEBUG</button>
-            </div>
-        </div>
     </div>
 </div>
     
@@ -101,7 +91,7 @@
         <form action="" method="POST">
             {% csrf_token %}
                 <div class="panel">
-                    {% if form.errors %}
+                    {% if form.errors or form.non_field_errors %}
                         <div class="collapse show" id="target1" data-parent="#two-form">
                     {% else %}
                         <div class="collapse" id="target1" data-parent="#two-form">
@@ -162,13 +152,18 @@
                             <div>
                             {% for ffield in file_form %}
                                 <div class="col-auto pb-2 align-items-center">
-                                {{ ffield|attr:"class:form-control" }}
+                                {{ ffield|attr:"class:form-control-file" }}
                                 </div>
+                                {% if ffield.errors %}
+                                    {% for error in ffield.errors %}
+                                        <div class="alert-danger">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
                             {% endfor %}
                             </div>
                             <div class="form-group col-md-12" style="float: right">
-                                <button type="submit" class="btn btn-primary" style="float: right">{% trans "Import" %}</button>
-                                <a class="btn btn-secondary mr-1" href="{{ batch.get_absolute_url }}" role="button" style="float: right">Cancel</a>
+                                <button type="submit" class="btn btn-primary float-right">{% trans "Import" %}</button>
+                                <a class="btn btn-secondary mr-1 float-right" href="{{ batch.get_absolute_url }}" role="button">Cancel</a>
                                 <input type="text" name="csv_import_form" value="1" class="invisible">
                             </div>
                         </div>
@@ -180,76 +175,109 @@
         <form action="" method="POST" id="session_defaults">
             {% csrf_token %}
             <div class="panel">
-                {% if session_form.errors %}
+                {% if session_form.errors or session_form.non_field_errors %}
                 <div class="collapse show" id="target3" data-parent="#two-form">
                 {% else %}
                 <div class="collapse" id="target3" data-parent="#two-form">
                 {% endif %}
-                    <div class="card card-body">
-                        {% if session_form.non_field_errors %}
-                          <div class="alert alert-danger" role="alert">
-                            {% for error in session_form.non_field_errors %}
-                              {{ error }}
-                            {% endfor %}
-                          </div>
-                        {% endif %}
-                        <div class="form-row">
-                            <div class="container">
-                                <div class="row align-items-center">
-                                    <h6>Set default values for new sessions (optional)</h6>
-                                </div>
-                                
-
-                            
-                                <div class="form-row mr-1">
-                                    <div class="form-group col-md-4">
-                                      <label for="inputState">{{ session_form.new_session_director.label }}</label>
-                                      <br>{{ session_form.new_session_director|attr:"class:form-control"|attr:"aria-describedby:basic-addon2" }}
-                                    </div>
-                                    <div class="form-group col-md-4">
-                                      <label for="inputState">{{ session_form.new_session_translator.label }}</label>
-                                     <br>{{ session_form.new_session_translator|attr:"class:form-control"|attr:"aria-describedby:basic-addon3" }}
-                                </div>
-                                    <div class="form-group col-md-2">
-                                      <label for="inputState">{{ session_form.new_session_day.label }}</label>
-                                    <br>{{ session_form.new_session_day|attr:"class:form-control"}}
-                                </div>
-                                    <div class="form-group col-md-1">
-                                      <label for="inputState">{{ session_form.new_session_hour.label }}</label>
-                                <br>{{ session_form.new_session_hour|attr:"class:form-control"}}
-                                </div>
-                                        <div class="form-group col-md-1">
-                                      <label for="inputState">{{ session_form.new_session_duration.label }}</label>
-                                <br>{{ session_form.new_session_duration|attr:"class:form-control"}}    </div>   
-                                </div>
-
-
-
-                            <!-- AUTO FORM PLACEMENT !-->
-{#                            {% for field in session_form %}#}
-{#                                <div class="form-group">#}
-{#                                    <label class="control-label" for="id_{{ field.name }}">{{ field.label }}</label>#}
-{#                                        {{ field|attr:"class:form-control p-0" }}#}
-{#                                    {% if field.errors %}#}
-{#                                        {% for error in field.errors %}#}
-{#                                            <div class="alert alert-danger">#}
-{#                                            {{ error }}#}
-{#                                            </div>#}
-{#                                        {% endfor %}#}
-{#                                    {% endif %}#}
-{#                                </div>#}
-{#                            {% endfor %}#}
-</div>                        
-                        <div class="form-group col-md-12" style="float: right">
-                            <button type="submit" class="btn btn-primary"  style="float: right">{% trans "Create Session" %}</button>
-                            <a class="btn btn-secondary mr-1" href="{{ batch.get_absolute_url }}" role="button"  style="float: right">Cancel</a>
-                            <input type="text" name="session_char_ids" value="-1" id="session_char_ids" class="invisible">
+                <div class="card card-body">
+                    {% if session_form.non_field_errors %}
+                    <div class="alert alert-danger" role="alert">
+                    {% for error in session_form.non_field_errors %}
+                      {{ error }}
+                    {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="row">
+                        <div class="col">
+                            <h6>Set default values for new sessions (optional)</h6>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-3"><label for="inputState">{{ session_form.new_session_director.label }}</label></div>
+                        <div class="col-3"><label for="inputState">{{ session_form.new_session_translator.label }}</label></div>
+                        <div class="col"><label for="inputState">{{ session_form.new_session_day.label }}</label></div>
+                        <div class="col"><label for="inputState">{{ session_form.new_session_hour.label }}</label></div>
+                        <div class="col"><label for="inputState">{{ session_form.new_session_duration.label }}</label></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-3">{{ session_form.new_session_director|attr:"class:form-control" }}</div>
+                        <div class="col-3">{{ session_form.new_session_translator|attr:"class:form-control" }}</div>
+                        <div class="col">{{ session_form.new_session_day|attr:"class:form-control"}}</div>
+                        <div class="col">{{ session_form.new_session_hour|attr:"class:form-control"}}</div>
+                        <div class="col">{{ session_form.new_session_duration|attr:"class:form-control"}}</div>
+                    </div>
+                    {% if session_form.errors %}
+                        <div class="row">
+                            <div class="col-3">
+                                {% if session_form.new_session_director.errors %}
+                                    {% for error in session_form.new_session_director.errors %}
+                                        <div class="alert alert-danger">
+                                                {{ error }}
+                                             </div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <div class="col-3">
+                                {% if session_form.new_session_translator.errors %}
+                                    {% for error in session_form.new_session_translator.errors %}
+                                        <div class="alert alert-danger">
+                                                {{ error }}
+                                             </div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <div class="col">
+                                {% if session_form.new_session_day.errors %}
+                                    {% for error in session_form.new_session_day.errors %}
+                                        <div class="alert alert-danger">
+                                                {{ error }}
+                                             </div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <div class="col">
+                                {% if session_form.new_session_hour.errors %}
+                                    {% for error in session_form.new_session_hour.errors %}
+                                        <div class="alert alert-danger">
+                                                {{ error }}
+                                             </div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <div class="col">
+                                {% if session_form.new_session_duration.errors %}
+                                    {% for error in session_form.new_session_duration.errors %}
+                                        <div class="alert alert-danger">
+                                                {{ error }}
+                                             </div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+{#                         {% for field in session_form %}#}
+{#                             {% if field.errors %}#}
+{#                                {% for error in field.errors %}#}
+{#                                    <div class="row justify-content-start align-items-center alert alert-danger">#}
+{#                                        {{ field.label }}: {{ error }}#}
+{#                                    </div>#}
+{#                                {% endfor %}#}
+{#                            {% endif %}#}
+{#                         {% endfor %}#}
+                    {% endif %}
+                    <div class="row mt-2">
+                        <div class="col">
+                            <button type="submit" class="btn btn-primary float-right">{% trans "Create Session" %}</button>
+                            <a class="btn btn-secondary mr-1 float-right" href="{{ batch.get_absolute_url }}" role="button">Cancel</a>
+                            <input type="text" name="session_char_ids" value="-1" id="session_char_ids" class="invisible">
+                            </div>
+                    </div>
+                </div>
                 </div>
             </div>
         </form>
     </div>
+
     <hr>
 
     {% if character_list %}
@@ -300,13 +328,15 @@
        <div class="alert alert-info">No characters added to the current batch.</div>
     {% endif %}
 
-    <hr style="height:2px;border:none;color:#333;background-color:#333;">
+    <hr class="fat-hr">
     {% if session_list %}
     <div class="row align-items-center"> 
         <div class="col-md-auto">
-    <h4>Sessions</h4>
+            <h4>Sessions</h4>
         </div>
     <button disabled type="button" class="btn btn-outline-danger" onclick="delete_selected_sessions()" id="delete-session-btn">Delete selected</button>
+    <button type="button" class="btn btn-outline-primary" onclick="generate_new_sessions()">Initialize Sessions - DEBUG</button>
+    <button type="button" class="btn btn-outline-primary" onclick="nuke_empty_sessions()">NUKE Sessions - DEBUG</button>
     </div>
         <hr>
         <table class="table table-borderless table-sm table-hover" id="sessions2">
@@ -394,6 +424,31 @@
                 },
                 success:function(){
                     console.log('nuke call successful');
+                    window.location.reload();
+                },
+            })
+        }
+
+        function nuke_chars(){
+            console.log('nuke chars button clicked');
+            $.ajax({
+                url:"{% url "nuke_chars" %}",
+                beforeSend: function(){
+                    timeOutHandler = setTimeout(function(){
+                        $("#loadMe").modal({
+                          backdrop: "static", //remove ability to close modal with click
+                          keyboard: false, //remove option to close with keyboard
+                          show: true //Display loader!
+                        });
+                    },1000);
+
+                },
+                complete: function(){
+                    clearTimeout(timeOutHander);
+                    $("#loadMe").modal("hide");
+                },
+                success:function(){
+                    console.log('nuke chars call successful');
                     window.location.reload();
                 },
             })

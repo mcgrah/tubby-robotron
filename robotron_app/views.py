@@ -236,7 +236,7 @@ def batch_detail_view(request, pk):
                         )
                         bulk_sessions.append(tmp_session)
                 Session.objects.bulk_create(bulk_sessions)
-            return HttpResponseRedirect(request.path_info)
+                return HttpResponseRedirect(request.path_info)
 
         # form handling for csv import
         elif 'csv_import_form' in request.POST:
@@ -245,39 +245,44 @@ def batch_detail_view(request, pk):
             if file_form.is_valid():
                 try:
                     file = request.FILES['file']
-                    if not file.name.endswith('.csv'):
-                        error_msg = 'file is not CSV type'
+                    # if not file.name.endswith('.csv'):
+                    #     error_msg = 'file is not CSV type'
+                    #     print(error_msg)
+                    #     raise file_form.ValidationError(error_msg)
+                    #
+                    # if file.multiple_chunks():
+                    #     error_msg = 'file is too large'
+                    #     print(error_msg)
+                    #     raise file_form.ValidationError(error_msg)
 
-                    if file.multiple_chunks():
-                        error_msg = 'file is too large'
+                    # if error_msg != '':
+                    #     print(error_msg)
+                    #     raise ValueError(error_msg)
+                    # else:
+                    file_data = file.read().decode('utf-8')
+                    lines = file_data.split("\n")
 
-                    if error_msg != '':
-                        print(error_msg)
-                        raise ValueError(error_msg)
-                    else:
-                        file_data = file.read().decode('utf-8')
-                        lines = file_data.split("\n")
+                    tmp_actor_list = []
+                    char_list = OrderedDict()
 
-                        tmp_actor_list = []
-                        char_list = OrderedDict()
-
-                        for l in lines:
-                            fields = l.split(",")
-                            # 1 field for char only, 2 fields for char + actor
-                            # anything else is invalid
-                            if 0 < len(fields) < 3:
-                                if len(fields) == 2:
-                                    # file with actors
-                                    tmp_actor = fields[1].strip()
-                                    if tmp_actor not in tmp_actor_list:
-                                        tmp_actor_list.append(tmp_actor)
-                                    char_list[(fields[0].strip())] = tmp_actor
-                                else:
-                                    # file with chars only
-                                    char_list[(fields[0].strip())] = ''
+                    for l in lines:
+                        fields = l.split(",")
+                        # 1 field for char only, 2 fields for char + actor
+                        # anything else is invalid
+                        if 0 < len(fields) < 3:
+                            if len(fields) == 2:
+                                # file with actors
+                                tmp_actor = fields[1].strip()
+                                if tmp_actor not in tmp_actor_list:
+                                    tmp_actor_list.append(tmp_actor)
+                                char_list[(fields[0].strip())] = tmp_actor
                             else:
-                                error_msg = 'wrong number of fields in csv'
-                                raise ValueError(error_msg)
+                                # file with chars only
+                                char_list[(fields[0].strip())] = ''
+                        else:
+                            error_msg = 'wrong number of fields in csv'
+                            raise file_form.ValidationError(error_msg)
+                            # raise ValueError(error_msg)
 
                         bulk_chars = []
                         bulk_actors = []
@@ -311,7 +316,7 @@ def batch_detail_view(request, pk):
                 except Exception as e:
                     print(e)
 
-            return HttpResponseRedirect(request.path_info)
+                return HttpResponseRedirect(request.path_info)
 
     context = {
         'batch': batch,
@@ -449,7 +454,7 @@ def manage_char_session(request, pk):
             'director': autocomplete.ModelSelect2(url='director-autocomplete'),
             'translator': autocomplete.ModelSelect2(url='translator-autocomplete'),
             'day': forms.DateInput(attrs={'class': 'datepicker'}),
-            'hour': forms.DateInput(),
+            'hour': forms.TimeInput(),
         }
     )
     if request.method == "POST":
@@ -491,6 +496,16 @@ def nuke_empty_sessions(request):
     nuke_this = Session.objects.filter(translator__isnull=True)
     if nuke_this.exists():
         nuke_this._raw_delete(nuke_this.db)
+
+    response = HttpResponse(content_type="text/html")
+    response.write('ok')
+    return response
+
+
+def nuke_chars(request):
+    nuke_this_char = Character.objects.filter(files_count__isnull=True)
+    if nuke_this_char.exists():
+        nuke_this_char._raw_delete(nuke_this_char.db)
 
     response = HttpResponse(content_type="text/html")
     response.write('ok')

@@ -42,10 +42,14 @@
                 {% endif %}
             </div>
         {% endfor %}
-        <div class="form-group col-md-10">
-            <button type="submit" class="btn btn-primary" style="float: right">{% trans "Add New Project" %}</button>
-            <a class="btn btn-secondary mr-1" href="." role="button" style="float: right">Cancel</a>
+        <div class="form-group row justify-content-end">
+            <div class="col">
+            <button type="submit" class="btn btn-primary float-right">{% trans "Add New Project" %}</button>
+            <a class="btn btn-secondary mr-1 float-right" href="." role="button">Undo Changes</a>
+            </div>
+            <div class="col-2"></div>
         </div>
+
     </form>
 {% endblock %}
 {% block after_bootstrap %}

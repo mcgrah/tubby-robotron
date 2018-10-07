@@ -25,6 +25,7 @@ urlpatterns = [
 # functions only:
 urlpatterns += [
     path('nuke_empty_sessions/', views.nuke_empty_sessions, name='nuke_empty_sessions'),
+    path('nuke_chars/', views.nuke_chars, name='nuke_chars'),
     path('generate_sessions/<int:batch_id>', views.generate_new_sessions, name='generate_new_sessions'),
     path('delete_selected_chars/', views.delete_selected_chars, name='delete_selected_chars'),
     path('delete_selected_sessions/', views.delete_selected_sessions, name='delete_selected_sessions'),

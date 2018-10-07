@@ -8,6 +8,9 @@ html {
 }
 body {
   padding-bottom: 20px; /* Margin bottom by footer height */
+  background-image: url("/static/bgimage.png");
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 .footer {
   position: absolute;
@@ -71,4 +74,11 @@ body {
 .select2-container {
    width: 100% !important;
    min-width: 10em !important;
+}
+
+.fat-hr {
+    height:2px;
+    border:none;
+    color:#333;
+    background-color:#333;
 }
