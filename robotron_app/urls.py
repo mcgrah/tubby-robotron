@@ -1,5 +1,5 @@
 from django.urls import path
-from robotron_app import views
+from robotron_app import views, calendar
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -19,7 +19,9 @@ urlpatterns = [
     # path('character/<int:pk>/', views.CharacterDetailView.as_view(), name='character'),
     path('character/<int:pk>/', views.CharacterDetailUpdateView.as_view(), name='character'),
     path('character/<int:pk>/update_sessions/', views.manage_char_session, name='manage_char_sessions'),
-    path('calendar/', views.calendar_view, name='calendar'),
+    # path('calendar/', views.calendar_view, name='calendar'),
+    path('calendar/', calendar.calendar_current, name='calendar'),
+    path('calendar/<int:year>/<int:month>/', calendar.calendar, name='calendar_range'),
 
 ]
 # functions only:

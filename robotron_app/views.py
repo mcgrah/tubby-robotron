@@ -451,6 +451,8 @@ def manage_char_session(request, pk):
     character = Character.objects.get(pk=pk)
     SessionInlineFormset = inlineformset_factory(Character, Session,
         fields=(
+            'batch',
+            'character',
             'day',
             'hour',
             'duration',
@@ -462,7 +464,8 @@ def manage_char_session(request, pk):
             'translator': autocomplete.ModelSelect2(url='translator-autocomplete'),
             'day': forms.DateInput(attrs={'class': 'datepicker'}),
             'hour': forms.TimeInput(),
-        }
+        },
+        extra=0
     )
     if request.method == "POST":
         formset = SessionInlineFormset(request.POST, instance=character)
