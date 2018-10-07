@@ -26,12 +26,6 @@
 {% endblock %}
 
 {% block content %}
-
-<h2>Character: <strong>{{ character.name }}</strong></h2>
-<h4>Manage Sessions</h4>
-    <div class="alert alert-info text-center lead">
-    Use bottom rows to add new sessions on-the-fly or leave empty to ignore.
-    </div>
     {{ formset.media }}
     <form method="post">
         {% csrf_token %}

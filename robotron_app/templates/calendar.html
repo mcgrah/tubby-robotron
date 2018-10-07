@@ -1,6 +1,59 @@
 {% extends "base.html"%}
+
+{% block pageScript %}
+    <script>
+        $( function() {
+            $("#nav_prev").attr(
+                "href","{% url "calendar_range" year=nav_year_prev month=nav_month_prev %}"
+            );
+            $("#nav_next").attr(
+                "href","{% url "calendar_range" year=nav_year_next month=nav_month_next %}"
+            );
+
+            $("tr.row_clickable","#calendar_month").each(function(){
+                $(this).on("click", function(e){
+                    var start_day;
+                    var end_day;
+                    //build range from 1st / last cell value
+                    for(i=0; i<7; i++){
+                        //console.log(i);
+                        start_day = $('td:eq('+i+')',this).text();
+                        if (start_day !== ""){
+//                            console.log(i,"start: "+start_day);
+                            break;
+                        }
+                    }
+                    for(j =6; j>=0; j--){
+//                        console.log(j);
+                        end_day = $('td:eq('+j+')',this).text();
+                        if(end_day !== ""){
+//                            console.log(j,"end: "+end_day);
+                            break;
+                        }
+                    }
+                    //are all empty?
+                    if(start_day !== "" && end_day !== ""){
+                        console.log('range: '+start_day+".{{ month }}"+'-'+end_day+".{{ month }}");
+                    } else {
+                        //pass
+                    }
+                });
+            });
+        } );
+    </script>
+{% endblock %}
+
 {% block title %}Calendar{% endblock %}
 
 {% block minicrumbs %}
-<li class="breadcrumb-item active" aria-current="page">Calendar</li>
+    <li class="breadcrumb-item"><a href="{% url 'calendar' %}">Calendar</a></li>
+{% endblock %}
+{% block content %}
+    <div>
+    {{ calendar }}
+    </div>
+    <div>
+    <h6>Week Overview</h6>
+    <hr>
+    </div>
 {% endblock %}
