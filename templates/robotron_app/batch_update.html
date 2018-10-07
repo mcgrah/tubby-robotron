@@ -31,10 +31,8 @@
           </div>
         {% endif %}
         
-        <h4>
-        Update Batch Details
+        <h4>Update Batch: <strong>{{ batch.name }}</strong></h4>
         <hr>
-        </h4>
          {% for field in form %}
             <div class="form-group row">
                 <label class="col-sm-2 col-form-label" for="id_{{ field.name }}">{{ field.label }}</label>
