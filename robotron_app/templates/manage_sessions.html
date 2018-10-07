@@ -1,0 +1,109 @@
+{% extends "base_scripted.html"%}
+{% block pageScript %}
+<script>
+        $( function() {
+            $("input[id*='-day']").each(function(){
+                $(this).datepicker();
+            });
+
+            $("input[id*='-hour']").each(function(){
+                $(this).timepicker({
+                    'timeFormat':'H:i',
+                    'scrollDefault':'now'
+                });
+            });
+        } );
+    </script>
+{% endblock %}
+
+{% block title %}Manage Character Sessions{% endblock %}
+
+{% block minicrumbs %}
+<li class="breadcrumb-item"><a href="{{ character.batch.project.get_absolute_url }}">{{ character.batch.project.name }}</a></li>
+<li class="breadcrumb-item"><a href="{{ character.batch.get_absolute_url }}">{{ character.batch.name }}</a></li>
+<li class="breadcrumb-item"><a href="{{ character.get_absolute_url }}">{{ character.name }}</a></li>
+<li class="breadcrumb-item active" aria-current="page">Sessions</li>
+{% endblock %}
+
+{% block content %}
+    <div class="alert alert-info text-center lead">
+    Use bottom rows to add new sessions on-the-fly or leave empty to ignore.
+    </div>
+    {{ formset.media }}
+    <form method="post">
+        {% csrf_token %}
+        {% load i18n widget_tweaks %}
+        {{ formset.management_form }}
+        <!-- AS GRID!-->
+{#        <div class="container">#}
+            <div class="row justify-content-start align-items-center">
+                <div class="col-1 h6">#</div>
+                <div class="col h6">Day</div>
+                <div class="col h6">Hour</div>
+                <div class="col h6">Duration</div>
+                <div class="col-3 h6">Director</div>
+                <div class="col-3 h6">Translator</div>
+            </div>
+
+        {% for form in formset %}
+            <div class="row justify-content-start align-items-center">
+                <div class="col d-none">{{ form.id }}</div>
+                <div class="col-1">{{ forloop.counter }}</div>
+                <div class="col">{{ form.day|attr:"class:form-control" }}</div>
+                <div class="col">{{ form.hour|attr:"class:form-control" }}</div>
+                <div class="col">{{ form.duration|attr:"class:form-control" }}</div>
+{#                add for admin / user diffs#}
+{#                <div class="col-3">{{ form.director|attr:"class:form-control"|attr:"disabled:true"}}</div>#}
+                <div class="col-3">{{ form.director|attr:"class:form-control"}}</div>
+                <div class="col-3">{{ form.translator|attr:"class:form-control"}}</div>
+            </div>
+            {% if form.non_field_errors %}
+                <div class="row justify-content-start align-items-center alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% for field in form %}
+                {% if field.errors %}
+                    {% for error in field.errors %}
+                        <div class="row justify-content-start align-items-center alert alert-danger">
+                            {{ field.name }}: {{ error }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+        <div class="form-group row justify-content-end mt-1">
+            <div class="col">
+            <button type="submit" class="btn btn-primary float-right">{% trans "Update" %}</button>
+            <a class="btn btn-secondary mr-1 float-right" href="." role="button">Undo Changes</a>
+            </div>
+        </div>
+{#        </div>#}
+        <!-- AS TABLE
+        <table class="table table-borderless">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Day</th>
+                    <th>Hour</th>
+                    <th>Duration</th>
+                    <th>Director</th>
+                    <th>Translator</th>
+                </tr>
+            </thead>
+{#        {% for form in formset %}#}
+            <tr>
+{#            <td>{{ forloop.counter }}</td>#}
+{#            <td>{{ form.day|attr:"class:form-control form-control-sm" }}</td>#}
+{#            <td>{{ form.hour|attr:"class:form-control form-control-sm" }}</td>#}
+{#            <td>{{ form.duration|attr:"class:form-control form-control-sm" }}</td>#}
+{#            <td>{{ form.director|attr:"class:form-control form-control-sm" }}</td>#}
+{#            <td>{{ form.translator|attr:"class:form-control form-control-sm"|attr:"style:" }}</td>#}
+            </tr>
+{#        {% endfor %}#}
+        </table>
+        !-->
+    </form>
+{% endblock %}

@@ -15,8 +15,10 @@ urlpatterns = [
     path('project/<int:pk>/update/', views.ProjectUpdateView.as_view(), name='update_project'),
     # path('batch/<int:pk>', views.BatchDetailView.as_view(), name='batch'),
     path('batch/<int:pk>/', views.batch_detail_view, name='batch'),
+    path('batch/<int:pk>/update/', views.BatchDetailUpdateView.as_view(), name='update_batch'),
     # path('character/<int:pk>/', views.CharacterDetailView.as_view(), name='character'),
     path('character/<int:pk>/', views.CharacterDetailUpdateView.as_view(), name='character'),
+    path('character/<int:pk>/update_sessions/', views.manage_char_session, name='manage_char_sessions'),
     path('calendar/', views.calendar_view, name='calendar'),
 
 ]

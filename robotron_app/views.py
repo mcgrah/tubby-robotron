@@ -5,6 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.views import generic
 from django.views.generic.edit import UpdateView
 from django.shortcuts import get_object_or_404, redirect
+from django.forms import inlineformset_factory
 from django.urls import reverse
 from django.db.models import Sum, Q, Count
 from django.http import HttpResponseRedirect, HttpResponse
@@ -330,6 +331,25 @@ def batch_detail_view(request, pk):
     return render(request, 'robotron_app/batch_detail.html', context=context)
 
 
+class BatchDetailUpdateView(UpdateView):
+    model = Batch
+    template_name_suffix = '_update'
+
+    fields = [
+        'name',
+        'start_date',
+        'deadline',
+        'files_count',
+        'word_count',
+        'char_count',
+    ]
+
+    widgets = {
+        'start_date': forms.DateInput(attrs={'class': 'datepicker'}),
+        'deadline': forms.DateInput(attrs={'class': 'datepicker'}),
+    }
+
+
 class CharacterDetailView(generic.DetailView):
     model = Character
 
@@ -413,6 +433,33 @@ class StudioAutocomplete(autocomplete.Select2QuerySetView):
             )
 
         return qs
+
+
+def manage_char_session(request, pk):
+    character = Character.objects.get(pk=pk)
+    SessionInlineFormset = inlineformset_factory(Character, Session,
+        fields=(
+            'day',
+            'hour',
+            'duration',
+            'director',
+            'translator'
+        ),
+        widgets={
+            'director': autocomplete.ModelSelect2(url='director-autocomplete'),
+            'translator': autocomplete.ModelSelect2(url='translator-autocomplete'),
+            'day': forms.DateInput(attrs={'class': 'datepicker'}),
+            'hour': forms.DateInput(),
+        }
+    )
+    if request.method == "POST":
+        formset = SessionInlineFormset(request.POST, instance=character)
+        if formset.is_valid():
+            formset.save()
+            return HttpResponseRedirect(character.get_absolute_url())
+    else:
+        formset = SessionInlineFormset(instance=character)
+    return render(request, 'manage_sessions.html', {'formset':formset,'character':character})
 
 
 def generate_new_sessions(request, batch_id):

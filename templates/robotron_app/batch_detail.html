@@ -46,7 +46,7 @@
             <h4>{{ batch.project.name }}: {{ batch.name }} Details</h4>
         </div>
         <div class="col">
-            <a role=button class="btn btn-outline-primary disabled" href="#">Edit</a>
+            <a role=button class="btn btn-outline-primary" href="{% url "update_batch" pk=batch.id %}">Edit</a>
         </div>
     </div>
     <hr>

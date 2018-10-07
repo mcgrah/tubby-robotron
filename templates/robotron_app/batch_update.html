@@ -1,16 +1,27 @@
 {% extends "base_scripted.html"%}
-{% block title %}Update Studio{% endblock %}
+
+{% block pageScript %}
+    <script>
+        $( function() {
+            $( "#id_start_date" ).datepicker();
+            $( "#id_deadline" ).datepicker();
+        } );
+    </script>
+{% endblock %}
+
+{% block title %}Update Batch{% endblock %}
 
 {% block minicrumbs %}
-<li class="breadcrumb-item"><a href="{% url "studios" %}">Studios</a></li>
-<li class="breadcrumb-item"><a href="..">{{ form.name.value }}</a></li>
+<li class="breadcrumb-item"><a href="{% url "projects" %}">Projects</a></li>
+<li class="breadcrumb-item"><a href="{{ batch.project.get_absolute_url }}">{{ batch.project.name }}</a></li>
+<li class="breadcrumb-item"><a href="{{ batch.get_absolute_url }}">{{ batch.name }}</a></li>
 <li class="breadcrumb-item active" aria-current="page">Update</li>
 {% endblock %}
 
 {% block content %}
     {{ form.media }}
     <form method="post">
-        {% csrf_token %}
+    {% csrf_token %}
         {% load i18n widget_tweaks %}
         {% if form.non_field_errors %}
           <div class="alert alert-danger" role="alert">
@@ -19,11 +30,16 @@
             {% endfor %}
           </div>
         {% endif %}
-        {% for field in form %}
+        
+        <h4>
+        Update Batch Details
+        <hr>
+        </h4>
+         {% for field in form %}
             <div class="form-group row">
                 <label class="col-sm-2 col-form-label" for="id_{{ field.name }}">{{ field.label }}</label>
                 <div class="col-sm-8">
-                {% if field.name == 'address' or  field.name == 'note'%}
+                {% if "note" in field.name %}
                     {{ field|attr:"class:form-control"|attr:"rows:5" }}
                 {% else %}
                     {{ field|attr:"class:form-control" }}
@@ -40,8 +56,8 @@
         {% endfor %}
         <div class="form-group row justify-content-end">
             <div class="col">
-            <button type="submit" class="btn btn-primary float-right">{% trans "Update Data" %}</button>
-            <a class="btn btn-secondary mr-1 float-right" href="." role="button">Cancel</a>
+            <button type="submit" class="btn btn-primary float-right">{% trans "Update" %}</button>
+            <a class="btn btn-secondary mr-1 float-right" href="." role="button">Undo Changes</a>
             </div>
             <div class="col-2"></div>
         </div>
