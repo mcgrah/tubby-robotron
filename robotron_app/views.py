@@ -6,6 +6,8 @@ from django.views import generic
 from django.views.generic.edit import UpdateView
 from django.shortcuts import get_object_or_404, redirect
 from django.forms import inlineformset_factory
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.db.models import Sum, Q, Count
 from django.http import HttpResponseRedirect, HttpResponse
@@ -22,21 +24,24 @@ class ModelFormWidgetMixin(object):
 
 
 # Create your views here.
+@login_required
 def index(request):
     return render(request, 'index.html')
 
 
+@login_required
 def calendar_view(request):
     return render(request, 'calendar.html')
 
 
-class StudioListView(generic.ListView):
+class StudioListView(LoginRequiredMixin, generic.ListView):
     model = Studio
     paginate_by = 50
 
     queryset = Studio.objects.annotate(num_projects = Count('project'))
 
 
+@login_required
 def studio_create_view(request):
     if request.method == 'POST':
         form = AddStudioForm(request.POST)
@@ -59,7 +64,7 @@ def studio_create_view(request):
     return render(request, 'create_studio.html', context=context)
 
 
-class ProjectCreateView(ModelFormWidgetMixin, generic.CreateView):
+class ProjectCreateView(LoginRequiredMixin, ModelFormWidgetMixin, generic.CreateView):
     model=Project
     template_name_suffix = '_create'
     fields = [
@@ -80,14 +85,14 @@ class ProjectCreateView(ModelFormWidgetMixin, generic.CreateView):
     }
 
 
-class ProjectListView(generic.ListView):
+class ProjectListView(LoginRequiredMixin, generic.ListView):
     model = Project
     paginate_by = 50
 
     queryset = Project.objects.annotate(num_batches=Count('batch'))
 
 
-class StudioDetailView(generic.DetailView):
+class StudioDetailView(LoginRequiredMixin, generic.DetailView):
     model = Studio
 
     def get_context_data(self, **kwargs):
@@ -96,7 +101,7 @@ class StudioDetailView(generic.DetailView):
         return context
 
 
-class StudioUpdateView(UpdateView):
+class StudioUpdateView(LoginRequiredMixin, UpdateView):
     model = Studio
     template_name_suffix = '_update'
     fields = [
@@ -108,7 +113,7 @@ class StudioUpdateView(UpdateView):
     ]
 
 
-class ProjectUpdateView(ModelFormWidgetMixin, UpdateView):
+class ProjectUpdateView(LoginRequiredMixin, ModelFormWidgetMixin, UpdateView):
     model = Project
     template_name_suffix = '_update'
     fields = [
@@ -129,7 +134,7 @@ class ProjectUpdateView(ModelFormWidgetMixin, UpdateView):
     }
 
 
-class ProjectDetailView(generic.DetailView):
+class ProjectDetailView(LoginRequiredMixin, generic.DetailView):
     model = Project
 
     def get_context_data(self, **kwargs):
@@ -138,6 +143,7 @@ class ProjectDetailView(generic.DetailView):
         return context
 
 
+@login_required
 def project_detail_view(request, pk):
     project = get_object_or_404(Project, pk=pk)
     batch_list = Batch.objects.annotate(real_chars=Count('character')).filter(project=project)
@@ -174,7 +180,7 @@ def project_detail_view(request, pk):
     return render(request, 'robotron_app/project_detail.html', context=context)
 
 
-class BatchDetailView(generic.DetailView):
+class BatchDetailView(LoginRequiredMixin, generic.DetailView):
     model = Batch
 
     def get_context_data(self, **kwargs):
@@ -189,7 +195,7 @@ class BatchDetailView(generic.DetailView):
 
         return context
 
-
+@login_required
 def batch_detail_view(request, pk):
     batch = get_object_or_404(Batch, pk=pk)
     error_msg = ''
@@ -336,7 +342,7 @@ def batch_detail_view(request, pk):
     return render(request, 'robotron_app/batch_detail.html', context=context)
 
 
-class BatchDetailUpdateView(UpdateView):
+class BatchDetailUpdateView(LoginRequiredMixin, UpdateView):
     model = Batch
     template_name_suffix = '_update'
 
@@ -355,7 +361,7 @@ class BatchDetailUpdateView(UpdateView):
     }
 
 
-class CharacterDetailView(generic.DetailView):
+class CharacterDetailView(LoginRequiredMixin, generic.DetailView):
     model = Character
 
     def get_context_data(self, **kwargs):
@@ -364,7 +370,7 @@ class CharacterDetailView(generic.DetailView):
         return context
 
 
-class CharacterDetailUpdateView(UpdateView):
+class CharacterDetailUpdateView(LoginRequiredMixin, UpdateView):
     model = Character
     template_name = 'robotron_app/character_detail.html'
 
@@ -440,6 +446,7 @@ class StudioAutocomplete(autocomplete.Select2QuerySetView):
         return qs
 
 
+@login_required
 def manage_char_session(request, pk):
     character = Character.objects.get(pk=pk)
     SessionInlineFormset = inlineformset_factory(Character, Session,
@@ -464,9 +471,10 @@ def manage_char_session(request, pk):
             return HttpResponseRedirect(character.get_absolute_url())
     else:
         formset = SessionInlineFormset(instance=character)
-    return render(request, 'manage_sessions.html', {'formset':formset,'character':character})
+    return render(request, 'manage_sessions.html', {'formset': formset, 'character': character})
 
 
+@login_required
 def generate_new_sessions(request, batch_id):
     # generate new sessions for all characters:
     # - in given batch AND
@@ -492,6 +500,7 @@ def generate_new_sessions(request, batch_id):
     return response
 
 
+@login_required
 def nuke_empty_sessions(request):
     nuke_this = Session.objects.filter(translator__isnull=True)
     if nuke_this.exists():
@@ -502,6 +511,7 @@ def nuke_empty_sessions(request):
     return response
 
 
+@login_required
 def nuke_chars(request):
     nuke_this_char = Character.objects.filter(files_count__isnull=True)
     if nuke_this_char.exists():
@@ -512,6 +522,7 @@ def nuke_chars(request):
     return response
 
 
+@login_required
 def delete_selected_chars(request):
     # get list of ids from url and del all char records
     ids = request.GET.get('ids', '')
@@ -529,6 +540,7 @@ def delete_selected_chars(request):
     return HttpResponse()
 
 
+@login_required
 def delete_selected_sessions(request):
     # get list of ids from url and del all char records
     ids = request.GET.get('ids', '')
@@ -546,6 +558,7 @@ def delete_selected_sessions(request):
     return HttpResponse()
 
 
+@login_required
 def delete_selected_batches(request):
     # get list of ids from url and del all char records
     ids = request.GET.get('ids', '')
@@ -563,6 +576,7 @@ def delete_selected_batches(request):
     return HttpResponse()
 
 
+@login_required
 def delete_studio(request, pk):
     marked = Studio.objects.get(id=pk)
     try:
@@ -574,6 +588,7 @@ def delete_studio(request, pk):
     return HttpResponseRedirect(reverse('studios'))
 
 
+@login_required
 def delete_project(request, pk):
     marked = Project.objects.get(id=pk)
     try:
