@@ -3,12 +3,15 @@
 {% block pageScript %}
     <script>
         $( function() {
+            //add navigation to calendar buttons
             $("#nav_prev").attr(
                 "href","{% url "calendar_range" year=nav_year_prev month=nav_month_prev %}"
             );
             $("#nav_next").attr(
                 "href","{% url "calendar_range" year=nav_year_next month=nav_month_next %}"
             );
+            //find current day by default
+
 
             $("tr.row_clickable","#calendar_month").each(function(){
                 $(this).on("click", function(e){
