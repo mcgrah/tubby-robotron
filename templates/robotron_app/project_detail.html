@@ -32,7 +32,7 @@
 
     <div class="row align-items-center">
         <div class="col-md-auto">
-            <h4>{{ project.name }}</h4>
+            <h4>Project: <strong>{{ project.name }}</strong></h4>
         </div>
         <div class="col">
             <a role=button class="btn btn-outline-primary" href="{% url "update_project" pk=project.id %}">Edit</a>
@@ -110,7 +110,7 @@
                 <th scope="col">Files</th>
                 <th scope="col">Words</th>
                 <th scope="col">Characters</th>
-                <th scope="col">Sessions</th>
+                <th scope="col"></th>
             </tr>
 
         {% for batch in batch_list %}
@@ -129,7 +129,7 @@
                 <td>{{ batch.files_count }}</td>
                 <td>{{ batch.word_count }}</td>
                 <td>{{ batch.real_chars }} / {{ batch.char_count }}</td>
-                <td><a href="{{ batch.get_absolute_url }}">View Details</a></td>
+                <td><a href="{{ batch.get_absolute_url }}">Details</a></td>
             </tr>
         {% endfor %}
         </tbody>
