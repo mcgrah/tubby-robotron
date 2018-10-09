@@ -342,16 +342,17 @@
     {% endif %}
 
     <hr class="fat-hr">
-    {% if session_list %}
+
     <div class="row align-items-center"> 
-        <div class="col-md-auto">
-            <h4>Sessions</h4>
-        </div>
+    <div class="col-md-auto">
+        <h4>Sessions</h4>
+    </div>
     <button disabled type="button" class="btn btn-outline-danger" onclick="delete_selected_sessions()" id="delete-session-btn">Delete selected</button>
     <button type="button" class="btn btn-outline-primary" onclick="generate_new_sessions()">Initialize Sessions - DEBUG</button>
     <button type="button" class="btn btn-outline-primary" onclick="nuke_empty_sessions()">NUKE Sessions - DEBUG</button>
     </div>
         <hr>
+    {% if session_list %}
         <table class="table table-borderless table-sm table-hover" id="sessions2">
         <thead>
             <tr>

@@ -3,6 +3,13 @@
 {% block pageScript %}
     <script>
         $( function() {
+
+            $('[data-toggle="popover"]').popover();
+
+            $('.popover-dismiss').popover({
+              trigger: 'focus'
+            });
+
             //add navigation to calendar buttons
             $("#nav_prev").attr(
                 "href","{% url "calendar_range" year=nav_year_prev month=nav_month_prev %}"
@@ -11,7 +18,17 @@
                 "href","{% url "calendar_range" year=nav_year_next month=nav_month_next %}"
             );
             //find current day by default
+            var today = new Date().toISOString().slice(0,10);
+            console.log(today);
+            $('#'+today).attr("class","day day-clickable day-active table-primary");
 
+            //toggle active day
+            $("td.day-clickable","#calendar_month").each(function(){
+                $(this).on("click", function(){
+                   $(".day-active").attr("class","day day-clickable");
+                   $(this).attr("class","day day-clickable day-active table-primary");
+                });
+            });
 
             $("tr.row_clickable","#calendar_month").each(function(){
                 $(this).on("click", function(e){
@@ -52,11 +69,9 @@
     <li class="breadcrumb-item"><a href="{% url 'calendar' %}">Calendar</a></li>
 {% endblock %}
 {% block content %}
-    <div>
-    {{ calendar }}
-    </div>
-    <div>
-    <h6>Week Overview</h6>
-    <hr>
-    </div>
+
+<div>
+{{ calendar }}
+</div>
+
 {% endblock %}

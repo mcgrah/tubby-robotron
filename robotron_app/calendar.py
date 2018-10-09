@@ -2,11 +2,111 @@ from django.utils.html import conditional_escape as esc
 from django.utils.safestring import mark_safe
 from itertools import groupby
 from calendar import HTMLCalendar, monthrange
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from django.shortcuts import render
+from robotron_app.models import Session
+import json
+
+
+def get_sessions_for_month(month):
+    month_sessions = Session.objects.filter(day__month=month).filter(day__isnull=False)
+    events_dict = {}
+    i = 1
+    for m in month_sessions:
+        day = m.day.day
+        project = m.batch.project.name
+        character = m.character.name
+        actor = m.character.actor.name
+        batch = m.batch.name
+        start_time = datetime.combine(m.day, m.hour)
+        end_time = start_time + timedelta(hours=m.duration)
+        if m.translator == None:
+            category = -1
+            translator = 'UNASSIGNED'
+        else:
+            category = m.translator_id
+            translator = m.translator.name
+        # director = m.director.name
+        try:
+            elem = len(events_dict[day].keys())
+            # print(len(elem))
+            events_dict[day][elem+1] = {
+                'event_category': category,
+                'event_title': f'{project}: {character}({batch})',
+                'event_start': str(start_time),
+                'event_end': str(end_time),
+                'event_body': translator,
+                'event_duration':start_time.strftime("%H:%M")+'-'+end_time.strftime("%H:%M")
+            }
+
+        except KeyError:
+            # print(f'adding first event for day: {day}')
+            events_dict[day] = {}
+            events_dict[day][1] = {
+                'event_category': category,
+                'event_title': f'{project}: {character} ({batch})',
+                'event_start': str(start_time),
+                'event_end': str(end_time),
+                'event_body': translator,
+                'event_duration': start_time.strftime("%H:%M") + '-' + end_time.strftime("%H:%M")
+            }
+            pass
+
+    # print(events_dict)
+    # print(json.dumps(events_dict, indent=4, sort_keys=True))
+    return events_dict
+
+
+        # print('=====')
+        # print(f'{project}: {character}({batch})')
+        # print('---------------')
+        # print('{:%a %d-%m-%Y }' .format(start_time))
+        # print('{:%H:%M}' .format(start_time), '-{:%H:%M}'.format(end_time))
+        # print(f'tanslator: {translator}')
+        # print(f'actor: {actor}')
+
+
+def color_pill(int):
+    if int == -1:
+        return 'badge-secondary'
+    if int == 0:
+        return 'badge-primary'
+    elif int == 1:
+        return 'badge-info'
+    elif int == 2:
+        return 'badge-success'
+    elif int == 3:
+        return 'badge-danger'
+    elif int == 4:
+        return 'badge-warning'
+    elif int == 5:
+        return 'badge-info'
+    else:
+        return 'badge-dark'
+
+
+def generate_day_events(day, event_list):
+#     content that goes inside event-container
+    event_text = ''
+    if day in event_list.keys():
+    #     iterate over list
+        for k in event_list[day].values():
+            category = color_pill(k['event_category'])
+            title = k['event_title']
+            body = k['event_duration']+' '+k['event_body']
+
+            # link = k['event_link']
+            link = '#'
+            # event_text += f'<a href="{link}" class="m-0 badge badge-pill {category}"> </a>\n'
+            event_text += f'<a tabindex="0" data-toggle="popover" data-placement="bottom" data-trigger="focus"' \
+                          f' title="{title}" data-content="{body}" class="m-0 event-pill badge badge-pill {category}"> </a>\n'
+
+    return event_text
 
 
 def generate_month_manual(year_number=(datetime.now().year), month_number=(datetime.now().month)):
+
+    get_sessions_for_month(month_number)
 
     start_day = monthrange(year_number,month_number)[0]
     month_length = monthrange(year_number,month_number)[1]
@@ -38,12 +138,78 @@ def generate_month_manual(year_number=(datetime.now().year), month_number=(datet
 
     day = 1
 
+    # TEST
+
+    events_list = {
+        3: {
+            1: {
+                'event_category':'badge-primary',
+                'event_title':'SomeTitle',
+                'event_body':'MoreLettersDesc',
+                'event_link':'SomeURL'
+            },
+            2: {
+                'event_category':'badge-success',
+                'event_title':'SomeTitle',
+                'event_body':'MoreLettersDesc',
+                'event_link':'SomeURL'
+            },
+            3: {
+                'event_category':'badge-success',
+                'event_title':'SomeTitle3',
+                'event_body':'MoreLettersDesc3',
+                'event_link':'SomeURL3'
+            },
+        },
+        4: {
+            1: {
+                'event_category': 'badge-primary',
+                'event_title': 'SomeTitle',
+                'event_body': 'MoreLettersDesc',
+                'event_link': 'SomeURL'
+            }
+        },
+        10: {
+            1: {
+                'event_category': 'badge-danger',
+                'event_title': 'SomeTitle',
+                'event_body': 'MoreLettersDesc',
+                'event_link': 'SomeURL'
+            }
+        },
+        15: {
+            1: {
+                'event_category': 'badge-primary',
+                'event_title': 'SomeTitle',
+                'event_body': 'MoreLettersDesc',
+                'event_link': 'SomeURL'
+            }
+        },
+        22: {
+            1: {
+                'event_category': 'badge-warning',
+                'event_title': 'SomeTitle',
+                'event_body': 'MoreLettersDesc',
+                'event_link': 'SomeURL'
+            }
+        },
+        25: {
+            1: {
+                'event_category': 'badge-success',
+                'event_title': 'SomeTitle',
+                'event_body': 'MoreLettersDesc',
+                'event_link': 'SomeURL'
+            }
+        }
+    }
+    events_list = get_sessions_for_month(month_number)
+
     for i in range(start_day, 7):
-        # if (day in month_events.keys()):
-        #     month_text += insert_event(day, month_events[day][0], month_events[day][1], month_events[day][2])
-        # else:
-        day_id = str(year_number)+'-'+str(month_number)+'-'+str(day)
-        month_text += '<td class="day day-clickable" id="'+day_id+'">' + str(day) + '</td>' + '\n'
+        day_id = str(year_number) + '-' + str(month_number) + '-' + str(day)
+        event_text = generate_day_events(day,events_list)
+        month_text += '<td class="day day-clickable" id="' + day_id + '">\n<div>' + str(day) + '</div>\n' \
+            '<div class="event-container justify-content-start m-0">\n'+event_text+'\n</div>\n</td>\n'
+
         day += 1
 
     month_text += '</tr>' + '\n'
@@ -56,7 +222,9 @@ def generate_month_manual(year_number=(datetime.now().year), month_number=(datet
         for i in range(0, 7):
             if (day <= month_length):
                 day_id = str(year_number) + '-' + str(month_number) + '-' + str(day)
-                month_text += '<td class="day day-clickable" id="' + day_id + '">' + str(day) + '</td>' + '\n'
+                event_text = generate_day_events(day, events_list)
+                month_text += '<td class="day day-clickable" id="' + day_id + '">\n<div>' + str(day) + '</div>\n' \
+                               '<div class="event-container justify-content-start m-0">\n' + event_text + '\n</div>\n</td>\n'
                 day += 1
             else:
                 month_text += '<td class="day"></td>' + '\n'
@@ -99,58 +267,3 @@ def calendar(request, year, month):
         'month':month,
     }
     return render(request, 'calendar.html', context=context)
-
-# DARKLANDS BELOW
-#
-# def start(request):
-#     """
-#     Show calendar of events this month
-#     """
-#     lToday = datetime.now()
-#     return calendar(request, lToday.year, lToday.month)
-#
-#
-# def calendar(request, year, month):
-#     """
-#     Show calendar of events for specified month and year
-#     """
-#     lYear = int(year)
-#     lMonth = int(month)
-#     lCalendarFromMonth = datetime(lYear, lMonth, 1)
-#     lCalendarToMonth = datetime(lYear, lMonth, monthrange(lYear, lMonth)[1])
-#
-#     lEvents = []
-#     lCalendar = RoboCalendar(lEvents).formatmonth(lYear, lMonth)
-#
-#     lPreviousYear = lYear
-#     lPreviousMonth = lMonth - 1
-#     if lPreviousMonth == 0:
-#         lPreviousMonth = 12
-#         lPreviousYear = lYear - 1
-#     lNextYear = lYear
-#     lNextMonth = lMonth + 1
-#     if lNextMonth == 13:
-#         lNextMonth = 1
-#         lNextYear = lYear + 1
-#     lYearAfterThis = lYear + 1
-#     lYearBeforeThis = lYear - 1
-#
-#     manual_calendar = generate_month_manual()
-#
-#     context = {
-#         'CalendarManual':mark_safe(manual_calendar),
-#         'Calendar': mark_safe(lCalendar),
-#         'Month': lMonth,
-#         'MonthName': named_month(lMonth),
-#         'Year': lYear,
-#         'PreviousMonth': lPreviousMonth,
-#         'PreviousMonthName': named_month(lPreviousMonth),
-#         'PreviousYear': lPreviousYear,
-#         'NextMonth': lNextMonth,
-#         'NextMonthName': named_month(lNextMonth),
-#         'NextYear': lNextYear,
-#         'YearBeforeThis': lYearBeforeThis,
-#         'YearAfterThis': lYearAfterThis,
-#     }
-#
-#     return render(request, 'calendar.html', context=context)

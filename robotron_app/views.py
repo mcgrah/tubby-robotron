@@ -290,34 +290,34 @@ def batch_detail_view(request, pk):
                             raise file_form.ValidationError(error_msg)
                             # raise ValueError(error_msg)
 
-                        bulk_chars = []
-                        bulk_actors = []
+                    bulk_chars = []
+                    bulk_actors = []
 
-                        # validate actors if present
-                        for c in tmp_actor_list:
-                            try:
-                                if Actor.objects.get(name=c):
-                                    print('actor found: ', c)
-                            except ObjectDoesNotExist:
-                                tmp_actor = Actor(name=c)
-                                print('actor will be created: ', tmp_actor)
-                                bulk_actors.append(tmp_actor)
+                    # validate actors if present
+                    for c in tmp_actor_list:
+                        try:
+                            if Actor.objects.get(name=c):
+                                print('actor found: ', c)
+                        except ObjectDoesNotExist:
+                            tmp_actor = Actor(name=c)
+                            print('actor will be created: ', tmp_actor)
+                            bulk_actors.append(tmp_actor)
 
-                        # create new actors before dependant characters
-                        if len(bulk_actors) > 0:
-                            Actor.objects.bulk_create(bulk_actors)
+                    # create new actors before dependant characters
+                    if len(bulk_actors) > 0:
+                        Actor.objects.bulk_create(bulk_actors)
 
-                        # create new characters
-                        for c in char_list:
-                            if char_list[c] != '':
-                                new_actor = Actor.objects.get(name=char_list[c])
-                                new_char = Character(name=c, batch=batch, actor=new_actor)
-                            else:
-                                new_char = Character(name=c, batch=batch)
-                            bulk_chars.append(new_char)
+                    # create new characters
+                    for c in char_list:
+                        if char_list[c] != '':
+                            new_actor = Actor.objects.get(name=char_list[c])
+                            new_char = Character(name=c, batch=batch, actor=new_actor)
+                        else:
+                            new_char = Character(name=c, batch=batch)
+                        bulk_chars.append(new_char)
 
-                        if len(bulk_chars) > 0:
-                            Character.objects.bulk_create(bulk_chars)
+                    if len(bulk_chars) > 0:
+                        Character.objects.bulk_create(bulk_chars)
 
                 except Exception as e:
                     print(e)
@@ -451,8 +451,6 @@ def manage_char_session(request, pk):
     character = Character.objects.get(pk=pk)
     SessionInlineFormset = inlineformset_factory(Character, Session,
         fields=(
-            'batch',
-            'character',
             'day',
             'hour',
             'duration',

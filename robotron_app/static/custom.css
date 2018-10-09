@@ -82,3 +82,30 @@ body {
     color:#333;
     background-color:#333;
 }
+
+.tile {
+    height: 80px;
+    width: 80px;
+}
+
+.event-pill {
+    height: 10px;
+    width: 10px;
+}
+
+.tile-row {
+    height: 80px;
+    min-width: 80px;
+}
+
+.tile-col {
+    width: 80px;
+}
+
+#fixed-month th {
+    width: 10% !important;
+}
+
+#calendar_month th {
+    width: 10% !important;
+}
