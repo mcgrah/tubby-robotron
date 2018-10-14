@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-    <h2>Character: <strong>{{ character.name }}</strong></h2>
+    <h2>Character: <strong>{{ character.name }}</strong></h2>	
     <p>
     <div class="row">
         <div class="col-6">
@@ -25,10 +25,10 @@
         <table class="table table-sm">
         <tbody>
             <tr><th scope="row">Batch: </th><td>{{ character.batch.name }}</td></tr>
-            <tr><th scope="row">Character: </th><td>{{ character.name }}</td></tr>
+            <!-- <tr><th scope="row">Character: </th><td>{{ character.name }}</td></tr> -->
             <tr><th scope="row">Actor: </th><td>{{ character.actor.name }}</td></tr>
             <tr><th scope="row">Files: </th><td>{{ character.files_count }}</td></tr>
-            <tr><th scope="row">Delivery Date: </th><td>{{ character.delivery_date|date:"Y-m-d" }}&nbsp&nbsp&nbsp&nbsp|&nbsp&nbsp&nbsp&nbsp{{ character.delivery_time|time:"H:i" }}</td></tr>
+            <tr><th scope="row">Delivery Date: </th><td>{{ character.delivery_date|date:"Y-m-d" }}&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp{{ character.delivery_time|time:"H:i" }}</td></tr>
         </tbody>
         </table>
         </div>
@@ -106,16 +106,14 @@
         </div>
         <div class="col"></div>
     </div>
-<hr>
+	<hr>
     <div class="row align-items-center">
         <div class="col-md-auto">
             <h4>Sessions</h4>
         </div>
         <div class="col">
             <a role=button class="btn btn-outline-primary" href="{% url "manage_char_sessions" pk=character.id %}" data-toggle="tooltip" title="Edit Character Sessions">Edit</a>
-            
         </div>
-        
     </div>
     <p>
     {% if session_list %}

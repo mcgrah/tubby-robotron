@@ -60,7 +60,7 @@
     </div>
 
 <hr class="fat-hr">
-<div class="row align-items-center">   
+<div class="row align-items-center">
     <div class="col-md-auto">
         <h4>Characters</h4>
     </div>
@@ -76,12 +76,12 @@
         </button>
         <button disabled type="button" class="btn btn-outline-danger" onclick="delete_selected_chars()" id="delete-char-btn">
             Delete selected
-        </button>                    
+        </button>
         <button type="button" class="btn btn-outline-danger" onclick="nuke_chars()" id="nuke-char-btn">NUKE Actors - DEBUG</button>
         {% load i18n widget_tweaks %}
     </div>
 </div>
-    
+
     <div id="two-form">
         <form action="" method="POST">
             {% csrf_token %}
@@ -104,19 +104,19 @@
                                 {% for field in form %}
                                     {% if "actor" in field.name %}
                                         <div class="form-group col-md-4">
-                                    {% endif %}                                
+                                    {% endif %}
                                     {% if "name" in field.name %}
                                         <div class="form-group col-md-3">
-                                    {% endif %}  
+                                    {% endif %}
                                     {% if "delivery_date" in field.name %}
                                         <div class="form-group col-md-2">
-                                    {% endif %}  
+                                    {% endif %}
                                     {% if "delivery_time" in field.name %}
                                         <div class="form-group col-md-2">
-                                    {% endif %}  
+                                    {% endif %}
                                     {% if "files" in field.name %}
                                         <div class="form-group col-md-1">
-                                    {% endif %}  
+                                    {% endif %}
                                         <label class="control-label" for="id_{{ field.name }}">{{ field.label }}</label>
                                             {{ field|attr:"class:form-control" }}
                                         {% if field.errors %}
@@ -343,7 +343,7 @@
 
     <hr class="fat-hr">
 
-    <div class="row align-items-center"> 
+    <div class="row align-items-center">
     <div class="col-md-auto">
         <h4>Sessions</h4>
     </div>
@@ -566,7 +566,7 @@
             })
         }
         $(document).ready(function() {
-            $('[data-toggle="tooltip"]').tooltip(); 
+            $('[data-toggle="tooltip"]').tooltip();
             $('#sessions2').DataTable();
             $('#character-table').DataTable();
 
@@ -631,6 +631,6 @@
                 'scrollDefault':'now'
             });
         } );
-        
+
     </script>
 {% endblock %}
