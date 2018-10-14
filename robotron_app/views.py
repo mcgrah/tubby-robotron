@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.views import generic
 from django.views.generic.edit import UpdateView
 from django.shortcuts import get_object_or_404, redirect
-from django.forms import inlineformset_factory
+from django.forms import inlineformset_factory, modelformset_factory
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse
@@ -108,6 +108,23 @@ class ProjectCreateView(LoginRequiredMixin, ModelFormWidgetMixin, RobotoCreateVi
         'director': autocomplete.ModelSelect2(url='director-autocomplete'),
         'studio': autocomplete.ModelSelect2(url='studio-autocomplete')
     }
+
+
+class CharactersListView(generic.ListView):
+    model = Character
+    paginate_by = 50
+
+    def get_context_data(self, **kwargs):
+        context = super(CharactersListView, self).get_context_data(**kwargs)
+        context['project_list'] = Project.objects.all()
+        context['character_list'] = Character.objects.all()
+        context['batch_list'] = Batch.objects.all()
+        context['actor_list'] = Actor.objects.all()
+        context['translator_list'] = Translator.objects.all()
+        context['director_list'] = Director.objects.all()
+        context['session_list'] = Session.objects.all()
+        return context
+
 
 
 class ProjectListView(LoginRequiredMixin, generic.ListView):
@@ -495,6 +512,53 @@ def manage_char_session(request, pk):
     else:
         formset = SessionInlineFormset(instance=character)
     return render(request, 'manage_sessions.html', {'formset': formset, 'character': character})
+
+
+@login_required
+def manage_asset(request):
+    asset_formset1 = modelformset_factory(Actor, fields=('name',), extra=0, can_delete=True)
+    asset_formset2 = modelformset_factory(Translator, fields=('name',), extra=0, can_delete=True)
+    asset_formset3 = modelformset_factory(Director, fields=('name',), extra=0, can_delete=True)
+
+    context = {
+        'formset_actor': asset_formset1,
+        'formset_translator': asset_formset2,
+        'formset_director': asset_formset3,
+        'form_errors': 'none',
+        'form_error_id': 'none'
+    }
+
+    if request.method == 'POST':
+        if 'actors_control' in request.POST:
+            formset_actor = asset_formset1(request.POST)
+            try:
+                if formset_actor.is_valid():
+                    formset_actor.save()
+            except Exception as e:
+                context['form_error_id'] = type(e).__name__
+                context['form_errors'] = 'error_actors'
+
+        elif 'translators_control' in request.POST:
+            formset_translator = asset_formset2(request.POST)
+            try:
+                if formset_translator.is_valid():
+                    formset_translator.save()
+            except Exception as e:
+                context['form_error_id'] = type(e).__name__
+                context['form_errors'] = 'error_translators'
+
+        elif 'directors_control' in request.POST:
+            formset_director = asset_formset3(request.POST)
+            try:
+                if formset_director.is_valid():
+                    formset_director.save()
+            except Exception as e:
+                context['form_error_id'] = type(e).__name__
+                context['form_errors'] = 'error_directors'
+        else:
+            print('WTF')
+
+    return render(request, 'manage_assets.html', context=context)
 
 
 @login_required

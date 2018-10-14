@@ -27,21 +27,51 @@
 
 {% block content %}
     {{ formset.media }}
-    <form method="post">
+    <h2>Character: <strong>{{ character.name }}</strong></h2>	
+    <p>
+    <div class="row">
+        <div class="col-6">
+            <div class="row align-items-center">
+                <div class="col-md-auto">
+                    <h4>Details</h4>
+                </div>
+            </div>
+            <p>
+        <table class="table table-sm">
+        <tbody>
+            <tr><th scope="row">Batch: </th><td>{{ character.batch.name }}</td></tr>
+            <!-- <tr><th scope="row">Character: </th><td>{{ character.name }}</td></tr> -->
+            <tr><th scope="row">Actor: </th><td>{{ character.actor.name }}</td></tr>
+            <tr><th scope="row">Files: </th><td>{{ character.files_count }}</td></tr>
+            <tr><th scope="row">Delivery Date: </th><td>{{ character.delivery_date|date:"Y-m-d" }}&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp{{ character.delivery_time|time:"H:i" }}</td></tr>
+        </tbody>
+        </table>
+        </div>
+    </div>
+	<hr>
+    <div class="row align-items-center">
+        <div class="col-md-auto">
+            <h4>Sessions</h4>
+        </div>
+    </div>
+    <p>
+		<form method="post">
+		<hr>
+
         {% csrf_token %}
         {% load i18n widget_tweaks %}
         {{ formset.management_form }}
         <!-- AS GRID!-->
 {#        <div class="container">#}
             <div class="row justify-content-start align-items-center">
-                <div class="col-1 h6">#</div>
-                <div class="col-2 h6">Day</div>
-                <div class="col-2 h6">Hour</div>
-                <div class="col-1 h6">Duration</div>
-                <div class="col-3 h6">Director</div>
-                <div class="col-3 h6">Translator</div>
+                <div class="col-1 h6"><strong>#</strong></div>
+                <div class="col-2 h6"><strong>Day</strong></div>
+                <div class="col-2 h6"><strong>Hour</strong></div>
+                <div class="col-1 h6"><strong>Duration</strong></div>
+                <div class="col-3 h6"><strong>Director</strong></div>
+                <div class="col-3 h6"><strong>Translator</strong></div>
             </div>
-
+		<hr>
         {% for form in formset %}
             <div class="row justify-content-start align-items-center">
                 <div class="col d-none">{{ form.id }}</div>
@@ -71,6 +101,7 @@
                 {% endif %}
             {% endfor %}
         {% endfor %}
+		
         <div class="form-group row justify-content-end mt-3">
             <div class="col">
             <button type="submit" class="btn btn-primary float-right">{% trans "Update" %}</button>

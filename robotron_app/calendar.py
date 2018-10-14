@@ -91,10 +91,10 @@ def get_sessions_for_month(month):
             # print(len(elem))
             events_dict[day][elem+1] = {
                 'event_category': category,
-                'event_title': f'{project}: {character}({batch})',
+                'event_title': translator,
                 'event_start': str(start_time),
                 'event_end': str(end_time),
-                'event_body': translator,
+                'event_body': f'Project: {project}<br>Batch: {batch}<br>Character: {character}<br>Actor: {actor}',
                 'event_duration':start_time.strftime("%H:%M")+'-'+end_time.strftime("%H:%M")
             }
 
@@ -103,10 +103,11 @@ def get_sessions_for_month(month):
             events_dict[day] = {}
             events_dict[day][1] = {
                 'event_category': category,
-                'event_title': f'{project}: {character} ({batch})',
+                'event_title': translator,
                 'event_start': str(start_time),
                 'event_end': str(end_time),
-                'event_body': translator,
+                #'event_body': translator,
+                'event_body': f'Project: {project}<br>Batch: {batch}<br>Character: {character}<br>Actor: {actor}',
                 'event_duration': start_time.strftime("%H:%M") + '-' + end_time.strftime("%H:%M")
             }
             pass
@@ -138,13 +139,13 @@ def generate_day_events(day, event_list):
     #     iterate over list
         for k in event_list[day].values():
             category = color_pill(k['event_category'])+' t-'+str(k['event_category'])
-            title = k['event_title']
-            body = k['event_duration']+' '+k['event_body']
+            title = k['event_duration']+' '+k['event_title']
+            body = k['event_body']
 
             # link = k['event_link']
             link = '#'
             # event_text += f'<a href="{link}" class="m-0 badge badge-pill {category}"> </a>\n'
-            event_text += f'<a tabindex="0" data-toggle="popover" data-placement="bottom" data-trigger="focus"' \
+            event_text += f'<a tabindex="0" data-html="true" data-toggle="popover" data-placement="bottom" data-trigger="focus"' \
                           f' title="{title}" data-content="{body}" class="m-0 event-pill badge badge-pill {category}"> </a>\n'
 
     return event_text

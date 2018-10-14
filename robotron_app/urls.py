@@ -10,20 +10,22 @@ urlpatterns = [
 
     path('projects/', views.ProjectListView.as_view(), {}, name='projects'),
     path('projects/create/',views.ProjectCreateView.as_view(),name='create_project'),
-    # path('project/<int:pk>', views.ProjectDetailView.as_view(), name='project'),
+
     path('project/<int:pk>/', views.project_detail_view, name='project'),
     path('project/<int:pk>/update/', views.ProjectUpdateView.as_view(), name='update_project'),
-    # path('batch/<int:pk>', views.BatchDetailView.as_view(), name='batch'),
+
     path('batch/<int:pk>/', views.batch_detail_view, name='batch'),
     path('batch/<int:pk>/update/', views.BatchDetailUpdateView.as_view(), name='update_batch'),
-    # path('character/<int:pk>/', views.CharacterDetailView.as_view(), name='character'),
+
     path('character/<int:pk>/', views.CharacterDetailUpdateView.as_view(), name='character'),
     path('character/<int:pk>/update_sessions/', views.manage_char_session, name='manage_char_sessions'),
-    # path('calendar/', views.calendar_view, name='calendar'),
+
+    path('assets', views.manage_asset, name='assets'),
     path('calendar/', calendar.calendar_current, name='calendar'),
     path('calendar/<int:year>/<int:month>/', calendar.calendar, name='calendar_range'),
 
     path('calendar/calendar_week', calendar.calendar_week, name='calendar_week_loader'),
+
 
 ]
 # functions only:

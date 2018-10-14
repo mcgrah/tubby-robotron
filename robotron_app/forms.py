@@ -56,6 +56,10 @@ class AddBatchForm(forms.Form):
         return data
 
 
+class AddAssetForm(forms.Form):
+    new_asset_name = forms.CharField(min_length=1, required=True, label='Name')
+
+
 class AddCharacterForm(forms.Form):
     new_char_name = forms.CharField(min_length=1, required=True, label='Name')
     # batch assigned automatically from batch detail page
