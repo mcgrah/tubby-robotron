@@ -32,7 +32,7 @@ def get_sessions_for_range(start_date,end_date):
         end_time = start_time + timedelta(hours=m.duration)
         timeblocks = m.duration * 60 / 15
         if m.translator == None:
-            category = -1
+            category = 0
             translator = 'UNASSIGNED'
         else:
             category = m.translator_id
@@ -77,7 +77,7 @@ def get_sessions_for_month(month):
         start_time = datetime.combine(m.day, m.hour)
         end_time = start_time + timedelta(hours=m.duration)
         if m.translator == None:
-            category = -1
+            category = 0
             translator = 'UNASSIGNED'
         else:
             category = m.translator_id
@@ -123,20 +123,8 @@ def get_sessions_for_month(month):
 
 
 def color_pill(int):
-    if int == -1:
-        return 'badge-secondary'
     if int == 0:
-        return 'badge-primary'
-    elif int == 1:
-        return 'badge-info'
-    elif int == 2:
-        return 'badge-success'
-    elif int == 3:
-        return 'badge-danger'
-    elif int == 4:
-        return 'badge-warning'
-    elif int == 5:
-        return 'badge-info'
+        return 'badge-secondary'
     return 'badge-dark'
 
 
@@ -233,7 +221,7 @@ def generate_weekday_events(weekday, event_list):
             # make column, generate padded content
             event = weekday_events[ids[col_i-1]]
             print(f'[DEBUG]: generating event {ids[col_i-1]} in column {num}')
-            text += '<div class="col p-0">\n'
+            text += '<div class="col p-0 event-holder">\n'
             text += generate_event_padded(startblock,endblock,event)
             text += '</div>\n'
             col_i = col_i +1
@@ -628,4 +616,87 @@ def calendar_week(request):
             'sun_events': mark_safe(generate_weekday_events(7, week_events)),
         }
     print('week loader called')
+    # one_time_gencss()
     return render(request, 'week_loader.html', context=context)
+
+
+def one_time_gencss():
+    colorlist = [
+        ['t-2', '00C000'],
+        ['t-3', 'ffc107'],
+        ['t-4', '58C1CD'],
+        ['t-5', 'dc3545'],
+        ['t-6', 'fd7e14'],
+        ['t-7', '6f42c1'],
+        ['t-8', '28a745'],
+        ['t-9', '20c997'],
+        ['t-10', '30A56C'],
+        ['t-11', 'D3A907'],
+        ['t-12', '1F56A7'],
+        ['t-13', 'EE3823'],
+        ['t-14', 'F4AFCD'],
+        ['t-15', 'FDB825'],
+        ['t-16', 'A2BAD2'],
+        ['t-17', 'B69FCC'],
+        ['t-19', 'ECC083'],
+        ['t-20', 'A82A70'],
+        ['t-21', 'e83e8c'],
+        ['t-22', '6DC066'],
+        ['t-23', '7A468C'],
+        ['t-24', '7DC734'],
+        ['t-25', '84C3AA'],
+        ['t-26', '90305D'],
+        ['t-27', 'AC8262'],
+        ['t-28', '125899'],
+        ['t-29', 'C2191F'],
+        ['t-30', '17a2b8'],
+        ['t-31', '004EFA'],
+        ['t-32', '6610f2'],
+        ['t-33', '038C67'],
+        ['t-34', 'B94278'],
+        ['t-35', '18ABCC'],
+        ['t-36', 'EA2F28'],
+        ['t-37', 'CAAD76'],
+        ['t-38', '3E805D'],
+        ['t-39', '4272B8'],
+        ['t-40', '471F5F']
+    ]
+    for c in colorlist:
+        code = c[0]
+        color = c[1]
+        base = ''
+        base += '.btn-' + code + ' {\n'
+        base += '  color: #' + color + ';\n'
+        base += '  background-color: transparent;\n'
+        base += '  background-image: none;\n'
+        base += '  border-color: #' + color + ';\n'
+        base += '}\n'
+        base += '\n'
+        base += '.btn-' + code + ':hover {\n'
+        base += '  color: #fff;\n'
+        base += '  background-color: #' + color + ';\n'
+        base += '  border-color: #' + color + ';\n'
+        base += '}\n'
+        base += '\n'
+        base += '.btn-' + code + ':focus, .btn-' + code + '.focus {\n'
+        base += '  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);\n'
+        base += '}\n'
+        base += '\n'
+        base += '.btn-' + code + '.disabled, .btn-' + code + ':disabled {\n'
+        base += '  color: #' + color + ';\n'
+        base += '  background-color: transparent;\n'
+        base += '}\n'
+        base += '\n'
+        base += '.btn-' + code + ':not(:disabled):not(.disabled):active, .btn-' + code + ':not(:disabled):not(.disabled).active,\n'
+        base += '.show > .btn-' + code + '.dropdown-toggle {\n'
+        base += '  color: #fff;\n'
+        base += '  background-color: #' + color + ';\n'
+        base += '  border-color: #' + color + ';\n'
+        base += '}\n'
+        base += '\n'
+        base += '.btn-' + code + ':not(:disabled):not(.disabled):active:focus, .btn-' + code + ':not(:disabled):not(.disabled).active:focus,\n'
+        base += '.show > .btn-' + code + '.dropdown-toggle:focus {\n'
+        base += '  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);\n'
+        base += '}\n'
+        print(f'===PRINTING CSS FOR {code}')
+        print(base)
