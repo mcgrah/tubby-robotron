@@ -60,6 +60,16 @@ body {
   transition: height 0.01s;
 }
 
+.robotorial {
+   background-image: url("/static/robotorial.png");
+   background-position: left bottom; /*Positioning*/
+   background-repeat: no-repeat; /*Prevent showing multiple background images*/
+   /*background-attachment: fixed;*/
+   background-size: contain;
+   border-color: #EE3823;
+
+}
+
 .panel-body .btn:not(.btn-block) {
     width:330px;
     height:330px;

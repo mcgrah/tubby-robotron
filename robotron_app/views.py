@@ -26,17 +26,23 @@ class ModelFormWidgetMixin(object):
 class RobotoUpdateView(UserPassesTestMixin, UpdateView):
 
     def test_func(self):
+        if self.request.user.is_superuser:
+            return True
         return self.request.user.groups.filter(name='Roboto Users').exists()
 
 
 class RobotoCreateView(UserPassesTestMixin, generic.CreateView):
 
     def test_func(self):
+        if self.request.user.is_superuser:
+            return True
         return self.request.user.groups.filter(name='Roboto Users').exists()
 
 class RobotoListView(UserPassesTestMixin, generic.ListView):
 
     def test_func(self):
+        if self.request.user.is_superuser:
+            return True
         return self.request.user.groups.filter(name='Roboto Users').exists()
 
 
@@ -136,7 +142,7 @@ class ProjectListView(LoginRequiredMixin, generic.ListView):
     def get_queryset(self, *args, **kwargs):
         this_user = self.request.user
         if is_roboto(this_user):
-            return Project.objects.all()
+            return Project.objects.annotate(num_batches=Count('batch'))
         else:
             try:
                 user_studio = Studio.objects.get(user=this_user)
