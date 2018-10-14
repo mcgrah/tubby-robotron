@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base_scripted.html" %}
 
 {% block title %}Manage Assets{% endblock %}
 
@@ -8,6 +8,12 @@
 {% load i18n widget_tweaks %}
 {##}
 {% block content %}
+    <div class="jumbotron robotorial border border-danger">
+      <div class="container">
+        <h3>Assets Managing page</h3>
+        <p class="lead">On this page Roboto Users can edit and remove unused entries for Actors, Directors or Translators. <br>Only unassigned Assets can be removed.</br></p>
+      </div>
+    </div>
     <h2>Assets</h2>
     <div id="accordion">
         <div class="card">

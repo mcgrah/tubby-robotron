@@ -12,7 +12,7 @@
 {% block content %}
     <div class="jumbotron robotorial border border-danger">
       <div class="container">
-        <h3>Index Page</h3>
+        <h3>Home Page</h3>
         <p class="lead">This is a default landing page for Roboto users.
           Studio users will be redirected to their projects list instead.
           Clicking 'Home' or little icon on navbar will also redirect to this page.</p>
@@ -21,6 +21,7 @@
     <div class="panel panel-primary">
         <div class="panel-body">
             <div class="row">
+                <div class="col-md-2"></div>
                 <div class="col-md-4">
                     <a href="{% url "studios" %}"
                        class="btn btn-danger btn-lg d-flex align-items-center justify-content-center"
@@ -33,6 +34,7 @@
                 </div>
             </div>
             <div class="row">
+                <div class="col-md-2"></div>
                 <div class="col-md-4">
                     <a href="{% url "calendar" %}"
                        class="btn btn-info btn-lg d-flex align-items-center justify-content-center"

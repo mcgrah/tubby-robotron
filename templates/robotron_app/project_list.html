@@ -1,57 +1,73 @@
-{% extends "base_scripted.html"%}
+{% extends "base_scripted.html" %}
 {% block title %}Projects{% endblock %}
 
 {% block minicrumbs %}
-<li class="breadcrumb-item active" aria-current="page">Projects</li>
+    <li class="breadcrumb-item active" aria-current="page">Projects</li>
 {% endblock %}
 
 {% block content %}
-    {% load filters %}
-    <div class="row align-items-center">
-    <div class="col-md-auto">
-    <h2>Projects</h2>
 
+    {% load filters %}
+
+    <div class="jumbotron robotorial border border-danger">
+        <div class="container">
+            <h3>Projects</h3>
+            {% if request.user|isRoboto %}
+                <p class="lead">This page list all Projects assigned to specific Studios.<br> You can only delete Projects that are currently not active.</p>
+            {% else %}
+                <p class="lead">This page lists all projects you are currently working on.</p>
+            {% endif %}
+        </div>
     </div>
-    {% if request.user|isRoboto %}
-    <div class="col-sm">
-        <a role=button class="btn btn-outline-primary" href="{% url "create_project" %}">Add New</a>
-    </div>
-    {% endif %}
+    <div class="row align-items-center">
+        <div class="col-md-auto">
+            <h2>Projects</h2>
+
+        </div>
+        {% if request.user|isRoboto %}
+            <div class="col-sm">
+                <a role=button class="btn btn-outline-primary" href="{% url "create_project" %}">Add New</a>
+            </div>
+        {% endif %}
     </div>
     <hr>
     {% if project_list %}
         <div class="list-group">
-          {% for project in project_list %}
-              <div class="row align-items-center">
-                  <div class="col-sm-8">
-                    <a href="{{ project.get_absolute_url }}" class="list-group-item list-group-item-action">
-                        {% if project.num_batches > 0 %}
-                          <span class="badge badge-primary">{{ project.num_batches }}</span>
-                        {% else %}
-                          <span class="badge badge-secondary">{{ project.num_batches }}</span>
-                        {% endif %}
-                        {{ project.name }} ( {{ project.studio.name }})
-                    </a>
-                  </div>
+            {% for project in project_list %}
+                <div class="row align-items-center">
+                    <div class="col-sm-8">
+                        <a href="{{ project.get_absolute_url }}" class="list-group-item list-group-item-action">
+                            {% if project.num_batches > 0 %}
+                                <span class="badge badge-primary">{{ project.num_batches }}</span>
+                            {% else %}
+                                <span class="badge badge-secondary">{{ project.num_batches }}</span>
+                            {% endif %}
+                            {{ project.name }} ( {{ project.studio.name }})
+                        </a>
+                    </div>
 
-                  <div class="col-sm">
-                      <div class="btn-group" role="group">
-                        {% if request.user|isRoboto %}
-                            <a role=button class="btn btn-outline-primary" href="{% url "update_project" pk=project.id %}">Edit</a>
+                    <div class="col-sm">
+                        <div class="btn-group" role="group">
+                            {% if request.user|isRoboto %}
+                                <a role=button class="btn btn-outline-primary"
+                                   href="{% url "update_project" pk=project.id %}">Edit</a>
 
-                              {% if project.num_batches > 0 %}
-                                  <button type="button" class="btn btn-outline-secondary" disabled>Archive</button>
-                                   {% else %}
-                                  <a role=button class="btn btn-outline-primary" href="{% url "delete_project" pk=project.id %}">Delete</a>
-                              {% endif %}
-                          {% endif %}
-                      </div>
-                  </div>
-              </div>
+                                {% if project.num_batches > 0 %}
+                                    <button type="button" class="btn btn-outline-secondary" disabled>Archive</button>
+                                {% else %}
+                                    <a role=button class="btn btn-outline-primary"
+                                       href="{% url "delete_project" pk=project.id %}">Delete</a>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
 
-          {% endfor %}
+            {% endfor %}
         </div>
     {% else %}
-       <div class="alert alert-info">There are no projects assigned to this account.<br> Please contact your Account Manager for more information.</div>
+        <div class="alert alert-info">There are no projects assigned to this account.<br> Please contact your Account
+            Manager for more information.
+        </div>
     {% endif %}
 {% endblock %}
