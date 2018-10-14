@@ -2,6 +2,55 @@
 
 {% block pageScript %}
     <script>
+        function select_all_trans(){
+            $('.btn-translator').each(function() {
+                $(this).addClass('active')
+            });
+            recheck_hidden_translators()
+        }
+
+        function deselect_all_trans() {
+            $('.btn-translator').each(function() {
+                $(this).removeClass('active')
+            });
+            recheck_hidden_translators()
+        }
+
+        function translator_show(tid){
+            console.log('show for '+tid);
+            $('.t-'+tid).each(function(){
+                if($(this).parent().hasClass('event-holder')){
+                    $(this).parent().removeClass('d-none')
+                } else {
+                    $(this).removeClass('invisible')
+                }
+            })
+        }
+
+        function translator_hide(tid){
+            console.log('hide for '+tid);
+            $('.t-'+tid).each(function(){
+                //check of split-column
+                if($(this).parent().hasClass('event-holder')){
+                    $(this).parent().addClass('d-none')
+                } else {
+                    $(this).addClass('invisible')
+                }
+            })
+        }
+
+        function recheck_hidden_translators(){
+            $('.btn-translator:not(.active)').each(function(){
+                tid = $(this).attr('id');
+                translator_hide(tid);
+            })
+
+            $('.btn-translator.active').each(function(){
+                tid = $(this).attr('id');
+                translator_show(tid);
+            })
+        }
+
         $( function() {
 
             {#$("#calendar_week_load_container").load("{% url "calendar_week_loader" %}");#}
@@ -10,6 +59,19 @@
 
             $('.popover-dismiss').popover({
               trigger: 'focus'
+            });
+
+            $('.btn-translator').each(function(){
+                $(this).on("click",function(){
+                    tid = $(this).attr('id');
+                    if($(this).hasClass('active')){
+                        console.log('button deactivated for '+tid);
+                        translator_hide(tid);
+                    } else {
+                        console.log('button activated for '+tid);
+                        translator_show(tid);
+                    }
+                });
             });
 
             //add navigation to calendar buttons
@@ -43,7 +105,9 @@
                             //console.log(monday_date.toLocaleString('sv-SE').slice(0,10));
 //                            console.log(monday_date.toISOString().slice(0,10));
                             //pass monday date to week loader
-                            $("#calendar_week_load_container").load("{% url "calendar_week_loader" %}"+'?mon='+monday_date);
+                            $("#calendar_week_load_container").load("{% url "calendar_week_loader" %}"+'?mon='+monday_date,function(){
+                                recheck_hidden_translators()
+                            });
                             break;
                         }
                     }
@@ -78,14 +142,23 @@
 {#    {% with ''|center:40 as range %}#}
 {#        {% for _ in range %}#}
 {#            <div class="row">#}
-{#                <button type="button" class="btn btn-sm btn-block btn-light t-{{ forloop.counter }}">TEST_{{ forloop.counter }}</button>#}
+{#                <button type="button" data-toggle="button" aria-pressed="true" class="btn btn-sm btn-block btn-t-{{ forloop.counter }} active">TEST_{{ forloop.counter }}</button>#}
 {#            </div>#}
 {#        {% endfor %}#}
 {#    {% endwith %}#}
+    <div class="row justify-content-center mb-2">
+        <div class="btn-group-sm" role="group" aria-label="Basic example">
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="select_all_trans()">Select All</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselect_all_trans()">Deselect All</button>
+        </div>
+    </div>
+    <div class="row">
+        <button type="button" data-toggle="button" aria-pressed="true" class="btn btn-sm btn-block btn-translator btn-t-0 active" id="0">UNASSIGNED</button>
+    </div>
     {% if translators %}
         {% for t in translators %}
             <div class="row">
-                <button type="button" class="btn btn-sm btn-block t-{{ t.id }}">{{ t.name }} [{{ t.id }}]</button>
+                <button type="button" data-toggle="button" aria-pressed="true" class="btn btn-sm btn-block btn-translator btn-t-{{ t.id }} active" id="{{ t.id }}">{{ t.name }}</button>
             </div>
         {% endfor %}
     {% endif %}
@@ -99,171 +172,171 @@
 <div class="alert alert-warning">Click any calendar week above to display detailed results</div>
 </div>
 <hr class="fat-hr">
-<div>
-<h6 class="text-center">Week Overview Test</h6>
-<div class="row flex-nowrap" id="calendar_week">
-    <div class="col-1 border-right" id="hour_column" style="background-color: rgba(108, 117, 125, 0.15)">
-        <div class="row h6 justify-content-center m-0 pb-1"></div>
-        <div class="row h6 justify-content-center m-0 pb-1"></div>
-        <div class="row">7:00</div>
-        <div class="row small">7:15</div>
-        <div class="row small">7:30</div>
-        <div class="row small">7:45</div>
-        <div class="row">8:00</div>
-        <div class="row small">8:15</div>
-        <div class="row small">8:30</div>
-        <div class="row small">8:45</div>
-        <div class="row">9:00</div>
-        <div class="row small">9:15</div>
-        <div class="row small">9:30</div>
-        <div class="row small">9:45</div>
-        <div class="row">10:00</div>
-        <div class="row small">10:15</div>
-        <div class="row small">10:30</div>
-        <div class="row small">10:45</div>
-        <div class="row">11:00</div>
-        <div class="row small">11:15</div>
-        <div class="row small">11:30</div>
-        <div class="row small">11:45</div>
-        <div class="row">12:00</div>
-        <div class="row small">12:15</div>
-        <div class="row small">12:30</div>
-        <div class="row small">12:45</div>
-        <div class="row">13:00</div>
-        <div class="row small">13:15</div>
-        <div class="row small">13:30</div>
-        <div class="row small">13:45</div>
-        <div class="row">14:00</div>
-        <div class="row small">14:15</div>
-        <div class="row small">14:30</div>
-        <div class="row small">14:45</div>
-        <div class="row">15:00</div>
-        <div class="row small">15:15</div>
-        <div class="row small">15:30</div>
-        <div class="row small">15:45</div>
-        <div class="row">16:00</div>
-        <div class="row small">16:15</div>
-        <div class="row small">16:30</div>
-        <div class="row small">16:45</div>
-        <div class="row">17:00</div>
-        <div class="row small">17:15</div>
-        <div class="row small">17:30</div>
-        <div class="row small">17:45</div>
-        <div class="row">18:00</div>
-        <div class="row small">18:15</div>
-        <div class="row small">18:30</div>
-        <div class="row small">18:45</div>
-        <div class="row">19:00</div>
-        <div class="row small">19:15</div>
-        <div class="row small">19:30</div>
-        <div class="row small">19:45</div>
-        <div class="row">20:00</div>
-        <div class="row small">20:15</div>
-        <div class="row small">20:30</div>
-        <div class="row small">20:45</div>
-    </div>
-    <div class="col p-0 border-right">
-        <div class="row h6 border-bottom justify-content-center m-0 pb-1">8.10</div>
-        <div class="row h6 border-bottom justify-content-center m-0 pb-1">Mon</div>
-        <div class="card bg-transparent border-0" style="height:{{ 4|mult:20 }}px"></div>
-        <div class="row flex-nowrap pl-3 pr-3" style="height: {{ 8|mult:20 }}px">
-            <div class="col p-0">
-                <div class="card t-1 text-center small" style="height: {{ 8|mult:20 }}px">
+{#<div>#}
+{#<h6 class="text-center">Week Overview Test</h6>#}
+{#<div class="row flex-nowrap" id="calendar_week">#}
+{#    <div class="col-1 border-right" id="hour_column" style="background-color: rgba(108, 117, 125, 0.15)">#}
+{#        <div class="row h6 justify-content-center m-0 pb-1"></div>#}
+{#        <div class="row h6 justify-content-center m-0 pb-1"></div>#}
+{#        <div class="row">7:00</div>#}
+{#        <div class="row small">7:15</div>#}
+{#        <div class="row small">7:30</div>#}
+{#        <div class="row small">7:45</div>#}
+{#        <div class="row">8:00</div>#}
+{#        <div class="row small">8:15</div>#}
+{#        <div class="row small">8:30</div>#}
+{#        <div class="row small">8:45</div>#}
+{#        <div class="row">9:00</div>#}
+{#        <div class="row small">9:15</div>#}
+{#        <div class="row small">9:30</div>#}
+{#        <div class="row small">9:45</div>#}
+{#        <div class="row">10:00</div>#}
+{#        <div class="row small">10:15</div>#}
+{#        <div class="row small">10:30</div>#}
+{#        <div class="row small">10:45</div>#}
+{#        <div class="row">11:00</div>#}
+{#        <div class="row small">11:15</div>#}
+{#        <div class="row small">11:30</div>#}
+{#        <div class="row small">11:45</div>#}
+{#        <div class="row">12:00</div>#}
+{#        <div class="row small">12:15</div>#}
+{#        <div class="row small">12:30</div>#}
+{#        <div class="row small">12:45</div>#}
+{#        <div class="row">13:00</div>#}
+{#        <div class="row small">13:15</div>#}
+{#        <div class="row small">13:30</div>#}
+{#        <div class="row small">13:45</div>#}
+{#        <div class="row">14:00</div>#}
+{#        <div class="row small">14:15</div>#}
+{#        <div class="row small">14:30</div>#}
+{#        <div class="row small">14:45</div>#}
+{#        <div class="row">15:00</div>#}
+{#        <div class="row small">15:15</div>#}
+{#        <div class="row small">15:30</div>#}
+{#        <div class="row small">15:45</div>#}
+{#        <div class="row">16:00</div>#}
+{#        <div class="row small">16:15</div>#}
+{#        <div class="row small">16:30</div>#}
+{#        <div class="row small">16:45</div>#}
+{#        <div class="row">17:00</div>#}
+{#        <div class="row small">17:15</div>#}
+{#        <div class="row small">17:30</div>#}
+{#        <div class="row small">17:45</div>#}
+{#        <div class="row">18:00</div>#}
+{#        <div class="row small">18:15</div>#}
+{#        <div class="row small">18:30</div>#}
+{#        <div class="row small">18:45</div>#}
+{#        <div class="row">19:00</div>#}
+{#        <div class="row small">19:15</div>#}
+{#        <div class="row small">19:30</div>#}
+{#        <div class="row small">19:45</div>#}
+{#        <div class="row">20:00</div>#}
+{#        <div class="row small">20:15</div>#}
+{#        <div class="row small">20:30</div>#}
+{#        <div class="row small">20:45</div>#}
+{#    </div>#}
+{#    <div class="col p-0 border-right">#}
+{#        <div class="row h6 border-bottom justify-content-center m-0 pb-1">8.10</div>#}
+{#        <div class="row h6 border-bottom justify-content-center m-0 pb-1">Mon</div>#}
+{#        <div class="card bg-transparent border-0" style="height:{{ 4|mult:20 }}px"></div>#}
+{#        <div class="row flex-nowrap pl-3 pr-3" style="height: {{ 8|mult:20 }}px">#}
+{#            <div class="col p-0">#}
+{#                <div class="card t-1 text-center small" style="height: {{ 8|mult:20 }}px">#}
 {#                    <div class="card-body event-body">Event 8:00-10:00</div>#}
-                    <div class="card-body event-body">
-                        <p class="card-title">8:00-10:00</p>
-                        <p class="card-subtitle">Translator Translator</p>
-                        <hr class="slim-hr">
-                        <p class="card-text">CHARACTER<br>
-                        Actor Actor</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col p-0">
-                <div class="card t-2 text-center small" style="height: {{ 8|mult:20 }}px"><div class="card-body event-body">Event 8:00-10:00</div></div>
-            </div>
-            <div class="col p-0">
-                <div class="card t-3 text-center small" style="height: {{ 8|mult:20 }}px"><div class="card-body event-body">Event 8:00-10:00</div></div>
-            </div>
-            <div class="col p-0">
-                <div class="card t-4 text-center small" style="height: {{ 8|mult:20 }}px"><div class="card-body event-body">Event 8:00-10:00</div></div>
-            </div>
-            <div class="col p-0">
-                <div class="card t-5 text-center small" style="height: {{ 8|mult:20 }}px"><div class="card-body event-body">Event 8:00-10:00</div></div>
-            </div>
-        </div>
-        <div class="card bg-transparent border-0" style="height:{{ 2|mult:20 }}px"></div>
-        <div class="card t-1 text-center small" style="height: {{ 8|mult:20 }}px">
-            <div class="card-body event-body">
-                <p class="card-title">10:30-12:30</p>
-                <p class="card-subtitle">Translator Translator</p>
-                <hr class="slim-hr">
-                <p class="card-text">CHARACTER<br>
-                Actor Actor</p>
-            </div>
-        </div>
-        <div class="card bg-transparent border-0" style="height:{{ 34|mult:20 }}px"></div>
-    </div>
-    <div class="col p-0 border-right" style="background-color: rgba(108, 117, 125, 0.15)">
-        <div class="row h6 border-bottom justify-content-center m-0 pb-1">9.10</div>
-        <div class="row h6 border-bottom justify-content-center m-0 pb-1">Tue</div>
-        <div class="card text-center small t-1" style="height: {{ 16|mult:20 }}px"><div class="card-body">Event 7:00-11:00</div></div>
-        <div class="card bg-transparent border-0" style="height:{{ 24|mult:20 }}px"></div>
-        <div class="card text-center small t-1" style="height: {{ 8|mult:20 }}px"><div class="card-body">Event 17:00-19:00</div></div>
-        <div class="card bg-transparent border-0" style="height:{{ 8|mult:20 }}px"></div>
-
-    </div>
-    <div class="col p-0 border-right">
-        <div class="row h6 border-bottom justify-content-center m-0 pb-1">10.10</div>
-        <div class="row h6 border-bottom justify-content-center m-0 pb-1">Wed</div>
-        <div class="card bg-transparent border-0" style="height:{{ 16|mult:20 }}px"></div>
-        <div class="row flex-nowrap pl-3 pr-3" style="height: {{ 16|mult:20 }}px">
-            <div class="col p-0">
-                <div class="card text-center small t-4" style="height: {{ 16|mult:20 }}px"><div class="card-body">Event 11:00-15:00</div></div>
-            </div>
-            <div class="col p-0">
-                <div class="card bg-transparent border-0" style="height:{{ 2|mult:20 }}px"></div>
-                <div class="card text-center small t-3" style="height: {{ 12|mult:20 }}px"><div class="card-body">Event 11:30-14:30</div></div>
-                <div class="card bg-transparent border-0" style="height:{{ 2|mult:20 }}px"></div>
-            </div>
-        </div>
-        <div class="card bg-transparent border-0" style="height:{{ 4|mult:20 }}px"></div>
-        <div class="card text-center small t-1" style="height: {{ 8|mult:20 }}px"><div class="card-body">Event 16:00-18:00</div></div>
-    </div>
-    <div class="col p-0 border-right" style="background-color: rgba(108, 117, 125, 0.15)">
-        <div class="row h6 border-bottom justify-content-center m-0 pb-1">11.10</div>
-        <div class="row h6 border-bottom justify-content-center m-0 pb-1">Thu</div>
-        <div class="card bg-transparent border-0" style="height:{{ 1|mult:20 }}px"></div>
-        <div class="card t-5 text-center small" style="height: {{ 8|mult:20 }}px"><div class="card-body">Event 7:15-9:15</div></div>
-        <div class="card bg-transparent border-0" style="height:{{ 3|mult:20 }}px"></div>
-        <div class="card t-4 text-center small" style="height: {{ 8|mult:20 }}px"><div class="card-body">Event 10:00-12:00</div></div>
-        <div class="card t-2 text-center small" style="height: {{ 8|mult:20 }}px"><div class="card-body">Event 12:00-14:00</div></div>
-        <div class="card bg-transparent border-0" style="height:{{ 12|mult:20 }}px"></div>
-        <div class="card t-4 text-center small" style="height: {{ 4|mult:20 }}px"><div class="card-body">Event 17:00-18:00</div></div>
-        <div class="card t-3 text-center small" style="height: {{ 4|mult:20 }}px"><div class="card-body">Event 18:00-19:00</div></div>
-        <div class="card bg-transparent border-0" style="height:{{ 8|mult:20 }}px"></div>
-    </div>
-    <div class="col p-0 border-right">
-        <div class="row h6 border-bottom justify-content-center m-0 pb-1">12.10</div>
-        <div class="row h6 border-bottom justify-content-center m-0 pb-1">Fri</div>
-        <div class="card bg-transparent border-0" style="height:{{ 4|mult:20 }}px"></div>
-        <div class="card text-center small t-5" style="height: {{ 12|mult:20 }}px"><div class="card-body">Event 8:00-11:00</div></div>
-        <div class="card bg-transparent border-0" style="height:{{ 40|mult:20 }}px"></div>
-    </div>
-    <div class="col p-0 border-right" style="background-color: rgba(108, 117, 125, 0.15)">
-        <div class="row h6 border-bottom justify-content-center m-0 pb-1">13.10</div>
-        <div class="row h6 border-bottom justify-content-center m-0 pb-1">Sat</div>
-        <div class="card bg-transparent border-0" style="height:{{ 25|mult:20 }}px"></div>
-        <div class="card text-center small bg-secondary" style="height: {{ 16|mult:20 }}px"><div class="card-body">Event 13:15-17:15</div></div>
-        <div class="card bg-transparent border-0" style="height:{{ 15|mult:20 }}px"></div>
-    </div>
-    <div class="col p-0">
-        <div class="row h6 border-bottom justify-content-center m-0 pb-1 flex-nowrap">14.10</div>
-        <div class="row h6 border-bottom justify-content-center m-0 pb-1 flex-nowrap">Sun</div>
-        <div class="card text-center small bg-secondary" style="height: {{ 6|mult:20 }}px"><div class="card-body">Event WRAPTEST</div></div>
-        <div class="card bg-transparent border-0" style="height:{{ 50|mult:20 }}px"></div>
-    </div>
-</div>
-</div>
+{#                    <div class="card-body event-body">#}
+{#                        <p class="card-title">8:00-10:00</p>#}
+{#                        <p class="card-subtitle">Translator Translator</p>#}
+{#                        <hr class="slim-hr">#}
+{#                        <p class="card-text">CHARACTER<br>#}
+{#                        Actor Actor</p>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#            <div class="col p-0">#}
+{#                <div class="card t-2 text-center small" style="height: {{ 8|mult:20 }}px"><div class="card-body event-body">Event 8:00-10:00</div></div>#}
+{#            </div>#}
+{#            <div class="col p-0">#}
+{#                <div class="card t-3 text-center small" style="height: {{ 8|mult:20 }}px"><div class="card-body event-body">Event 8:00-10:00</div></div>#}
+{#            </div>#}
+{#            <div class="col p-0">#}
+{#                <div class="card t-4 text-center small" style="height: {{ 8|mult:20 }}px"><div class="card-body event-body">Event 8:00-10:00</div></div>#}
+{#            </div>#}
+{#            <div class="col p-0">#}
+{#                <div class="card t-5 text-center small" style="height: {{ 8|mult:20 }}px"><div class="card-body event-body">Event 8:00-10:00</div></div>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="card bg-transparent border-0" style="height:{{ 2|mult:20 }}px"></div>#}
+{#        <div class="card t-1 text-center small" style="height: {{ 8|mult:20 }}px">#}
+{#            <div class="card-body event-body">#}
+{#                <p class="card-title">10:30-12:30</p>#}
+{#                <p class="card-subtitle">Translator Translator</p>#}
+{#                <hr class="slim-hr">#}
+{#                <p class="card-text">CHARACTER<br>#}
+{#                Actor Actor</p>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="card bg-transparent border-0" style="height:{{ 34|mult:20 }}px"></div>#}
+{#    </div>#}
+{#    <div class="col p-0 border-right" style="background-color: rgba(108, 117, 125, 0.15)">#}
+{#        <div class="row h6 border-bottom justify-content-center m-0 pb-1">9.10</div>#}
+{#        <div class="row h6 border-bottom justify-content-center m-0 pb-1">Tue</div>#}
+{#        <div class="card text-center small t-1" style="height: {{ 16|mult:20 }}px"><div class="card-body">Event 7:00-11:00</div></div>#}
+{#        <div class="card bg-transparent border-0" style="height:{{ 24|mult:20 }}px"></div>#}
+{#        <div class="card text-center small t-1" style="height: {{ 8|mult:20 }}px"><div class="card-body">Event 17:00-19:00</div></div>#}
+{#        <div class="card bg-transparent border-0" style="height:{{ 8|mult:20 }}px"></div>#}
+{##}
+{#    </div>#}
+{#    <div class="col p-0 border-right">#}
+{#        <div class="row h6 border-bottom justify-content-center m-0 pb-1">10.10</div>#}
+{#        <div class="row h6 border-bottom justify-content-center m-0 pb-1">Wed</div>#}
+{#        <div class="card bg-transparent border-0" style="height:{{ 16|mult:20 }}px"></div>#}
+{#        <div class="row flex-nowrap pl-3 pr-3" style="height: {{ 16|mult:20 }}px">#}
+{#            <div class="col p-0">#}
+{#                <div class="card text-center small t-4" style="height: {{ 16|mult:20 }}px"><div class="card-body">Event 11:00-15:00</div></div>#}
+{#            </div>#}
+{#            <div class="col p-0">#}
+{#                <div class="card bg-transparent border-0" style="height:{{ 2|mult:20 }}px"></div>#}
+{#                <div class="card text-center small t-3" style="height: {{ 12|mult:20 }}px"><div class="card-body">Event 11:30-14:30</div></div>#}
+{#                <div class="card bg-transparent border-0" style="height:{{ 2|mult:20 }}px"></div>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="card bg-transparent border-0" style="height:{{ 4|mult:20 }}px"></div>#}
+{#        <div class="card text-center small t-1" style="height: {{ 8|mult:20 }}px"><div class="card-body">Event 16:00-18:00</div></div>#}
+{#    </div>#}
+{#    <div class="col p-0 border-right" style="background-color: rgba(108, 117, 125, 0.15)">#}
+{#        <div class="row h6 border-bottom justify-content-center m-0 pb-1">11.10</div>#}
+{#        <div class="row h6 border-bottom justify-content-center m-0 pb-1">Thu</div>#}
+{#        <div class="card bg-transparent border-0" style="height:{{ 1|mult:20 }}px"></div>#}
+{#        <div class="card t-5 text-center small" style="height: {{ 8|mult:20 }}px"><div class="card-body">Event 7:15-9:15</div></div>#}
+{#        <div class="card bg-transparent border-0" style="height:{{ 3|mult:20 }}px"></div>#}
+{#        <div class="card t-4 text-center small" style="height: {{ 8|mult:20 }}px"><div class="card-body">Event 10:00-12:00</div></div>#}
+{#        <div class="card t-2 text-center small" style="height: {{ 8|mult:20 }}px"><div class="card-body">Event 12:00-14:00</div></div>#}
+{#        <div class="card bg-transparent border-0" style="height:{{ 12|mult:20 }}px"></div>#}
+{#        <div class="card t-4 text-center small" style="height: {{ 4|mult:20 }}px"><div class="card-body">Event 17:00-18:00</div></div>#}
+{#        <div class="card t-3 text-center small" style="height: {{ 4|mult:20 }}px"><div class="card-body">Event 18:00-19:00</div></div>#}
+{#        <div class="card bg-transparent border-0" style="height:{{ 8|mult:20 }}px"></div>#}
+{#    </div>#}
+{#    <div class="col p-0 border-right">#}
+{#        <div class="row h6 border-bottom justify-content-center m-0 pb-1">12.10</div>#}
+{#        <div class="row h6 border-bottom justify-content-center m-0 pb-1">Fri</div>#}
+{#        <div class="card bg-transparent border-0" style="height:{{ 4|mult:20 }}px"></div>#}
+{#        <div class="card text-center small t-5" style="height: {{ 12|mult:20 }}px"><div class="card-body">Event 8:00-11:00</div></div>#}
+{#        <div class="card bg-transparent border-0" style="height:{{ 40|mult:20 }}px"></div>#}
+{#    </div>#}
+{#    <div class="col p-0 border-right" style="background-color: rgba(108, 117, 125, 0.15)">#}
+{#        <div class="row h6 border-bottom justify-content-center m-0 pb-1">13.10</div>#}
+{#        <div class="row h6 border-bottom justify-content-center m-0 pb-1">Sat</div>#}
+{#        <div class="card bg-transparent border-0" style="height:{{ 25|mult:20 }}px"></div>#}
+{#        <div class="card text-center small bg-secondary" style="height: {{ 16|mult:20 }}px"><div class="card-body">Event 13:15-17:15</div></div>#}
+{#        <div class="card bg-transparent border-0" style="height:{{ 15|mult:20 }}px"></div>#}
+{#    </div>#}
+{#    <div class="col p-0">#}
+{#        <div class="row h6 border-bottom justify-content-center m-0 pb-1 flex-nowrap">14.10</div>#}
+{#        <div class="row h6 border-bottom justify-content-center m-0 pb-1 flex-nowrap">Sun</div>#}
+{#        <div class="card text-center small bg-secondary" style="height: {{ 6|mult:20 }}px"><div class="card-body">Event WRAPTEST</div></div>#}
+{#        <div class="card bg-transparent border-0" style="height:{{ 50|mult:20 }}px"></div>#}
+{#    </div>#}
+{#</div>#}
+{#</div>#}
 
 {% endblock %}

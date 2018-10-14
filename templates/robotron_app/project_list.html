@@ -6,14 +6,17 @@
 {% endblock %}
 
 {% block content %}
+    {% load filters %}
     <div class="row align-items-center">
     <div class="col-md-auto">
     <h2>Projects</h2>
 
     </div>
+    {% if request.user|isRoboto %}
     <div class="col-sm">
         <a role=button class="btn btn-outline-primary" href="{% url "create_project" %}">Add New</a>
     </div>
+    {% endif %}
     </div>
     <hr>
     {% if project_list %}
@@ -34,10 +37,12 @@
                   <div class="col-sm">
                       <div class="btn-group" role="group">
                           <a role=button class="btn btn-outline-primary" href="{% url "update_project" pk=project.id %}">Edit</a>
-                          {% if project.num_batches > 0 %}
-                              <button type="button" class="btn btn-outline-secondary" disabled>Archive</button>
-                               {% else %}
-                              <a role=button class="btn btn-outline-primary" href="{% url "delete_project" pk=project.id %}">Delete</a>
+                          {% if request.user|isRoboto %}
+                              {% if project.num_batches > 0 %}
+                                  <button type="button" class="btn btn-outline-secondary" disabled>Archive</button>
+                                   {% else %}
+                                  <a role=button class="btn btn-outline-primary" href="{% url "delete_project" pk=project.id %}">Delete</a>
+                              {% endif %}
                           {% endif %}
                       </div>
                   </div>
@@ -46,6 +51,6 @@
           {% endfor %}
         </div>
     {% else %}
-       <div class="alert alert-info">There are no projects in the database.</div>
+       <div class="alert alert-info">There are no projects assigned to this account.<br> Please contact your Account Manager for more information.</div>
     {% endif %}
 {% endblock %}

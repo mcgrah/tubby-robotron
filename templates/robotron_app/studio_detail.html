@@ -41,8 +41,9 @@
        <div class="alert alert-info">This studio has no associated projects.</div>
     {% endif %}
     <hr>
-    <h4>Users:</h4>
-    {% if user_list %}
+    <h6>Current Active User:</h6>
+    {% if studio.user %}
+        <div>{{ studio.user }}</div>
     {% else %}
        <div class="alert alert-info">No users added to this account.</div>
     {% endif %}

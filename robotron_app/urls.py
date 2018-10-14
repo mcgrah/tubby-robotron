@@ -20,7 +20,6 @@ urlpatterns = [
     path('character/<int:pk>/', views.CharacterDetailUpdateView.as_view(), name='character'),
     path('character/<int:pk>/update_sessions/', views.manage_char_session, name='manage_char_sessions'),
 
-    # path('assets/', views.CharactersListView.as_view(), {}, name='assets'),
     path('assets', views.manage_asset, name='assets'),
     path('calendar/', calendar.calendar_current, name='calendar'),
     path('calendar/<int:year>/<int:month>/', calendar.calendar, name='calendar_range'),
