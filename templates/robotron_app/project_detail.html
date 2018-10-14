@@ -29,13 +29,17 @@
     </div>
 {% endblock %}
 {% block content %}
-
+    {% load filters %}
     <div class="row align-items-center">
         <div class="col-md-auto">
             <h4>Project: <strong>{{ project.name }}</strong></h4>
         </div>
         <div class="col">
-            <a role=button class="btn btn-outline-primary" href="{% url "update_project" pk=project.id %}">Edit</a>
+            {% if request.user|isRoboto %}
+                <a role=button class="btn btn-outline-primary" href="{% url "update_project" pk=project.id %}">Edit</a>
+            {% else %}
+                <a role=button class="btn btn-outline-primary" href="{% url "update_project_mini" pk=project.id %}">Edit</a>
+            {% endif %}
         </div>
     </div>
     <hr>
@@ -62,10 +66,12 @@
         <div class="col-md-auto">
             <h4>Batches</h4>
         </div>
+        {% if request.user|isRoboto %}
         <div class="col btn-group">
             <button type="button" class="btn btn-outline-primary" data-toggle="collapse" data-target="#batchForm" aria-pressed="false" aria-expanded="false">Add New</button>
             <button type="button" class="btn btn-outline-danger disabled" onclick="delete_selected_batches()" id="delete-batch-btn">Delete Selected</button>
         </div>
+        {% endif %}
     </div>
     {% load i18n widget_tweaks %}
     {{ form.media }}

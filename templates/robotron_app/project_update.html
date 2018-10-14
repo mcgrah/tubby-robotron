@@ -9,7 +9,7 @@
 
 {% block content %}
     {% load filters %}
-    {% if request.user|isRoboto %}
+
     {{ form.media }}
     <form method="post">
     {% csrf_token %}
@@ -28,12 +28,21 @@
             <div class="form-group row">
                 <label class="col-sm-2 col-form-label" for="id_{{ field.name }}">{{ field.label }}</label>
                 <div class="col-sm-8">
-
+                {% if request.user|isRoboto %}
                     {% if "note" in field.name %}
                         {{ field|attr:"class:form-control"|attr:"rows:5" }}
                     {% else %}
                         {{ field|attr:"class:form-control" }}
                     {% endif %}
+                {% else %}
+                    {% if "note" in field.name %}
+                        {{ field|attr:"class:form-control"|attr:"readonly"|attr:"rows:5" }}
+                    {% elif "director" in field.name %}
+                        {{ field|attr:"class:form-control" }}
+                    {% else %}
+                        {{ field|attr:"class:form-control"|attr:"readonly" }}
+                    {% endif %}
+                {% endif %}
 
                 </div>
                 {% if field.errors %}
@@ -53,5 +62,5 @@
             <div class="col-2"></div>
         </div>
     </form>
-    {% endif %}
+
 {% endblock %}

@@ -187,6 +187,15 @@ class ProjectUpdateView(LoginRequiredMixin, ModelFormWidgetMixin, UpdateView):
     }
 
 
+class ProjectUpdateViewMini(LoginRequiredMixin, ModelFormWidgetMixin, UpdateView):
+    model = Project
+    template_name_suffix = '_update'
+    fields = [
+        'director',
+    ]
+    widgets = {
+        'director': autocomplete.ModelSelect2(url='director-autocomplete'),
+    }
 class ProjectDetailView(LoginRequiredMixin, generic.DetailView):
     model = Project
 
