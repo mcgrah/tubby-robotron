@@ -83,6 +83,11 @@ body {
     background-color:#333;
 }
 
+.slim-hr {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
 .tile {
     height: 80px;
     width: 80px;
@@ -102,10 +107,200 @@ body {
     width: 80px;
 }
 
+#calendar_week td.time-cell {
+    min-width: 19px !important;
+}
+
+#hour_column .row{
+    height: 20px !important;
+    justify-content: flex-end;
+    padding-right: 10px;
+}
+
 #fixed-month th {
     width: 10% !important;
 }
 
 #calendar_month th {
     width: 10% !important;
+}
+
+.event-body {
+  padding: 0.5rem; !important;
+}
+
+/*TRANSLATOR COLORS*/
+.t-1 {
+    /*blue*/
+	background-color: #007bff !important;
+}
+.t-2 {
+    /*Waystone Green*/
+	background-color: #00C000 !important;
+}
+.t-3 {
+    /*yellow*/
+	background-color: #ffc107 !important;
+
+}
+.t-4 {
+    /*Baharroth Blue*/
+	background-color: #58C1CD !important;
+}
+.t-5 {
+    /*red*/
+	background-color: #dc3545 !important;
+}
+.t-6 {
+    /*orange*/
+	background-color: #fd7e14 !important;
+}
+.t-7 {
+    /*purple*/
+	background-color: #6f42c1 !important;
+    color: #fff;
+}
+.t-8 {
+    /*green*/
+	background-color: #28a745 !important;
+}
+.t-9 {
+    /*teal*/
+	background-color: #20c997 !important;
+}
+.t-10 {
+    /*Sybarite Green*/
+	background-color: #30A56C !important;
+}
+.t-11 {
+    /*Armageddon Dust*/
+	background-color: #D3A907 !important;
+}
+.t-12 {
+    /*Altdorf Guard Blue*/
+	background-color: #1F56A7 !important;
+    color: #fff;
+}
+.t-13 {
+    /*Jokaero Orange*/
+	background-color: #EE3823 !important;
+}
+.t-14 {
+    /*Changeling Pink*/
+	background-color: #F4AFCD !important;
+}
+.t-15 {
+    /*Averland Sunset*/
+	background-color: #FDB825 !important;
+}
+.t-16 {
+    /*Blue Horror*/
+	background-color: #A2BAD2 !important;
+}
+.t-17 {
+    /*Dechala Lilac*/
+	background-color: #B69FCC !important;
+}
+.t-18 {
+    /*Bloodletter*/
+	background-color: #F37355 !important;
+}
+.t-19 {
+    /*Eldar Flesh*/
+	background-color: #ECC083 !important;
+}
+.t-20 {
+    /*Carroburg Crimson*/
+	background-color: #A82A70 !important;
+    color: #fff;
+}
+.t-21 {
+    /*pink*/
+	background-color: #e83e8c !important;
+}
+.t-22 {
+    /*Waywatcher Green*/
+	background-color: #6DC066 !important;
+}
+.t-23 {
+    /*Druchii Violet*/
+	background-color: #7A468C !important;
+    color: #fff;
+}
+.t-24 {
+    /*Niblet Green*/
+	background-color: #7DC734 !important;
+}
+.t-25 {
+    /*Hellion Green*/
+	background-color: #84C3AA !important;
+}
+.t-26 {
+    /*Pink Horror*/
+	background-color: #90305D !important;
+    color: #fff;
+}
+.t-27 {
+    /*Sylvaneth Bark*/
+	background-color: #AC8262 !important;
+}
+.t-28 {
+    /*Drakenhof Nightshade*/
+	background-color: #125899 !important;
+    color: #fff;
+}
+.t-29 {
+    /*Evil Sunz Scarlet*/
+	background-color: #C2191F !important;
+}
+
+.t-30 {
+    /*cyan*/
+	background-color: #17a2b8 !important;
+}
+.t-31 {
+    /*Soulstone Blue*/
+	background-color: #004EFA !important;
+    color: #fff;
+}
+.t-32 {
+    /*indigo*/
+	background-color: #6610f2 !important;
+    color: #fff;
+}
+.t-33 {
+    /*Kabalite Green*/
+	background-color: #038C67 !important;
+}
+.t-34 {
+    /*Emperors Children*/
+	background-color: #B94278 !important;
+
+}
+.t-35 {
+    /*Thousand Sons Blue*/
+	background-color: #18ABCC !important;
+}
+.t-36 {
+    /*Wild Rider Red*/
+	background-color: #EA2F28 !important;
+
+}
+.t-37 {
+    /*Sigmarite*/
+	background-color: #CAAD76 !important;
+
+}
+.t-38 {
+    /*Warboss Green*/
+	background-color: #3E805D !important;
+}
+.t-39 {
+    /*Calgar Blue*/
+	background-color: #4272B8 !important;
+}
+.t-40 {
+    /*Xereus Purple*/
+	background-color: #471F5F !important;
+    color: #fff;
 }

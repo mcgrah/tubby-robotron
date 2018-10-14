@@ -23,6 +23,8 @@ urlpatterns = [
     path('calendar/', calendar.calendar_current, name='calendar'),
     path('calendar/<int:year>/<int:month>/', calendar.calendar, name='calendar_range'),
 
+    path('calendar/calendar_week', calendar.calendar_week, name='calendar_week_loader'),
+
 ]
 # functions only:
 urlpatterns += [
