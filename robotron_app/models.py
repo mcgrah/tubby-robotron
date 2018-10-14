@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from django.conf import settings
 
 
 # =======================
@@ -76,6 +77,7 @@ class Studio(models.Model):
     telephone = models.CharField(null=True, blank=True, max_length=20)
     email = models.EmailField(null=True, blank=True)
     note = models.TextField(null=True, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, null=True, blank=True)
 
     class Meta:
         ordering = ['name']

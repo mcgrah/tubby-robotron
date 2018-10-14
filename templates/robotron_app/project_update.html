@@ -8,6 +8,8 @@
 {% endblock %}
 
 {% block content %}
+    {% load filters %}
+    {% if request.user|isRoboto %}
     {{ form.media }}
     <form method="post">
     {% csrf_token %}
@@ -26,11 +28,13 @@
             <div class="form-group row">
                 <label class="col-sm-2 col-form-label" for="id_{{ field.name }}">{{ field.label }}</label>
                 <div class="col-sm-8">
-                {% if "note" in field.name %}
-                    {{ field|attr:"class:form-control"|attr:"rows:5" }}
-                {% else %}
-                    {{ field|attr:"class:form-control" }}
-                {% endif %}
+
+                    {% if "note" in field.name %}
+                        {{ field|attr:"class:form-control"|attr:"rows:5" }}
+                    {% else %}
+                        {{ field|attr:"class:form-control" }}
+                    {% endif %}
+
                 </div>
                 {% if field.errors %}
                     {% for error in field.errors %}
@@ -49,4 +53,5 @@
             <div class="col-2"></div>
         </div>
     </form>
+    {% endif %}
 {% endblock %}

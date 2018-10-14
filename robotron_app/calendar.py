@@ -1,12 +1,15 @@
-from django.utils.html import conditional_escape as esc
 from django.utils.safestring import mark_safe
-from itertools import groupby
-from calendar import HTMLCalendar, monthrange
+from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
+from calendar import monthrange
 from datetime import date, datetime, timedelta
 from django.shortcuts import render
 from robotron_app.models import Session, Translator
 import json
 
+def is_roboto(user):
+    if user.is_superuser:
+        return True
+    return user.groups.filter(name='Roboto Users').exists()
 
 def get_sessions_for_range(start_date,end_date):
     range_sessions = Session.objects.filter(day__range=(start_date,end_date )).order_by('hour')
@@ -556,12 +559,15 @@ def generate_month_manual(year_number=(datetime.now().year), month_number=(datet
     # print(month_text)
     return month_text
 
+@login_required
+@user_passes_test(is_roboto)
 def calendar_current(request):
 
     today = datetime.now()
     return calendar(request, today.year,  today.month)
 
-
+@login_required
+@user_passes_test(is_roboto)
 def calendar(request, year, month):
     manual_calendar = generate_month_manual(year, month)
     nav_year_prev = year

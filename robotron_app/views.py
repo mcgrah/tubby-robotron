@@ -6,8 +6,8 @@ from django.views import generic
 from django.views.generic.edit import UpdateView
 from django.shortcuts import get_object_or_404, redirect
 from django.forms import inlineformset_factory
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse
 from django.db.models import Sum, Q, Count
 from django.http import HttpResponseRedirect, HttpResponse
@@ -23,18 +23,42 @@ class ModelFormWidgetMixin(object):
         return modelform_factory(self.model, fields=self.fields, widgets=self.widgets)
 
 
+class RobotoUpdateView(UserPassesTestMixin, UpdateView):
+
+    def test_func(self):
+        return self.request.user.groups.filter(name='Roboto Users').exists()
+
+
+class RobotoCreateView(UserPassesTestMixin, generic.CreateView):
+
+    def test_func(self):
+        return self.request.user.groups.filter(name='Roboto Users').exists()
+
+class RobotoListView(UserPassesTestMixin, generic.ListView):
+
+    def test_func(self):
+        return self.request.user.groups.filter(name='Roboto Users').exists()
+
+
+def is_roboto(user):
+    if user.is_superuser:
+        return True
+    return user.groups.filter(name='Roboto Users').exists()
+
 # Create your views here.
 @login_required
+@user_passes_test(is_roboto,login_url='projects',redirect_field_name=None)
 def index(request):
     return render(request, 'index.html')
 
 
 @login_required
+@user_passes_test(is_roboto)
 def calendar_view(request):
     return render(request, 'calendar.html')
 
 
-class StudioListView(LoginRequiredMixin, generic.ListView):
+class StudioListView(LoginRequiredMixin, RobotoListView):
     model = Studio
     paginate_by = 50
 
@@ -42,6 +66,7 @@ class StudioListView(LoginRequiredMixin, generic.ListView):
 
 
 @login_required
+@user_passes_test(is_roboto)
 def studio_create_view(request):
     if request.method == 'POST':
         form = AddStudioForm(request.POST)
@@ -64,7 +89,7 @@ def studio_create_view(request):
     return render(request, 'create_studio.html', context=context)
 
 
-class ProjectCreateView(LoginRequiredMixin, ModelFormWidgetMixin, generic.CreateView):
+class ProjectCreateView(LoginRequiredMixin, ModelFormWidgetMixin, RobotoCreateView):
     model=Project
     template_name_suffix = '_create'
     fields = [
@@ -90,6 +115,17 @@ class ProjectListView(LoginRequiredMixin, generic.ListView):
     paginate_by = 50
 
     queryset = Project.objects.annotate(num_batches=Count('batch'))
+
+    def get_queryset(self, *args, **kwargs):
+        this_user = self.request.user
+        if is_roboto(this_user):
+            return Project.objects.all()
+        else:
+            try:
+                user_studio = Studio.objects.get(user=this_user)
+                return Project.objects.filter(studio=user_studio)
+            except ObjectDoesNotExist:
+                return Project.objects.none()
 
 
 class StudioDetailView(LoginRequiredMixin, generic.DetailView):
@@ -251,20 +287,6 @@ def batch_detail_view(request, pk):
             if file_form.is_valid():
                 try:
                     file = request.FILES['file']
-                    # if not file.name.endswith('.csv'):
-                    #     error_msg = 'file is not CSV type'
-                    #     print(error_msg)
-                    #     raise file_form.ValidationError(error_msg)
-                    #
-                    # if file.multiple_chunks():
-                    #     error_msg = 'file is too large'
-                    #     print(error_msg)
-                    #     raise file_form.ValidationError(error_msg)
-
-                    # if error_msg != '':
-                    #     print(error_msg)
-                    #     raise ValueError(error_msg)
-                    # else:
                     file_data = file.read().decode('utf-8')
                     lines = file_data.split("\n")
 

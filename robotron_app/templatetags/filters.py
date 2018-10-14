@@ -11,3 +11,9 @@ def mult(value, arg):
 def addDays(date,days):
     newDate = date + datetime.timedelta(days=days)
     return newDate
+
+@register.filter
+def isRoboto(user):
+    if user.is_superuser:
+        return True
+    return user.groups.filter(name='Roboto Users').exists()
