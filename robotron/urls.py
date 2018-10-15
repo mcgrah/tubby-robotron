@@ -19,7 +19,13 @@ from django.conf.urls import include, url
 from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
+
 from robotron_app.views import ActorAutocomplete, DirectorAutocomplete, TranslatorAutocomplete, StudioAutocomplete
+
+handler404 = 'robotron_app.views.error404'
+handler500 = 'robotron_app.views.error500'
+handler403 = 'robotron_app.views.error403'
+handler400 = 'robotron_app.views.error400'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -52,3 +58,10 @@ urlpatterns = [
 
 # for debug only
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+# urlpatterns += [
+#     path('404/',test404),
+#     path('403/',test403),
+#     path('400/',test400),
+#     path('500/',test500),
+# ]

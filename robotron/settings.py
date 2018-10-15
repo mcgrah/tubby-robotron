@@ -25,7 +25,11 @@ SECRET_KEY = '2s(ok#42nbhg(x+!dgym927bi0=6njmn^9!2@b+l%$r20l_qia'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
+ADMINS = [
+    ('Thiev', 'a.thiev@gmail.com'),
+]
 
 
 # Application definition

@@ -1,7 +1,7 @@
 from itertools import islice
 from collections import OrderedDict
 from django.shortcuts import render
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ViewDoesNotExist
 from django.views import generic
 from django.views.generic.edit import UpdateView
 from django.shortcuts import get_object_or_404, redirect
@@ -795,3 +795,44 @@ def delete_project(request, pk):
         pass
 
     return HttpResponseRedirect(reverse('projects'))
+
+# ERROR HANDLERS
+def error404(request, exception):
+    context = {
+        'code':'404'
+    }
+    print('hit 404')
+    return render(request,'base_error.html',context=context)
+
+def error403(request, exception):
+    context = {
+        'code': '403'
+    }
+    print('hit 403')
+    return render(request, 'base_error.html', context=context)
+
+def error400(request, exception):
+    context = {
+        'code': '400'
+    }
+    print('hit 400')
+    return render(request, 'base_error.html', context=context)
+
+def error500(request, exception):
+    context = {
+        'code': '500'
+    }
+    print('hit 500')
+    return render(request, 'base_error.html', context=context)
+
+# def test400(request):
+#     raise PermissionDenied
+#
+# def test403(request):
+#     raise PermissionDenied
+#
+# def test404(request):
+#     raise ViewDoesNotExist
+#
+# def test500(request):
+#     raise PermissionDenied
