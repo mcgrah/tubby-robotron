@@ -13,7 +13,7 @@
         <div class="container">
             <h3>Projects</h3>
             {% if request.user|isRoboto %}
-                <p class="lead">This page list all Projects assigned to specific Studios.<br> You can only delete Projects that are currently not active.</p>
+                <p class="lead">This page list all Projects assigned to specific Studios.<br> Only Projects w/o Batches and Sessions can be deleted<br>You can view selected Project Calendar clicking on suspicious button named: View Calendar</p>
             {% else %}
                 <p class="lead">This page lists all projects you are currently working on.</p>
             {% endif %}
