@@ -1,7 +1,5 @@
 {#{{ calendar_week }}#}
 {% load filters %}
-
-<p>Loader Test: {{ start }}-{{ end }}</p>
 <div class="row flex-nowrap" id="calendar_week">
     <div class="col-1 border-right" id="hour_column" style="background-color: rgba(108, 117, 125, 0.15)">
         <div class="row h6 justify-content-center m-0 pb-1"></div>
@@ -67,46 +65,6 @@
         <div class="row h6 border-bottom justify-content-center m-0 pb-1">{{ mon_date|date:"d.m" }}</div>
         <div class="row h6 border-bottom justify-content-center m-0 pb-1">Mon</div>
         {{ mon_events }}
-{#        <div class="row h6 border-bottom justify-content-center m-0 pb-1">8.10</div>#}
-{#        <div class="row h6 border-bottom justify-content-center m-0 pb-1">Mon</div>#}
-{#        <div class="card bg-transparent border-0" style="height:{{ 4|mult:20 }}px"></div>#}
-{#        <div class="row flex-nowrap pl-3 pr-3" style="height: {{ 8|mult:20 }}px">#}
-{#            <div class="col p-0">#}
-{#                <div class="card t-1 text-center small" style="height: {{ 8|mult:20 }}px">#}
-{#                    <div class="card-body event-body">Event 8:00-10:00</div>#}
-{#                    <div class="card-body event-body">#}
-{#                        <p class="card-title">8:00-10:00</p>#}
-{#                        <p class="card-subtitle">Translator Translator</p>#}
-{#                        <hr class="slim-hr">#}
-{#                        <p class="card-text">CHARACTER<br>#}
-{#                        Actor Actor</p>#}
-{#                    </div>#}
-{#                </div>#}
-{#            </div>#}
-{#            <div class="col p-0">#}
-{#                <div class="card t-2 text-center small" style="height: {{ 8|mult:20 }}px"><div class="card-body event-body">Event 8:00-10:00</div></div>#}
-{#            </div>#}
-{#            <div class="col p-0">#}
-{#                <div class="card t-3 text-center small" style="height: {{ 8|mult:20 }}px"><div class="card-body event-body">Event 8:00-10:00</div></div>#}
-{#            </div>#}
-{#            <div class="col p-0">#}
-{#                <div class="card t-4 text-center small" style="height: {{ 8|mult:20 }}px"><div class="card-body event-body">Event 8:00-10:00</div></div>#}
-{#            </div>#}
-{#            <div class="col p-0">#}
-{#                <div class="card t-5 text-center small" style="height: {{ 8|mult:20 }}px"><div class="card-body event-body">Event 8:00-10:00</div></div>#}
-{#            </div>#}
-{#        </div>#}
-{#        <div class="card bg-transparent border-0" style="height:{{ 2|mult:20 }}px"></div>#}
-{#        <div class="card t-1 text-center small" style="height: {{ 8|mult:20 }}px">#}
-{#            <div class="card-body event-body">#}
-{#                <p class="card-title">10:30-12:30</p>#}
-{#                <p class="card-subtitle">Translator Translator</p>#}
-{#                <hr class="slim-hr">#}
-{#                <p class="card-text">CHARACTER<br>#}
-{#                Actor Actor</p>#}
-{#            </div>#}
-{#        </div>#}
-{#        <div class="card bg-transparent border-0" style="height:{{ 34|mult:20 }}px"></div>#}
     </div>
     <div class="col p-0 border-right" style="background-color: rgba(108, 117, 125, 0.15)">
         <div class="row h6 border-bottom justify-content-center m-0 pb-1">{{ mon_date|addDays:1|date:"d.m" }}</div>

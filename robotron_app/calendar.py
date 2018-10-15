@@ -3,16 +3,24 @@ from django.contrib.auth.decorators import login_required, permission_required, 
 from calendar import monthrange
 from datetime import date, datetime, timedelta
 from django.shortcuts import render
-from robotron_app.models import Session, Translator
+from robotron_app.models import Session, Translator, Project
 import json
+
+# SOON™- replace ordinary copy-paste with proper classes
 
 def is_roboto(user):
     if user.is_superuser:
         return True
     return user.groups.filter(name='Roboto Users').exists()
 
-def get_sessions_for_range(start_date,end_date):
-    range_sessions = Session.objects.filter(day__range=(start_date,end_date )).order_by('hour')
+def get_sessions_for_range(start_date,end_date,pk=None):
+
+    if pk==None:
+        range_sessions = Session.objects.filter(day__range=(start_date,end_date )).order_by('hour')
+    else:
+        selected_project = Project.objects.get(id=pk)
+        range_sessions = Session.objects.filter(batch__project=selected_project).filter(day__range=(start_date, end_date)).order_by('hour')
+
     # empty for all weekdays
     events_dict = {
         1:{},
@@ -67,8 +75,16 @@ def get_sessions_for_range(start_date,end_date):
     return events_dict
 
 
-def get_sessions_for_month(month):
-    month_sessions = Session.objects.filter(day__month=month).filter(day__isnull=False).order_by('day','hour')
+
+def get_sessions_for_month(month, pk=None):
+
+    if pk==None:
+        month_sessions = Session.objects.filter(day__month=month).filter(day__isnull=False).order_by('day','hour')
+    else:
+        selected_project = Project.objects.get(id=pk)
+        month_sessions = Session.objects.filter(batch__project=selected_project).filter(day__month=month).filter(
+            day__isnull=False).order_by('day', 'hour')
+
     events_dict = {}
 
     for m in month_sessions:
@@ -115,15 +131,6 @@ def get_sessions_for_month(month):
     # print(events_dict)
     # print(json.dumps(events_dict, indent=4, sort_keys=True))
     return events_dict
-
-
-        # print('=====')
-        # print(f'{project}: {character}({batch})')
-        # print('---------------')
-        # print('{:%a %d-%m-%Y }' .format(start_time))
-        # print('{:%H:%M}' .format(start_time), '-{:%H:%M}'.format(end_time))
-        # print(f'tanslator: {translator}')
-        # print(f'actor: {actor}')
 
 
 def color_pill(int):
@@ -475,25 +482,9 @@ def generate_weekday_events(weekday, event_list):
     return column
 
 
+def generate_month_manual(year_number=(datetime.now().year), month_number=(datetime.now().month), pk=None):
 
-def generate_week_manual(week_events):
-
-    debug_empty_events = ''
-    mon_events = generate_weekday_events(1,week_events)
-    tue_events = generate_weekday_events(2,week_events)
-    wed_events = generate_weekday_events(3,week_events)
-    thu_events = generate_weekday_events(4,week_events)
-    fri_events = generate_weekday_events(5,week_events)
-    sat_events = generate_weekday_events(6,week_events)
-    sun_events = generate_weekday_events(7,week_events)
-
-    week_text = ''
-    return week_text
-
-
-def generate_month_manual(year_number=(datetime.now().year), month_number=(datetime.now().month)):
-
-    get_sessions_for_month(month_number)
+    # get_sessions_for_month(month_number)
 
     start_day = monthrange(year_number,month_number)[0]
     month_length = monthrange(year_number,month_number)[1]
@@ -524,9 +515,10 @@ def generate_month_manual(year_number=(datetime.now().year), month_number=(datet
         month_text += '<td class="day"></td>' + '\n'
 
     day = 1
-
-
-    events_list = get_sessions_for_month(month_number)
+    if pk == None:
+        events_list = get_sessions_for_month(month_number)
+    else:
+        events_list = get_sessions_for_month(month_number, pk)
 
     for i in range(start_day, 7):
         day_id = str(year_number) + '-' + str(month_number) + '-' + str(day)
@@ -560,17 +552,26 @@ def generate_month_manual(year_number=(datetime.now().year), month_number=(datet
     # print(month_text)
     return month_text
 
+
 @login_required
 @user_passes_test(is_roboto)
-def calendar_current(request):
+def calendar_current(request,pk=None):
 
     today = datetime.now()
-    return calendar(request, today.year,  today.month)
+    if pk==None:
+        return calendar(request, today.year,  today.month)
+    else:
+        return calendar(request, today.year,  today.month, pk)
+
 
 @login_required
 @user_passes_test(is_roboto)
-def calendar(request, year, month):
-    manual_calendar = generate_month_manual(year, month)
+def calendar(request, year, month, pk=None):
+    if pk==None:
+        manual_calendar = generate_month_manual(year, month)
+    else:
+        manual_calendar = generate_month_manual(year, month,pk)
+
     nav_year_prev = year
     nav_year_next = year
 
@@ -594,10 +595,16 @@ def calendar(request, year, month):
         'month':month,
         'translators':Translator.objects.all(),
     }
+
+    if pk != None:
+        project = Project.objects.get(id=pk)
+        context['project'] = project
+
     return render(request, 'calendar.html', context=context)
 
 
-def calendar_week(request):
+
+def calendar_week(request,pk=None):
     # ids = request.GET.get('ids', '')
     context = {}
     if(request.GET.get('mon')):
@@ -606,7 +613,10 @@ def calendar_week(request):
         monday_as_date = date(int(monday_as_date[0]),int(monday_as_date[1]),int(monday_as_date[2]))
         sunday_as_date = monday_as_date + timedelta(days=6)
         sunday = sunday_as_date.isoformat()
-        week_events = get_sessions_for_range(monday,sunday)
+        if pk==None:
+            week_events = get_sessions_for_range(monday,sunday)
+        else:
+            week_events = get_sessions_for_range(monday, sunday, pk)
         # week_text = generate_week_manual(week_events)
 
         context = {
@@ -622,6 +632,11 @@ def calendar_week(request):
             'sat_events': mark_safe(generate_weekday_events(6, week_events)),
             'sun_events': mark_safe(generate_weekday_events(7, week_events)),
         }
+
+        if pk != None:
+            project = Project.objects.get(id=pk)
+            context['project'] = project
+
     print('week loader called')
     # one_time_gencss()
     return render(request, 'week_loader.html', context=context)

@@ -58,6 +58,8 @@
                                     <a role=button class="btn btn-outline-primary"
                                        href="{% url "delete_project" pk=project.id %}">Delete</a>
                                 {% endif %}
+                                <a role=button class="btn btn-outline-primary"
+                                   href="{% url "project_calendar" pk=project.id %}">View Calendar</a>
                             {% endif %}
                         </div>
                     </div>

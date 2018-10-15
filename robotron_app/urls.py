@@ -27,8 +27,11 @@ urlpatterns = [
     path('assets', views.manage_asset, name='assets'),
     path('calendar/', calendar.calendar_current, name='calendar'),
     path('calendar/<int:year>/<int:month>/', calendar.calendar, name='calendar_range'),
+    path('project/<int:pk>/calendar/', calendar.calendar_current, name='project_calendar'),
+    path('project/<int:pk>/calendar/<int:year>/<int:month>/', calendar.calendar, name='project_calendar_range'),
 
     path('calendar/calendar_week', calendar.calendar_week, name='calendar_week_loader'),
+    path('project/<int:pk>/calendar/calendar_week', calendar.calendar_week, name='project_calendar_week_loader'),
 
     # path('users/', views.UserListView.as_view(), {}, name='users'),
     path('users/', views.userlist_view, {}, name='users'),
