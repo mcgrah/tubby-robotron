@@ -16,15 +16,21 @@ urlpatterns = [
     path('project/<int:pk>/updatemini/', views.ProjectUpdateViewMini.as_view(), name='update_project_mini'),
     path('batch/<int:pk>/', views.batch_detail_view, name='batch'),
     path('batch/<int:pk>/update/', views.BatchDetailUpdateView.as_view(), name='update_batch'),
+    path('batch/<int:pk>/edit_loader/', views.SessionDetailUpdateViewMini.as_view(), name='session_loader'),
 
     path('character/<int:pk>/', views.CharacterDetailUpdateView.as_view(), name='character'),
     path('character/<int:pk>/update_sessions/', views.manage_char_session, name='manage_char_sessions'),
+    # path('character/<int:pk>/edit_loader/', views.character_loader, name='character_loader'),
+    path('character/<int:pk>/edit_loader/', views.CharacterDetailUpdateViewMini.as_view(), name='character_loader'),
 
     path('assets', views.manage_asset, name='assets'),
     path('calendar/', calendar.calendar_current, name='calendar'),
     path('calendar/<int:year>/<int:month>/', calendar.calendar, name='calendar_range'),
 
     path('calendar/calendar_week', calendar.calendar_week, name='calendar_week_loader'),
+
+    # path('users/', views.UserListView.as_view(), {}, name='users'),
+    path('users/', views.userlist_view, {}, name='users'),
 
 
 ]

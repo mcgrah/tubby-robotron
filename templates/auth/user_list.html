@@ -1,0 +1,58 @@
+{% extends "base_scripted.html" %}
+{% block title %}Users{% endblock %}
+
+{% block minicrumbs %}
+    <li class="breadcrumb-item active" aria-current="page">Users</li>
+{% endblock %}
+
+{% block content %}
+    {% load filters %}
+    <div class="jumbotron robotorial border border-danger">
+      <div class="container">
+        <h3>Users List</h3>
+        <p class="lead">Here are listed all Users with their respective Groups.<br>
+            You can Add new Users here and associate them with a respective Studio.<br>
+            Currently only one User can be assigned to a Studio. Roboto Users can access all Projects and Studios.
+        </p>
+      </div>
+    </div>
+<div class="row align-items-center">
+    <div class="col-md-auto">
+    <h2>Users</h2>
+    </div>
+    <div class="col">
+        <a role=button class="btn btn-outline-primary" href="{% url "create_studio" %}">Add New</a>
+    </div>
+    </div>
+    {% if user_list %}
+        <div class="list-group">
+          {% for user in user_list %}
+              <div class="row align-items-center">
+                  <div class="col-sm-8">
+                  <a href="#" class="list-group-item list-group-item-action">
+                      <div class="col">{{ user.username }}</div>
+                      <div class="col">{{ user.email }}</div>
+                      <div class="col">{{ user.groups }}</div>
+                      <div class="col">{{ user.studio_num }}</div>
+                      <div class="col">{{ user.studio_set }}</div>
+                      <div class="col">{{ user.studio.name }}</div>
+
+                  </a>
+                  </div>
+                  <div class="col-sm">
+                      <div class="btn-group" role="group">
+                          <a role=button class="btn btn-outline-primary" href="#">Edit</a>
+                          {% if studio.num_projects > 0 %}
+                              <button type="button" class="btn btn-outline-secondary" disabled>Archive</button>
+                          {% else %}
+                              <a role=button class="btn btn-outline-danger" href="#">Delete</a>
+                          {% endif %}
+                      </div>
+                  </div>
+              </div>
+          {% endfor %}
+        </div>
+    {% else %}
+       <div class="alert alert-info">There are no users in the database.</div>
+    {% endif %}
+{% endblock %}

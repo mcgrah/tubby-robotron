@@ -11,6 +11,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse
 from django.db.models import Sum, Q, Count
 from django.http import HttpResponseRedirect, HttpResponse
+from django.contrib.auth.models import User, Group
 from robotron_app.models import *
 from robotron_app.forms import *
 # autocomplete
@@ -149,6 +150,24 @@ class ProjectListView(LoginRequiredMixin, generic.ListView):
                 return Project.objects.filter(studio=user_studio)
             except ObjectDoesNotExist:
                 return Project.objects.none()
+
+
+class UserListView(LoginRequiredMixin, RobotoListView):
+    model = User
+
+
+@login_required
+@user_passes_test(is_roboto)
+def userlist_view(request):
+    users = User.objects.all()
+    for u in users:
+        print(u)
+        print(u.is_superuser)
+
+    context = {
+        'user_list':users
+    }
+    return render(request, 'auth/user_list.html', context=context)
 
 
 class StudioDetailView(LoginRequiredMixin, generic.DetailView):
@@ -424,6 +443,51 @@ class CharacterDetailView(LoginRequiredMixin, generic.DetailView):
         return context
 
 
+class CharacterDetailUpdateViewMini(LoginRequiredMixin, UpdateView):
+    model = Character
+    template_name = 'character_loader.html'
+    fields = [
+        'name',
+        'actor',
+        'files_count',
+        'delivery_date',
+        'delivery_time'
+    ]
+    widgets = {
+        'actor': autocomplete.ModelSelect2(url='actor-autocomplete'),
+        'delivety_date': forms.DateInput(attrs={'class': 'datepicker'}),
+        'delivety_time': forms.DateInput(),
+    }
+
+    def get_success_url(self, **kwargs):
+        context = super(CharacterDetailUpdateViewMini, self).get_context_data(**kwargs)
+        return_batch = Batch.objects.get(character=context['character'])
+        return return_batch.get_absolute_url()
+
+
+class SessionDetailUpdateViewMini(LoginRequiredMixin, UpdateView):
+    model = Session
+    template_name = 'session_loader.html'
+    fields = [
+        'day',
+        'hour',
+        'duration',
+        'director',
+        'translator'
+    ]
+    widgets = {
+          'director': autocomplete.ModelSelect2(url='director-autocomplete'),
+          'translator': autocomplete.ModelSelect2(url='translator-autocomplete'),
+          'day': forms.DateInput(attrs={'class': 'datepicker'}),
+          'hour': forms.TimeInput(),
+    }
+
+    def get_success_url(self, **kwargs):
+        context = super(SessionDetailUpdateViewMini, self).get_context_data(**kwargs)
+        return_batch = Batch.objects.get(session=context['session'])
+        return return_batch.get_absolute_url()
+
+
 class CharacterDetailUpdateView(LoginRequiredMixin, UpdateView):
     model = Character
     template_name = 'robotron_app/character_detail.html'
@@ -575,6 +639,13 @@ def manage_asset(request):
 
     return render(request, 'manage_assets.html', context=context)
 
+@login_required
+def character_loader(request, pk):
+    character = Character.objects.get(id=pk)
+    context = {
+        'character':character
+    }
+    return render(request, 'character_loader.html', context=context)
 
 @login_required
 def generate_new_sessions(request, batch_id):

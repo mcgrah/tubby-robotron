@@ -3,6 +3,7 @@
 
 
 {% block pageScript %}
+
         {{ form.media }}
         {{ file_form.media }}
         {{ session_form.media }}
@@ -39,7 +40,7 @@
             <h4>Batch: <strong>{{ batch.name }}</strong></h4>
         </div>
         <div class="col">
-            <a role=button class="btn btn-outline-primary" href="{% url "update_batch" pk=batch.id %}">Edit</a>
+            <a role=button class="btn btn-outline-primary" href="{% url "update_batch" pk=batch.id %}">Edit Batch Details</a>
         </div>
     </div>
     <hr>
@@ -307,7 +308,7 @@
         </thead>
             <tbody>
             {% for char in character_list %}
-                <tr>
+                <tr class="char-row" onclick="char_quickedit({{ char.id }})">
                 <td>
 {#                {% if char.session_count == 0 %}#}
                     <input type="checkbox" aria-label="delete_mark" class="delete-char-box" id="{{ char.id }}">
@@ -331,8 +332,8 @@
 
                 </td>
                 <td>
-                    <a href="{{ char.get_absolute_url }}">Details<a>
-               </td>
+                    <a href="{{ char.get_absolute_url }}">Details</a>
+                </td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -368,7 +369,7 @@
         </thead>
         <tbody>
         {% for session in session_list %}
-            <tr>
+            <tr class="session-row" onclick="sess_quickedit({{ session.id }})">
                 <td><input type="checkbox" aria-label="delete_mark_sess" class="delete-session-box" id="{{ session.id }}"></td>
                 <td>{{ session.character.name }}</td>
                 <td>{{ session.character.actor.name }}</td>
@@ -384,6 +385,14 @@
     {% else %}
        <div class="alert alert-info">No sessions found in the current batch.</div>
     {% endif %}
+
+<!-- Modal -->
+<div class="modal fade" id="charModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" id="charModal-content">
+    </div>
+  </div>
+</div>
 
 {% endblock %}
 
@@ -565,10 +574,53 @@
                 },
             })
         }
+
+        function char_quickedit(charid){
+            {#charid = $(this).attr('char');#}
+            console.log('clicked row for '+charid);
+            $('#charModal-content').load("/robotron/character/"+charid+"/edit_loader",function(){
+                $('#charModal').modal({
+                    show: true //Display loader!
+                });
+            });
+        }
+
+        function sess_quickedit(sessid){
+            {#sessid = $(this).attr('data-sessid');#}
+            console.log('clicked row for '+sessid);
+            $('#charModal-content').load("/robotron/batch/"+sessid+"/edit_loader",function(){
+                $('#charModal').modal({
+                        show: true //Display loader!
+                    });
+                });
+            }
+
         $(document).ready(function() {
             $('[data-toggle="tooltip"]').tooltip();
             $('#sessions2').DataTable();
             $('#character-table').DataTable();
+
+            /* REPLACE WITH ONCLICK PER ELEMENT CAUSE PAGINATION
+            $('.char-row').on('click', function(e){
+            charid = $(this).attr('char');
+            console.log('clicked row for '+charid);
+            $('#charModal-content').load("/robotron/character/"+charid+"/edit_loader",function(){
+                $('#charModal').modal({
+                        show: true //Display loader!
+                    });
+                });
+            });
+
+            $('.session-row').on('click', function(e){
+            sessid = $(this).attr('data-sessid');
+            console.log('clicked row for '+sessid);
+            $('#charModal-content').load("/robotron/batch/"+sessid+"/edit_loader",function(){
+                $('#charModal').modal({
+                        show: true //Display loader!
+                    });
+                });
+            });
+            */
 
             $("#just_load_please").on("click", function (e) {
                 console.log('dbg_btn_clicked');
@@ -631,6 +683,5 @@
                 'scrollDefault':'now'
             });
         } );
-
     </script>
 {% endblock %}
