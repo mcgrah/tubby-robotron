@@ -304,11 +304,12 @@
                 <th scope="col">Delivery Time</th>
                 <th scope="col">Sessions</th>
                 <th scope="col"></th>
+                <th scope="col"></th>
             </tr>
         </thead>
             <tbody>
             {% for char in character_list %}
-                <tr class="char-row" onclick="char_quickedit({{ char.id }})">
+                <tr class="char-row" >
                 <td>
 {#                {% if char.session_count == 0 %}#}
                     <input type="checkbox" aria-label="delete_mark" class="delete-char-box" id="{{ char.id }}">
@@ -333,6 +334,9 @@
                 </td>
                 <td>
                     <a href="{{ char.get_absolute_url }}">Details</a>
+                </td>
+                <td>
+                    <a role="button" class="btn btn-sm btn-outline-info" onclick="char_quickedit({{ char.id }})">QUICK EDIT</a>
                 </td>
                 </tr>
             {% endfor %}
@@ -365,11 +369,12 @@
                 <th>Duration</th>
                 <th>Director</th>
                 <th>Translator</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
         {% for session in session_list %}
-            <tr class="session-row" onclick="sess_quickedit({{ session.id }})">
+            <tr class="session-row">
                 <td><input type="checkbox" aria-label="delete_mark_sess" class="delete-session-box" id="{{ session.id }}"></td>
                 <td>{{ session.character.name }}</td>
                 <td>{{ session.character.actor.name }}</td>
@@ -378,6 +383,7 @@
                 <td>{{ session.duration|default_if_none:'' }}</td>
                 <td>{{ session.director.name }}</td>
                 <td>{{ session.translator.name }}</td>
+                <td><a role="button" class="btn btn-sm btn-outline-info" onclick="sess_quickedit({{ session.id }})">QUICK EDIT</a></td>
             </tr>
         {% endfor %}
         </tbody>
