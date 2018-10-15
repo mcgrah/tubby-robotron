@@ -1,0 +1,40 @@
+<div class="modal-header">
+    <h5 class="modal-title" id="charModalLabel">Batch Quick Edit</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+    {% if form %}
+        {{ form.media }}
+        {% load i18n widget_tweaks %}
+        <form method="POST" action="{% url "batch_loader" pk=batch.id %}">
+        {% csrf_token %}
+        <div class="modal-body" >
+            <table class="table table-sm table-borderless">
+            <tbody>
+            <tr><th scope="row">Name: </th><td>{{ form.name|attr:"class:form-control form-control-sm" }}</td></tr>
+            <tr><th scope="row">Start Date: </th><td>{{ form.start_date|attr:"class:form-control form-control-sm" }}</td></tr>
+            <tr><th scope="row">Deadline: </th><td>{{ form.deadline|attr:"class:form-control form-control-sm" }}</td></tr>
+            <tr><th scope="row">Files: </th><td>{{ form.files_count|attr:"class:form-control form-control-sm" }}</td></tr>
+            <tr><th scope="row">Words: </th><td>{{ form.word_count|attr:"class:form-control form-control-sm" }}</td></tr>
+            <tr><th scope="row">Characters: </th><td>{{ form.char_count|attr:"class:form-control form-control-sm" }}</td></tr>
+            </tbody>
+            </table>
+        </div>
+        <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary btn-sm">Save changes</button>
+        </div>
+        </form>
+    {% endif %}
+
+
+    <script>
+        $( function() {
+            $( "#id_start_date" ).datepicker({
+                "dateFormat": "yy-mm-dd"});
+            $( "#id_deadline" ).datepicker({
+                "dateFormat": "yy-mm-dd"});
+        } );
+    </script>

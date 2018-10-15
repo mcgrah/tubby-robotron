@@ -14,6 +14,7 @@ urlpatterns = [
     path('project/<int:pk>/', views.project_detail_view, name='project'),
     path('project/<int:pk>/update/', views.ProjectUpdateView.as_view(), name='update_project'),
     path('project/<int:pk>/updatemini/', views.ProjectUpdateViewMini.as_view(), name='update_project_mini'),
+    path('project/<int:pk>/edit_loader/', views.BatchDetailUpdateViewMini.as_view(), name='batch_loader'),
     path('batch/<int:pk>/', views.batch_detail_view, name='batch'),
     path('batch/<int:pk>/update/', views.BatchDetailUpdateView.as_view(), name='update_batch'),
     path('batch/<int:pk>/edit_loader/', views.SessionDetailUpdateViewMini.as_view(), name='session_loader'),

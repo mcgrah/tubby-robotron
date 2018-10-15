@@ -434,6 +434,30 @@ class BatchDetailUpdateView(LoginRequiredMixin, UpdateView):
     }
 
 
+class BatchDetailUpdateViewMini(LoginRequiredMixin, UpdateView):
+    model = Batch
+    template_name = 'batch_loader.html'
+
+    fields = [
+        'name',
+        'start_date',
+        'deadline',
+        'files_count',
+        'word_count',
+        'char_count',
+    ]
+
+    widgets = {
+        'start_date': forms.DateInput(attrs={'class': 'datepicker'}),
+        'deadline': forms.DateInput(attrs={'class': 'datepicker'}),
+    }
+
+    def get_success_url(self, **kwargs):
+        context = super(BatchDetailUpdateViewMini, self).get_context_data(**kwargs)
+        return_project = Project.objects.get(batch=context['batch'])
+        return return_project.get_absolute_url()
+
+
 class CharacterDetailView(LoginRequiredMixin, generic.DetailView):
     model = Character
 

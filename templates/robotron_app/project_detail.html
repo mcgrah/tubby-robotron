@@ -117,6 +117,7 @@
                 <th scope="col">Words</th>
                 <th scope="col">Characters</th>
                 <th scope="col"></th>
+                <th scope="col"></th>
             </tr>
 
         {% for batch in batch_list %}
@@ -135,7 +136,12 @@
                 <td>{{ batch.files_count }}</td>
                 <td>{{ batch.word_count }}</td>
                 <td>{{ batch.real_chars }} / {{ batch.char_count }}</td>
-                <td><a href="{{ batch.get_absolute_url }}">Details</a></td>
+                <td>
+                    <a role="button" class="btn btn-sm btn-outline-info" href="{{ batch.get_absolute_url }}">View Details</a>
+                </td>
+                <td>
+                    <a role="button" class="btn btn-sm btn-outline-info" onclick="batch_quickedit({{ batch.id }})">QUICK EDIT</a>
+                </td>
             </tr>
         {% endfor %}
         </tbody>
@@ -143,55 +149,73 @@
     {% else %}
        <div class="alert alert-info">No batches added.</div>
     {% endif %}
+
+<!-- Modal -->
+<div class="modal fade" id="charModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" id="charModal-content">
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 {% block custom_script_end %}
     <script type="text/javascript">
         var timeOutHandler;
 
+        function batch_quickedit(batchid){
+            {#charid = $(this).attr('char');#}
+            console.log('clicked row for '+batchid);
+            $('#charModal-content').load("/robotron/project/"+batchid+"/edit_loader",function(){
+                $('#charModal').modal({
+                    show: true //Display loader!
+                });
+            });
+        }
 
         function delete_selected_batches(){
             if($('#batch-table input:checkbox:checked').length > 0){        
-            console.log('delete batches clicked');
+                console.log('delete batches clicked');
 
 
-            // retrieve ids from checked boxes
-            var ids_for_del = '';
-            
-            $('#batch-table input:checkbox:checked').each(function(){
-               console.log('batch_id_for_del:', $(this).attr('id'));
-                  if(ids_for_del === '') {
-                      ids_for_del = '?ids='+$(this).attr('id')
-                  } else {
-                      ids_for_del = ids_for_del+','+$(this).attr('id')
-                  }
-            });
-            console.log(ids_for_del);
-            tmpurl ="{% url "delete_selected_batches" %}"+ids_for_del;
-            console.log(tmpurl);
+                // retrieve ids from checked boxes
+                var ids_for_del = '';
 
-            $.ajax({
-              url:tmpurl,
-                cache:false,
-                beforeSend: function(){
-                    timeOutHandler = setTimeout(function(){
-                        $("#loadMe").modal({
-                          backdrop: "static", //remove ability to close modal with click
-                          keyboard: false, //remove option to close with keyboard
-                          show: true //Display loader!
-                        });
-                    },500);
+                $('#batch-table input:checkbox:checked').each(function(){
+                   console.log('batch_id_for_del:', $(this).attr('id'));
+                      if(ids_for_del === '') {
+                          ids_for_del = '?ids='+$(this).attr('id')
+                      } else {
+                          ids_for_del = ids_for_del+','+$(this).attr('id')
+                      }
+                });
+                console.log(ids_for_del);
+                tmpurl ="{% url "delete_selected_batches" %}"+ids_for_del;
+                console.log(tmpurl);
 
-                },
-                complete: function(){
-                    clearTimeout(timeOutHander);
-                    $("#loadMe").modal("hide");
-                },
-                success:function(){
-                    console.log('del call successful');
-                    window.location.reload();
-                },
-            })
-        }
+                $.ajax({
+                  url:tmpurl,
+                    cache:false,
+                    beforeSend: function(){
+                        timeOutHandler = setTimeout(function(){
+                            $("#loadMe").modal({
+                              backdrop: "static", //remove ability to close modal with click
+                              keyboard: false, //remove option to close with keyboard
+                              show: true //Display loader!
+                            });
+                        },500);
+
+                    },
+                    complete: function(){
+                        clearTimeout(timeOutHander);
+                        $("#loadMe").modal("hide");
+                    },
+                    success:function(){
+                        console.log('del call successful');
+                        window.location.reload();
+                    },
+                })
+            }
         }
 
         $(document).ready(function() {
