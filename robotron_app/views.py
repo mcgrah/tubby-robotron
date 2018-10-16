@@ -458,7 +458,7 @@ class BatchDetailUpdateViewMini(LoginRequiredMixin, UpdateView):
         return return_project.get_absolute_url()
 
 
-class CharacterDetailView(LoginRequiredMixin, generic.DetailView):
+class CharacterDetailView(LoginRequiredMixin, ModelFormWidgetMixin, generic.DetailView):
     model = Character
 
     def get_context_data(self, **kwargs):
@@ -467,7 +467,7 @@ class CharacterDetailView(LoginRequiredMixin, generic.DetailView):
         return context
 
 
-class CharacterDetailUpdateViewMini(LoginRequiredMixin, UpdateView):
+class CharacterDetailUpdateViewMini(LoginRequiredMixin, ModelFormWidgetMixin, UpdateView):
     model = Character
     template_name = 'character_loader.html'
     fields = [
@@ -479,8 +479,8 @@ class CharacterDetailUpdateViewMini(LoginRequiredMixin, UpdateView):
     ]
     widgets = {
         'actor': autocomplete.ModelSelect2(url='actor-autocomplete'),
-        'delivety_date': forms.DateInput(attrs={'class': 'datepicker'}),
-        'delivety_time': forms.DateInput(),
+        'delivery_date': forms.DateInput(attrs={'class': 'datepicker'}),
+        'delivery_time': forms.DateInput(),
     }
 
     def get_success_url(self, **kwargs):
@@ -489,7 +489,7 @@ class CharacterDetailUpdateViewMini(LoginRequiredMixin, UpdateView):
         return return_batch.get_absolute_url()
 
 
-class SessionDetailUpdateViewMini(LoginRequiredMixin, UpdateView):
+class SessionDetailUpdateViewMini(LoginRequiredMixin, ModelFormWidgetMixin, UpdateView):
     model = Session
     template_name = 'session_loader.html'
     fields = [
@@ -533,7 +533,7 @@ class SessionDetailUpdateProjectCalendar(SessionDetailUpdateViewMini):
         return return_project.get_absolute_url() + 'calendar/'
 
 
-class CharacterDetailUpdateView(LoginRequiredMixin, UpdateView):
+class CharacterDetailUpdateView(LoginRequiredMixin, ModelFormWidgetMixin, UpdateView):
     model = Character
     template_name = 'robotron_app/character_detail.html'
 

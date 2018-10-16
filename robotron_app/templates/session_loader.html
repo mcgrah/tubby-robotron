@@ -6,7 +6,7 @@
 </div>
 
     {% if form %}
-        {{ form.media }}
+{#        {{ form.media }}#}
         {% load i18n widget_tweaks %}
         <form method="POST" action="{% url "session_loader" pk=session.id %}">
         {% csrf_token %}

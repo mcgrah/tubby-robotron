@@ -16,11 +16,13 @@ def is_roboto(user):
 def get_sessions_for_range(start_date,end_date,pk=None):
 
     if pk==None:
-        range_sessions = Session.objects.filter(day__range=(start_date,end_date )).order_by('hour')
+        range_sessions = Session.objects.filter(day__range=(start_date,end_date )).order_by('day').order_by('hour')
     else:
         selected_project = Project.objects.get(id=pk)
-        range_sessions = Session.objects.filter(batch__project=selected_project).filter(day__range=(start_date, end_date)).order_by('hour')
+        range_sessions = Session.objects.filter(batch__project=selected_project).filter(day__range=(start_date, end_date)).order_by('day').order_by('hour')
 
+    # only sessions with actual content
+    range_sessions = range_sessions.filter(character__actor__isnull=False)
     # empty for all weekdays
     events_dict = {
         1:{},
@@ -85,6 +87,9 @@ def get_sessions_for_month(month, pk=None):
         selected_project = Project.objects.get(id=pk)
         month_sessions = Session.objects.filter(batch__project=selected_project).filter(day__month=month).filter(
             day__isnull=False).order_by('day', 'hour')
+
+    # only sessions with actual content
+    month_sessions = month_sessions.filter(character__actor__isnull=False)
 
     events_dict = {}
 
@@ -197,6 +202,7 @@ def generate_weekday_events(weekday, event_list):
         text = ''
         height = time_blocks * 20
         text += f'<div class="card bg-transparent border-0" style="height:{height}px"></div>\n'
+        print(f'[BUILDER] making empty card of {time_blocks} blocks')
         return text
 
     def generate_event_block(event):
@@ -217,11 +223,12 @@ def generate_weekday_events(weekday, event_list):
         text += '<hr class="slim-hr">\n'
         text += f'<p class="card-text">{character}<br>{actor}</p>\n'
         text += '</div></div>\n'
+        print(f'[BUILDER] making event card of {event["event_timeblocks"]} blocks')
         return text
 
     def generate_event_column(num,ids,startblock,endblock):
         # generate column split into num parts, for listed events
-        print(f'[DEBUG]: num:{num} ids:{ids} start:{startblock} end:{endblock}')
+        print(f'[DEBUG]:COLUMN: num:{num} ids:{ids} start:{startblock} end:{endblock}')
         text = ''
         col_i = 1
         height = (endblock - startblock) * 20
@@ -356,7 +363,7 @@ def generate_weekday_events(weekday, event_list):
         # each event has to be checked with all following events, except the last one
         collider = -1
         for w in weekday_events:
-            if collider < w < len(weekday_events):
+            if collider < w <= len(weekday_events):
                 print(f'[DEBUG] running checks for {w}')
                 event_ids = []
                 event_ids.append(w)
@@ -403,7 +410,7 @@ def generate_weekday_events(weekday, event_list):
 
                                     if collide2[1] > split_column[1]:
                                         split_column[1] = collide2[1]
-                        i = i + 1
+                    i = i + 1
 
                     print(f'current column blocks: {split_column}')
                 # do we need empty block before anything?
@@ -412,7 +419,7 @@ def generate_weekday_events(weekday, event_list):
                 event_ids = (list(set(event_ids)))
 
                 print(f'[DEBUG]: we are at {int(56 - blocks_left)} block')
-                if (collider > 1):
+                if (len(event_ids) > 1):
                     # content inside column is padded, but no column itself
                     diff = split_column[0] - int(56 - blocks_left)
                     print(f'[DEBUG] column diff is {diff}')
@@ -421,18 +428,21 @@ def generate_weekday_events(weekday, event_list):
                         blocks_left = blocks_left - diff
                     column += generate_event_column(len(event_ids), event_ids, split_column[0], split_column[1])
                     blocks_left = blocks_left - (split_column[1]+1 - split_column[0])
+
                 else:
                     # single event, needs manual padding?
-
                     start = get_start_block(e['event_hour'])
-                    diff = int(56 - blocks_left) - start
+                    print(f'[DEBUG] start is {start}')
+                    diff = start - int(56 - blocks_left)
+                    # diff = int(56 - blocks_left) - start
                     print(f'[DEBUG] diff is {diff}')
                     if diff == 0:
                         column += generate_event_block(e)
                         blocks_left = blocks_left - e['event_timeblocks']
                     elif diff < 0:
                         # should not happen
-                        print('[ERROR] wrong event order')
+                        print('[ERROR] wrong event order for')
+                        print(e)
                         raise KeyError
                     else:
                         column += generate_empty_block(diff)
