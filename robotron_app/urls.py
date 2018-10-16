@@ -18,6 +18,8 @@ urlpatterns = [
     path('batch/<int:pk>/', views.batch_detail_view, name='batch'),
     path('batch/<int:pk>/update/', views.BatchDetailUpdateView.as_view(), name='update_batch'),
     path('batch/<int:pk>/edit_loader/', views.SessionDetailUpdateViewMini.as_view(), name='session_loader'),
+    path('batch/<int:pk>/edit_loader_cal/', views.SessionDetailUpdateCalendar.as_view(), name='session_loader_cal'),
+    path('batch/<int:pk>/edit_loader_pcal/', views.SessionDetailUpdateProjectCalendar.as_view(), name='session_loader_pcal'),
 
     path('character/<int:pk>/', views.CharacterDetailUpdateView.as_view(), name='character'),
     path('character/<int:pk>/update_sessions/', views.manage_char_session, name='manage_char_sessions'),

@@ -60,7 +60,8 @@ def get_sessions_for_range(start_date,end_date,pk=None):
                 'event_actor':actor,
                 'event_category': category,
                 'event_timeblocks': timeblocks,
-                'event_hour': m.hour
+                'event_hour': m.hour,
+                'event_id': m.id
             }
 
         try:
@@ -101,31 +102,26 @@ def get_sessions_for_month(month, pk=None):
         else:
             category = m.translator_id
             translator = m.translator.name
-        # director = m.director.name
+
+        content = {
+            'event_category': category,
+            'event_title': translator,
+            'event_start': str(start_time),
+            'event_end': str(end_time),
+            'event_body': f'Project: {project}<br>Batch: {batch}<br>Character: {character}<br>Actor: {actor}',
+            'event_duration': start_time.strftime("%H:%M") + '-' + end_time.strftime("%H:%M"),
+            'event_id': m.id
+        }
+
         try:
             elem = len(events_dict[day].keys())
             # print(len(elem))
-            events_dict[day][elem+1] = {
-                'event_category': category,
-                'event_title': translator,
-                'event_start': str(start_time),
-                'event_end': str(end_time),
-                'event_body': f'Project: {project}<br>Batch: {batch}<br>Character: {character}<br>Actor: {actor}',
-                'event_duration':start_time.strftime("%H:%M")+'-'+end_time.strftime("%H:%M")
-            }
+            events_dict[day][elem+1] = content
 
         except KeyError:
             # print(f'adding first event for day: {day}')
             events_dict[day] = {}
-            events_dict[day][1] = {
-                'event_category': category,
-                'event_title': translator,
-                'event_start': str(start_time),
-                'event_end': str(end_time),
-                #'event_body': translator,
-                'event_body': f'Project: {project}<br>Batch: {batch}<br>Character: {character}<br>Actor: {actor}',
-                'event_duration': start_time.strftime("%H:%M") + '-' + end_time.strftime("%H:%M")
-            }
+            events_dict[day][1] = content
             pass
 
     # print(events_dict)
@@ -211,8 +207,10 @@ def generate_weekday_events(weekday, event_list):
         character = event['event_character']
         actor = event['event_actor']
         category = 't-'+str(event['event_category'])
+        sid = event['event_id']
 
-        text += f'<div class="card text-center small {category}" style="height:{height}px">\n'
+        text += f'<div class="card text-center small {category}"  data-session="{sid}" ' \
+                f'onclick="sess_quickedit({sid})" style="height:{height}px">\n'
         text += '<div class="card-body event-body">\n'
         text += f'<p class="card-title">{time}</p>\n'
         text += f'<p class="card-subtitle">{translator}</p>\n'

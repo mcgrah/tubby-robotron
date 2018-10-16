@@ -43,13 +43,37 @@
             $('.btn-translator:not(.active)').each(function(){
                 tid = $(this).attr('id');
                 translator_hide(tid);
-            })
+            });
 
             $('.btn-translator.active').each(function(){
                 tid = $(this).attr('id');
                 translator_show(tid);
             })
         }
+{% if project %}
+        function sess_quickedit(sessid){
+            {#sessid = $(this).attr('data-sessid');#}
+            console.log('clicked event for '+sessid);
+            $('#charModal-content').load("/robotron/batch/"+sessid+"/edit_loader_pcal",function(){
+                $('#charModal').modal({
+                    show: true //Display modal
+                });
+            });
+        }
+
+{% else %}
+        function sess_quickedit(sessid){
+            {#sessid = $(this).attr('data-sessid');#}
+            console.log('clicked event for '+sessid);
+            $('#charModal-content').load("/robotron/batch/"+sessid+"/edit_loader_cal",function(){
+                $('#charModal').modal({
+                    show: true //Display modal
+                });
+            });
+        }
+
+{% endif %}
+
 
         $( function() {
 
@@ -109,9 +133,6 @@
                             diff = d.getDate() - day + (day === 0 ? -6:1);
                             monday_date = new Date(d.setDate(diff));
                             monday_date = monday_date.toLocaleString('sv-SE').slice(0,10);
-                            //console.log(monday_date);
-                            //console.log(monday_date.toLocaleString('sv-SE').slice(0,10));
-//                            console.log(monday_date.toISOString().slice(0,10));
                             //pass monday date to week loader
 {% if project %}
                             $("#calendar_week_load_container").load("{% url "project_calendar_week_loader" pk=project.id %}"+'?mon='+monday_date,function(){
@@ -127,7 +148,6 @@
                         }
                     }
                     for(j =6; j>=0; j--){
-//                        console.log(j);
                         end_day = $('td:eq('+j+')',this).attr("id");
                         if(end_day !== "" && end_day !== undefined){
                             break;
@@ -214,4 +234,11 @@
     </div>
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="charModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" id="charModal-content">
+    </div>
+  </div>
+</div>
 {% endblock %}

@@ -512,6 +512,27 @@ class SessionDetailUpdateViewMini(LoginRequiredMixin, UpdateView):
         return return_batch.get_absolute_url()
 
 
+# Calendar should redirect elsewhere
+class SessionDetailUpdateCalendar(SessionDetailUpdateViewMini):
+    template_name = 'session_loader_cal.html'
+
+    def get_success_url(self, **kwargs):
+        context = super(SessionDetailUpdateCalendar, self).get_context_data(**kwargs)
+        return_batch = Batch.objects.get(session=context['session'])
+        return_project = Project.objects.get(batch=return_batch)
+        return reverse('calendar')
+
+
+class SessionDetailUpdateProjectCalendar(SessionDetailUpdateViewMini):
+    template_name = 'session_loader_pcal.html'
+
+    def get_success_url(self, **kwargs):
+        context = super(SessionDetailUpdateProjectCalendar, self).get_context_data(**kwargs)
+        return_batch = Batch.objects.get(session=context['session'])
+        return_project = Project.objects.get(batch=return_batch)
+        return return_project.get_absolute_url() + 'calendar/'
+
+
 class CharacterDetailUpdateView(LoginRequiredMixin, UpdateView):
     model = Character
     template_name = 'robotron_app/character_detail.html'
