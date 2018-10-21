@@ -3,8 +3,14 @@
 {% block pageScript %}
     <script>
         $( function() {
-            $( "#id_start_date" ).datepicker();
-            $( "#id_deadline" ).datepicker();
+            $( "#id_start_date" ).datepicker({
+                "dateFormat": "yy-mm-dd",
+                "firstDay": 1
+            });
+            $( "#id_deadline" ).datepicker({
+                "dateFormat": "yy-mm-dd",
+                "firstDay": 1
+            });
         } );
     </script>
 {% endblock %}
@@ -19,7 +25,7 @@
 {% endblock %}
 
 {% block content %}
-    {{ form.media }}
+{#    {{ form.media }}#}
     <form method="post">
     {% csrf_token %}
         {% load i18n widget_tweaks %}

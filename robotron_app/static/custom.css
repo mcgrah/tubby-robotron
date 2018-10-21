@@ -1534,8 +1534,9 @@ body {
 /*BUTTONS STOP*/
 .t-0 {
     /*grey*/
-    background-color: #6c757d !important;
-    color: #fff;
+    background-color: #c4c5c6 !important;
+    border-color: red;
+
 }
 
 .t-1 {

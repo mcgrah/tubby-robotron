@@ -34,7 +34,9 @@
     <script>
         $( function() {
             $( "#id_day" ).datepicker({
-                "dateFormat": "yy-mm-dd"});
+                "dateFormat": "yy-mm-dd",
+                "firstDay": 1
+            });
             $( "#id_hour" ).timepicker({
                 'timeFormat':'H:i',
                 'scrollDefault':'now'

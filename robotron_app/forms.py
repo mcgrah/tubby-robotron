@@ -39,7 +39,7 @@ class AddBatchForm(forms.Form):
     # new_batch_start_date = forms.DateField(initial=datetime.date.today, required=False, label='Start Date', widget=DateInput())
     new_batch_start_date = forms.DateField(initial=datetime.date.today, required=False, label='Start Date',
                                            widget=forms.DateInput(attrs={'class': 'datepicker'}))
-    new_batch_deadline = forms.DateField(required=False, label='Deadline',
+    new_batch_deadline = forms.DateField(initial=datetime.date.today,required=False, label='Deadline',
                                          widget=forms.DateInput(attrs={'class': 'datepicker'}))
     new_batch_files_count = forms.IntegerField(min_value=0, initial=0,  required=False, label='Files')
     new_batch_word_count = forms.IntegerField(min_value=0, initial=0, required=False, label='Words')

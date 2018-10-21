@@ -1,0 +1,118 @@
+{% extends "base_scripted.html"%}
+{% block pageScript %}
+<script>
+        $( function() {
+            $("input[id*='-delivery_date']").each(function(){
+                $(this).datepicker({
+                "dateFormat": "yy-mm-dd",
+                "firstDay": 1
+            });
+            });
+
+            $("input[id*='-delivery_time']").each(function(){
+                $(this).timepicker({
+                    'timeFormat':'H:i',
+                    'scrollDefault':'now'
+                });
+            });
+        } );
+    </script>
+{% endblock %}
+{% block title %}Manage Batch Characters{% endblock %}
+
+{% block minicrumbs %}
+<li class="breadcrumb-item"><a href="{{ batch.project.get_absolute_url }}">{{ batch.project.name }}</a></li>
+<li class="breadcrumb-item"><a href="{{ batch.get_absolute_url }}">{{ batch.name }}</a></li>
+<li class="breadcrumb-item active" aria-current="page">Edit Characters</li>
+{% endblock %}
+
+{% block content %}
+{#    {{ formset.media }}#}
+    <h2>Batch: <strong>{{ Batch.name }}</strong></h2>
+    <hr>
+    <div class="row">
+        <div class="col">
+            <table class="table table-striped table-sm">
+                <tbody>
+                    <tr><th scope="row">Name: </th><td>{{ batch.name }}</td></tr>
+                    <tr><th scope="row">Start Date: </th><td>{{ batch.start_date }}</td></tr>
+                    <tr><th scope="row">Deadline: </th><td>{{ batch.deadline }}</td></tr>
+                    <tr><th scope="row">Files: </th><td>{{ batch.files_count }}</td></tr>
+                    <tr><th scope="row">Wordcount: </th><td>{{ batch.word_count }}</td></tr>
+                    <tr><th scope="row">Characters: </th><td>{{ batch.char_count }}</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col"></div>
+    </div>
+
+    <div class="row align-items-center">
+        <div class="col-md-auto">
+            <h4>Sessions</h4>
+        </div>
+    </div>
+    <p>
+		<form method="post">
+		<hr>
+
+        {% csrf_token %}
+        {% load i18n widget_tweaks %}
+        {{ formset.management_form }}
+        <!-- AS GRID!-->
+{#        <div class="container">#}
+            <div class="row justify-content-start align-items-center">
+                <div class="col-1 h6"><strong>#</strong></div>
+                <div class="col-3 h6"><strong>Name</strong></div>
+                <div class="col-3 h6"><strong>Actor</strong></div>
+                <div class="col-2 h6"><strong>Files</strong></div>
+                <div class="col-2 h6"><strong>Delivery Date</strong></div>
+                <div class="col-1 h6"><strong>Delivery Time</strong></div>
+            </div>
+		<hr>
+        {% for form in formset %}
+            <div class="row justify-content-start align-items-center">
+                <div class="col d-none">{{ form.id }}</div>
+                <div class="col-1 p-0">{{ forloop.counter }}</div>
+                <div class="col-3 p-0">{{ form.name|attr:"class:form-control"}}</div>
+{#                add for admin / user diffs#}
+{#                <div class="col-3">{{ form.actor|attr:"class:form-control"|attr:"disabled:true"}}</div>#}
+                <div class="col-3 p-0">{{ form.actor|attr:"class:form-control"}}</div>
+                <div class="col-2 p-0">{{ form.files_count|attr:"class:form-control" }}</div>
+                <div class="col-2 p-0">{{ form.delivery_date|attr:"class:form-control" }}</div>
+                <div class="col-1 p-0">{{ form.delivery_time|attr:"class:form-control" }}</div>
+
+
+
+            </div>
+            {% if form.non_field_errors %}
+                <div class="row justify-content-start align-items-center alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% for field in form %}
+                {% if field.errors %}
+                    {% for error in field.errors %}
+                        <div class="row justify-content-start align-items-center alert alert-danger">
+                            {{ field.name }}: {{ error }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+		
+        <div class="form-group row justify-content-end mt-3">
+            <div class="col">
+            <button type="submit" class="btn btn-primary float-right">{% trans "Update" %}</button>
+            <a class="btn btn-secondary mr-1 float-right" href="." role="button">Undo Changes</a>
+            </div>
+        </div>
+
+<script>
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip(); 
+});
+</script>
+</form>
+{% endblock %}

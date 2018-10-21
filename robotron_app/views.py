@@ -284,11 +284,16 @@ class BatchDetailView(LoginRequiredMixin, generic.DetailView):
 
 @login_required
 def batch_detail_view(request, pk):
-    batch = get_object_or_404(Batch, pk=pk)
+    batch = Batch.objects.annotate(char_filecount=Sum('character__files_count')).get(pk=pk)
+    # batch = get_object_or_404(Batch, pk=pk)
     error_msg = ''
 
     # init forms
-    new_char_form = AddCharacterForm()
+    new_char_form = AddCharacterForm(initial=
+        {
+            'new_char_delivery_date':batch.deadline,
+            'new_char_delivery_time':'17:00'
+        })
     file_form = UploadCSVForm()
     session_form = AddSessionForm(initial={'new_session_director':Director.objects.get(id=batch.project.director_id)})
 
@@ -380,13 +385,26 @@ def batch_detail_view(request, pk):
                     if len(bulk_actors) > 0:
                         Actor.objects.bulk_create(bulk_actors)
 
-                    # create new characters
+                    # create new characters, setting delivery to batch deadline
                     for c in char_list:
                         if char_list[c] != '':
                             new_actor = Actor.objects.get(name=char_list[c])
-                            new_char = Character(name=c, batch=batch, actor=new_actor)
+                            new_char = Character(
+                                name=c,
+                                batch=batch,
+                                actor=new_actor,
+                                files_count=0,
+                                delivery_date=batch.deadline,
+                                delivery_time='17:00'
+                            )
                         else:
-                            new_char = Character(name=c, batch=batch)
+                            new_char = Character(
+                                name=c,
+                                batch=batch,
+                                files_count=0,
+                                delivery_date=batch.deadline,
+                                delivery_time='17:00'
+                            )
                         bulk_chars.append(new_char)
 
                     if len(bulk_chars) > 0:
@@ -636,6 +654,35 @@ def manage_char_session(request, pk):
     else:
         formset = SessionInlineFormset(instance=character)
     return render(request, 'manage_sessions.html', {'formset': formset, 'character': character})
+
+
+@login_required
+def manage_batch_characters(request, pk):
+    batch = Batch.objects.get(pk=pk)
+    CharInlineFormset = inlineformset_factory(
+        Batch, Character,
+        fields=(
+            'name',
+            'files_count',
+            'actor',
+            'delivery_date',
+            'delivery_time'
+        ),
+        widgets={
+            'actor': autocomplete.ModelSelect2(url='actor-autocomplete'),
+            'delivery_date': forms.DateInput(attrs={'class': 'datepicker'}),
+            'delivery_time': forms.TimeInput(),
+        },
+        extra=0
+    )
+    if request.method == "POST":
+        formset = CharInlineFormset(request.POST, instance=batch)
+        if formset.is_valid():
+            formset.save()
+            return HttpResponseRedirect(batch.get_absolute_url())
+    else:
+        formset = CharInlineFormset(instance=batch)
+    return render(request, 'manage_characters.html', {'formset': formset, 'batch': batch})
 
 
 @login_required

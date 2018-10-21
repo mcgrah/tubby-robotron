@@ -4,7 +4,9 @@
         $( function() {
             $("input[id*='-day']").each(function(){
                 $(this).datepicker({
-                "dateFormat": "yy-mm-dd"});
+                "dateFormat": "yy-mm-dd",
+                "firstDay": 1
+            });
             });
 
             $("input[id*='-hour']").each(function(){
@@ -26,7 +28,7 @@
 {% endblock %}
 
 {% block content %}
-    {{ formset.media }}
+{#    {{ formset.media }}#}
     <h2>Character: <strong>{{ character.name }}</strong></h2>	
     <p>
     <div class="row">

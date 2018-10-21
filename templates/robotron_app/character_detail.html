@@ -35,7 +35,7 @@
         <div class="col">
             {# make this one container for editable form? #}
             {% if form %}
-                {{ form.media }}
+{#                {{ form.media }}#}
                 {% load i18n widget_tweaks %}
                 <form method="POST" action=".">
                 {% csrf_token %}
@@ -156,7 +156,9 @@
     <script>
         $( function() {
             $( "#id_delivery_date" ).datepicker({
-                "dateFormat": "yy-mm-dd"});
+                "dateFormat": "yy-mm-dd",
+                "firstDay": 1
+            });
             $( "#id_delivery_time" ).timepicker({
                 'timeFormat':'H:i',
                 'scrollDefault':'now'

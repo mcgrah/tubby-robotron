@@ -4,8 +4,8 @@
 
 {% block pageScript %}
 
-        {{ form.media }}
-        {{ file_form.media }}
+{#        {{ form.media }}#}
+{#        {{ file_form.media }}#}
 {#        {{ session_form.media }}#}
 {% endblock %}
 
@@ -19,15 +19,10 @@
 {% endblock %}
 
 {% block page_alerts %}
-
-    {% if errors %}
-        <div class="alert alert-danger">
-            <p>{{  errors }}</p>
-        </div>
-        {% elif success %}
-        <div class="alert alert-success">
-            <p>{{ success }}</p>
-        </div>
+    {% if  batch.char_filecount != batch.files_count  %}
+    <div class="alert alert-warning">
+        <p>! Number of character files different than declared: (current: {{ batch.char_filecount }}, expected: {{ batch.files_count }} )</p>
+    </div>
     {% endif %}
 
 {% endblock %}
@@ -73,7 +68,7 @@
         <h4>Characters</h4>
     </div>
     <div class="btn-group">
-        <button class="btn btn-outline-primary" type="button"data-toggle="collapse" data-target="#target1" aria-expanded="false">
+        <button class="btn btn-outline-primary" type="button" data-toggle="collapse" data-target="#target1" aria-expanded="false">
             Add Character
         </button>
         <button class="btn btn-outline-primary" type="button" data-parent="#two-form" data-toggle="collapse" data-target="#target2" aria-expanded="false">
@@ -82,10 +77,13 @@
         <button disabled id="create-sessions-btn" class="btn btn-outline-primary" type="button" data-parent="#two-form" data-toggle="collapse" data-target="#target3" aria-expanded="false">
             Create Sessions for selected Characters
         </button>
+        <a class="btn btn-outline-primary" role="button" href="{% url "manage_batch_characters" pk=batch.id %}">
+            Edit ALL
+        </a>
         <button disabled type="button" class="btn btn-outline-danger" onclick="delete_selected_chars()" id="delete-char-btn">
             Delete selected
         </button>
-        <button type="button" class="btn btn-outline-danger" onclick="nuke_chars()" id="nuke-char-btn">NUKE Actors - DEBUG</button>
+{#        <button type="button" class="btn btn-outline-danger" onclick="nuke_chars()" id="nuke-char-btn">NUKE Actors - DEBUG</button>#}
         {% load i18n widget_tweaks %}
     </div>
 </div>
@@ -406,7 +404,7 @@
     {% endif %}
 
 <!-- Modal -->
-<div class="modal fade" id="charModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="charModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content" id="charModal-content">
     </div>
@@ -688,7 +686,9 @@
     <script>
         $( function() {
             $( "#id_new_session_day" ).datepicker({
-                "dateFormat": "yy-mm-dd"});
+                "dateFormat": "yy-mm-dd",
+                "firstDay": 1
+            });
             $( "#id_new_session_hour" ).timepicker({
                 'timeFormat':'H:i',
                 'scrollDefault':'now'
@@ -696,7 +696,9 @@
         } );
         $( function() {
             $( "#id_new_char_delivery_date" ).datepicker({
-                "dateFormat": "yy-mm-dd"});
+                "dateFormat": "yy-mm-dd",
+                "firstDay": 1
+            });
             $( "#id_new_char_delivery_time" ).timepicker({
                 'timeFormat':'H:i',
                 'scrollDefault':'now'

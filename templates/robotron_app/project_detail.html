@@ -5,8 +5,14 @@
 {% block pageScript %}
     <script>
         $( function() {
-            $( "#id_new_batch_start_date" ).datepicker();
-            $( "#id_new_batch_deadline" ).datepicker();
+            $( "#id_new_batch_start_date" ).datepicker({
+                "dateFormat": "yy-mm-dd",
+                "firstDay": 1
+            });
+            $( "#id_new_batch_deadline" ).datepicker({
+                "dateFormat": "yy-mm-dd",
+                "firstDay": 1
+            });
         } );
     </script>
 {% endblock %}
@@ -58,8 +64,8 @@
         <tr><th scope="row">Words: </th><td>{{ project.word_count }}</td></tr>
         <tr><th scope="row">Characters: </th><td>{{ project.char_count }}</td></tr>
         <tr><th scope="row">Actors: </th><td>{{ project.actor_count }}</td></tr>
-        <tr><th scope="row">SFX: </th><td>{{ project.sfx_note }}</td></tr>
-        <tr><th scope="row">TC: </th><td>{{ project.tc_note }}</td></tr>
+        <tr><th scope="row">SFX: </th><td>{{ project.sfx_note|linebreaksbr  }}</td></tr>
+        <tr><th scope="row">TC: </th><td>{{ project.tc_note|linebreaksbr  }}</td></tr>
         </tbody>
     </table>
     </div>
@@ -85,7 +91,7 @@
         {% endif %}
     </div>
     {% load i18n widget_tweaks %}
-    {{ form.media }}
+{#    {{ form.media }}#}
     <form action="" method="POST" id="batch-form">
         {% csrf_token %}
         {% if form.errors %}
@@ -162,7 +168,7 @@
     {% endif %}
 
 <!-- Modal -->
-<div class="modal fade" id="charModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="charModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content" id="charModal-content">
     </div>

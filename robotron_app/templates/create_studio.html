@@ -7,11 +7,11 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container">
+
         <h3>Create New Studio</h3>
         <hr>
-        <div>
-            {{ form.media }}
+
+{#            {{ form.media }}#}
             <form action="" method="POST">
             {% csrf_token %}
                 {% load i18n widget_tweaks %}
@@ -37,11 +37,14 @@
                         {% endif %}
                     </div>
                 {% endfor %}
-            <div class="form-group col-md-10">
-                <button type="submit" class="btn btn-primary" style="float: right">{% trans "Create New Studio" %}</button>
-                <a class="btn btn-secondary mr-1" href="{% url "create_studio" %}" role="button" style="float: right">Cancel</a>
+            <div class="form-group row justify-content-end">
+            <div class="col">
+            <button type="submit" class="btn btn-primary float-right">{% trans "Create New Studio" %}</button>
+            <a class="btn btn-secondary mr-1 float-right" href="." role="button">Undo Changes</a>
             </div>
-            </form>
+            <div class="col-2"></div>
         </div>
-    </div>
+            </form>
+
+
 {% endblock %}

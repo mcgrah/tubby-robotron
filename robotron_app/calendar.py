@@ -215,8 +215,13 @@ def generate_weekday_events(weekday, event_list):
         category = 't-'+str(event['event_category'])
         sid = event['event_id']
 
-        text += f'<div class="card text-center small {category}"  data-session="{sid}" ' \
-                f'onclick="sess_quickedit({sid})" style="height:{height}px">\n'
+        tooltip_text = f'<p><strong>{time}</strong></p><p>{translator}</p><p>{character}<br>{actor}</p>'
+
+        # tooltip_text = mark_safe(tooltip_text)
+
+        text += f'<div class="card text-center small {category}" data-session="{sid}" ' \
+                f'onclick="sess_quickedit({sid})" data-html="true" data-toggle="tooltip" title="{tooltip_text}" ' \
+                f'style="height:{height}px">\n'
         text += '<div class="card-body event-body">\n'
         text += f'<p class="card-title">{time}</p>\n'
         text += f'<p class="card-subtitle">{translator}</p>\n'
