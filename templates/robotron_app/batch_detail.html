@@ -63,7 +63,7 @@
         </div>
     </div>
 
-<div class="row align-items-center">
+<div class="row align-items-center" id="char-section">
     <div class="col-md-auto">
         <h4>Characters</h4>
     </div>
@@ -109,22 +109,29 @@
                             <div class="form-row">
                                 {% for field in form %}
                                     {% if "actor" in field.name %}
-                                        <div class="form-group col-md-4">
+                                        <div class="form-group col-md-3">
                                     {% endif %}
                                     {% if "name" in field.name %}
-                                        <div class="form-group col-md-3">
+                                        <div class="form-group col-md-2">
                                     {% endif %}
                                     {% if "delivery_date" in field.name %}
                                         <div class="form-group col-md-2">
                                     {% endif %}
                                     {% if "delivery_time" in field.name %}
-                                        <div class="form-group col-md-2">
+                                        <div class="form-group col-md-1">
                                     {% endif %}
                                     {% if "files" in field.name %}
                                         <div class="form-group col-md-1">
                                     {% endif %}
+                                    {% if 'note' in field.name %}
+                                        <div class="form-group col-md-3">
+                                    {% endif %}
+                                        {% if "delivery_time" in field.name %}
+                                        <label class="control-label" for="id_{{ field.name }}">Time</label>
+                                        {% else %}
                                         <label class="control-label" for="id_{{ field.name }}">{{ field.label }}</label>
-                                            {{ field|attr:"class:form-control" }}
+                                        {% endif %}
+                                        {{ field|attr:"class:form-control" }}
                                         {% if field.errors %}
                                             {% for error in field.errors %}
                                             <div class="alert alert-danger">
@@ -306,8 +313,9 @@
                 <th scope="col">Actor</th>
                 <th scope="col">Files</th>
                 <th scope="col">Delivery Date</th>
-                <th scope="col">Delivery Time</th>
-                <th scope="col">Sessions</th>
+                <th scope="col">D.Time</th>
+                <th scope="col">Comments</th>
+                <th scope="col" class="align-content-center text-center">Sessions</th>
                 <th scope="col"></th>
                 <th scope="col"></th>
             </tr>
@@ -315,33 +323,38 @@
             <tbody>
             {% for char in character_list %}
                 <tr class="char-row" >
-                <td>
+                <td class="align-middle">
 {#                {% if char.session_count == 0 %}#}
                     <input type="checkbox" aria-label="delete_mark" class="delete-char-box" id="{{ char.id }}">
 {#                {% else %}#}
 {#                    <input type="checkbox" disabled>#}
 {#                {% endif %}#}
                 </td>
-                <td>{{ char.name }}</td>
+                <td class="align-middle">{{ char.name }}</td>
 {#                <td>{{ char.actor.surname }} {{ char.actor.name }}</td>#}
-                <td>{{ char.actor.name }}</td>
-                <td>{{ char.files_count }}</td>
-                <td>{{ char.delivery_date|date:"Y-m-d" }}</td>
-                <td>{{ char.delivery_time|time:"H:i"  }}</td>
-                <td>
+                <td class="align-middle">{{ char.actor.name }}</td>
+                <td class="align-middle">{{ char.files_count }}</td>
+                <td class="align-middle">{{ char.delivery_date|date:"Y-m-d" }}</td>
+                <td class="align-middle">{{ char.delivery_time|time:"H:i"  }}</td>
+                {% if char.char_note %}
+                    <td class="align-middle"><span class="small">{{ char.char_note|linebreaksbr }}</span></td>
+                 {% else %}
+                    <td></td>
+                  {% endif %}
+                <td class="align-middle text-center">
                         {% if char.session_count > 0 %}
-                            &nbsp&nbsp&nbsp&nbsp&nbsp<span class="badge badge-primary">
+                            <span class="badge badge-primary">
                         {% else %}
-                            &nbsp&nbsp&nbsp&nbsp&nbsp<span class="badge badge-secondary">
+                            <span class="badge badge-secondary">
                         {% endif %}
                         {{ char.session_count }}</span>
 
                 </td>
-                <td>
-                    <a role="button" class="btn btn-sm btn-outline-info" href="{{ char.get_absolute_url }}">View Details</a>
+                <td class="align-middle">
+                    <a role="button" class="btn btn-sm btn-outline-info" href="{{ char.get_absolute_url }}">Details</a>
                 </td>
-                <td>
-                    <a role="button" class="btn btn-sm btn-outline-info" onclick="char_quickedit({{ char.id }})">QUICK EDIT</a>
+                <td class="align-middle">
+                    <a role="button" class="btn btn-sm btn-outline-info" onclick="char_quickedit({{ char.id }})">Q.EDIT</a>
                 </td>
                 </tr>
             {% endfor %}
@@ -359,7 +372,7 @@
         </div>
     </div>
 
-    <div class="row align-items-center">
+    <div class="row align-items-center" id="sess-section">
     <div class="col-md-auto">
         <h4>Sessions</h4>
     </div>

@@ -39,6 +39,7 @@ class RobotoCreateView(UserPassesTestMixin, generic.CreateView):
             return True
         return self.request.user.groups.filter(name='Roboto Users').exists()
 
+
 class RobotoListView(UserPassesTestMixin, generic.ListView):
 
     def test_func(self):
@@ -51,6 +52,7 @@ def is_roboto(user):
     if user.is_superuser:
         return True
     return user.groups.filter(name='Roboto Users').exists()
+
 
 # Create your views here.
 @login_required
@@ -221,6 +223,8 @@ class ProjectUpdateViewMini(LoginRequiredMixin, ModelFormWidgetMixin, UpdateView
     widgets = {
         'director': autocomplete.ModelSelect2(url='director-autocomplete'),
     }
+
+
 class ProjectDetailView(LoginRequiredMixin, generic.DetailView):
     model = Project
 
@@ -282,6 +286,7 @@ class BatchDetailView(LoginRequiredMixin, generic.DetailView):
 
         return context
 
+
 @login_required
 def batch_detail_view(request, pk):
     batch = Batch.objects.annotate(char_filecount=Sum('character__files_count')).get(pk=pk)
@@ -310,7 +315,8 @@ def batch_detail_view(request, pk):
                     files_count=new_char_form.cleaned_data['new_char_files_count'],
                     delivery_date=new_char_form.cleaned_data['new_char_delivery_date'],
                     delivery_time=new_char_form.cleaned_data['new_char_delivery_time'],
-                    actor=new_char_form.cleaned_data['new_char_actor']
+                    actor=new_char_form.cleaned_data['new_char_actor'],
+                    char_note=new_char_form.cleaned_data['new_char_note']
                 )
                 return HttpResponseRedirect(request.path_info)
         # form handling for session generation
@@ -473,7 +479,7 @@ class BatchDetailUpdateViewMini(LoginRequiredMixin, UpdateView):
     def get_success_url(self, **kwargs):
         context = super(BatchDetailUpdateViewMini, self).get_context_data(**kwargs)
         return_project = Project.objects.get(batch=context['batch'])
-        return return_project.get_absolute_url()
+        return return_project.get_absolute_url()+"#batch-table"
 
 
 class CharacterDetailView(LoginRequiredMixin, ModelFormWidgetMixin, generic.DetailView):
@@ -493,18 +499,19 @@ class CharacterDetailUpdateViewMini(LoginRequiredMixin, ModelFormWidgetMixin, Up
         'actor',
         'files_count',
         'delivery_date',
-        'delivery_time'
+        'delivery_time',
+        'char_note'
     ]
     widgets = {
         'actor': autocomplete.ModelSelect2(url='actor-autocomplete'),
         'delivery_date': forms.DateInput(attrs={'class': 'datepicker'}),
-        'delivery_time': forms.DateInput(),
+        'delivery_time': forms.TimeInput(),
     }
 
     def get_success_url(self, **kwargs):
         context = super(CharacterDetailUpdateViewMini, self).get_context_data(**kwargs)
         return_batch = Batch.objects.get(character=context['character'])
-        return return_batch.get_absolute_url()
+        return return_batch.get_absolute_url()+"#char-section"
 
 
 class SessionDetailUpdateViewMini(LoginRequiredMixin, ModelFormWidgetMixin, UpdateView):
@@ -527,7 +534,7 @@ class SessionDetailUpdateViewMini(LoginRequiredMixin, ModelFormWidgetMixin, Upda
     def get_success_url(self, **kwargs):
         context = super(SessionDetailUpdateViewMini, self).get_context_data(**kwargs)
         return_batch = Batch.objects.get(session=context['session'])
-        return return_batch.get_absolute_url()
+        return return_batch.get_absolute_url()+"#sess-section"
 
 
 # Calendar should redirect elsewhere
@@ -560,13 +567,14 @@ class CharacterDetailUpdateView(LoginRequiredMixin, ModelFormWidgetMixin, Update
         'actor',
         'files_count',
         'delivery_date',
-        'delivery_time'
+        'delivery_time',
+        'char_note'
     ]
 
     widgets = {
         'actor': autocomplete.ModelSelect2(url='actor-autocomplete'),
-        'delivety_date': forms.DateInput(attrs={'class': 'datepicker'}),
-        'delivety_time': forms.DateInput(),
+        'delivery_date': forms.DateInput(attrs={'class': 'datepicker'}),
+        'delivery_time': forms.TimeInput(),
     }
 
     def get_context_data(self, **kwargs):
@@ -666,7 +674,8 @@ def manage_batch_characters(request, pk):
             'files_count',
             'actor',
             'delivery_date',
-            'delivery_time'
+            'delivery_time',
+            'char_note'
         ),
         widgets={
             'actor': autocomplete.ModelSelect2(url='actor-autocomplete'),
@@ -731,6 +740,7 @@ def manage_asset(request):
 
     return render(request, 'manage_assets.html', context=context)
 
+
 @login_required
 def character_loader(request, pk):
     character = Character.objects.get(id=pk)
@@ -738,6 +748,7 @@ def character_loader(request, pk):
         'character':character
     }
     return render(request, 'character_loader.html', context=context)
+
 
 @login_required
 def generate_new_sessions(request, batch_id):

@@ -58,6 +58,7 @@ class Character(models.Model):
     )
     delivery_date = models.DateField(null=True, blank=True)
     delivery_time = models.TimeField(null=True, blank=True)
+    char_note = models.TextField(null=True, blank=True)
 
     def get_absolute_url(self):
         return reverse('character', args=[str(self.id)])
@@ -101,7 +102,7 @@ class Project(models.Model):
     batch_count = models.PositiveSmallIntegerField(null=True, blank=True)
     files_count = models.PositiveIntegerField(null=True, blank=True)
     word_count = models.PositiveIntegerField(null=True, blank=True)
-    char_count = models.PositiveSmallIntegerField(null=True, blank=True)
+    char_count = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name="Characters number")
     actor_count = models.PositiveSmallIntegerField(null=True, blank=True)
     sfx_note = models.TextField(null=True, blank=True)
     tc_note = models.TextField(null=True, blank=True)
@@ -123,7 +124,7 @@ class Batch(models.Model):
     deadline = models.DateField(null=True, blank=True)
     files_count = models.PositiveIntegerField(null=True, blank=True)
     word_count = models.PositiveIntegerField(null=True, blank=True)
-    char_count = models.PositiveSmallIntegerField(null=True, blank=True)
+    char_count = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name="Characters number")
     # characters can be queried from helper Character class
     # char_list =
 

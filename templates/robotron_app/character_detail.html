@@ -8,7 +8,9 @@
 {% endblock %}
 
 {% block content %}
+
     <h2>Character: <strong>{{ character.name }}</strong></h2>	
+    {% load i18n widget_tweaks %}
     <p>
     <div class="row">
         <div class="col-6">
@@ -29,6 +31,7 @@
             <tr><th scope="row">Actor: </th><td>{{ character.actor.name }}</td></tr>
             <tr><th scope="row">Files: </th><td>{{ character.files_count }}</td></tr>
             <tr><th scope="row">Delivery Date: </th><td>{{ character.delivery_date|date:"Y-m-d" }}&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp{{ character.delivery_time|time:"H:i" }}</td></tr>
+            <tr><th scope="row">Comments: </th><td>{{ character.char_note|linebreaksbr }}</td></tr>
         </tbody>
         </table>
         </div>
@@ -36,7 +39,7 @@
             {# make this one container for editable form? #}
             {% if form %}
 {#                {{ form.media }}#}
-                {% load i18n widget_tweaks %}
+
                 <form method="POST" action=".">
                 {% csrf_token %}
                 {% if form.errors %}
@@ -51,7 +54,7 @@
                             <td colspan="2"><button type="submit" class="btn btn-outline-primary btn-sm">{% trans "Update" %}</button></td>
                         </tr>
                         <tr>
-                            <td class="p-0" colspan="2">{{ form.name|attr:"class:form-control form-control-sm" }}</td>
+                            <td class="p-0" colspan="2">{{ form.name|attr:"class:form-control form-control-sm"|attr:"disabled" }}</td>
                             <td>
                             {% if form.name.errors %}
                                 {% for error in  form.name.errors %}{{ error }}{% endfor %}
@@ -85,6 +88,14 @@
                         <td>
                             {% if form.delivery_time.errors %}
                                 {% for error in  form.delivery_time.errors %}{{ error }}{% endfor %}
+                            {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="p-0" colspan="2">{{ form.char_note|attr:"class:form-control form-control-sm"|attr:"rows:3" }}</td>
+                            <td>
+                            {% if form.char_note.errors %}
+                                {% for error in  form.char_note.errors %}{{ error }}{% endfor %}
                             {% endif %}
                             </td>
                         </tr>

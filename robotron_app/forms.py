@@ -75,6 +75,7 @@ class AddCharacterForm(forms.Form):
         label='Actor',
         required=False
     )
+    new_char_note = forms.CharField(required=False, label='Comments')
 
 
 class AddStudioForm(forms.Form):
