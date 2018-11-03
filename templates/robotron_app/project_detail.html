@@ -1,37 +1,39 @@
-{% extends "base.html"%}
+{% extends "base.html" %}
 {% load static %}
 
 
 {% block pageScript %}
     <script>
-        $( function() {
-            $( "#id_new_batch_start_date" ).datepicker({
+        $(function () {
+            $("#id_new_batch_start_date").datepicker({
                 "dateFormat": "yy-mm-dd",
                 "firstDay": 1
             });
-            $( "#id_new_batch_deadline" ).datepicker({
+            $("#id_new_batch_deadline").datepicker({
                 "dateFormat": "yy-mm-dd",
                 "firstDay": 1
             });
-        } );
+        });
     </script>
 {% endblock %}
 
 {% block title %}Project: {{ project.name }}{% endblock %}
 
 {% block minicrumbs %}
-<li class="breadcrumb-item"><a href="{% url "projects" %}">Projects</a></li>
-<li class="breadcrumb-item active" aria-current="page">{{ project.name }}</li>
+    <li class="breadcrumb-item"><a href="{% url "projects" %}">Projects</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ project.name }}</li>
 {% endblock %}
 
 {% block page_alerts %}
     <div class="alert alert-warning">
-    {% if  project.batch_count != batch_list.count  %}
-        <p>! Number of batches different than declared: (current: {{ batch_list.count }}, expected: {{ project.batch_count }} )</p>
-    {% endif %}
-    {% if  total_chars != project.char_count  %}
-        <p class="mb-0">! Number of characters different than declared: (current: {{ total_chars|default_if_none:0 }}, expected: {{ project.char_count }} )</p>
-    {% endif %}
+        {% if  project.batch_count != batch_list.count %}
+            <p>! Number of batches different than declared: (current: {{ batch_list.count }},
+                expected: {{ project.batch_count }} )</p>
+        {% endif %}
+        {% if  total_chars != project.char_count %}
+            <p class="mb-0">! Number of characters different than declared:
+                (current: {{ total_chars|default_if_none:0 }}, expected: {{ project.char_count }} )</p>
+        {% endif %}
     </div>
 {% endblock %}
 {% block content %}
@@ -42,40 +44,119 @@
         </div>
         <div class="col">
             <div class="btn-group" role="group">
-            {% if request.user|isRoboto %}
-                <a role=button class="btn btn-outline-primary" href="{% url "update_project" pk=project.id %}">Edit</a>
-            {% else %}
-                <a role=button class="btn btn-outline-primary" href="{% url "update_project_mini" pk=project.id %}">Edit</a>
-            {% endif %}
+                {% if request.user|isRoboto %}
+                    <a role=button class="btn btn-outline-primary"
+                       href="{% url "update_project" pk=project.id %}">Edit</a>
+                {% else %}
+                    <a role=button class="btn btn-outline-primary" href="{% url "update_project_mini" pk=project.id %}">Edit</a>
+                {% endif %}
                 <a role=button class="btn btn-outline-primary"
-                                   href="{% url "project_calendar" pk=project.id %}">View Calendar</a>
+                   href="{% url "project_calendar" pk=project.id %}">View Calendar</a>
             </div>
         </div>
     </div>
     <hr>
     <div class="row">
-    <div class="col">
-    <table class="table table-striped table-sm">
-        <tbody>
-        <tr><th scope="row">Studio: </th><td><a href="{{ project.studio.get_absolute_url }}">{{ project.studio.name }}</a></td></tr>
-        <tr><th scope="row">Director: </th><td>{{ project.director.name }}</td></tr>
-        <tr><th scope="row">Batches: </th><td>{{ project.batch_count }}</td></tr>
-        <tr><th scope="row">Files: </th><td>{{ project.files_count }}</td></tr>
-        <tr><th scope="row">Words: </th><td>{{ project.word_count }}</td></tr>
-        <tr><th scope="row">Characters: </th><td>{{ project.char_count }}</td></tr>
-        <tr><th scope="row">Actors: </th><td>{{ project.actor_count }}</td></tr>
-        <tr><th scope="row">SFX: </th><td>{{ project.sfx_note|linebreaksbr  }}</td></tr>
-        <tr><th scope="row">TC: </th><td>{{ project.tc_note|linebreaksbr  }}</td></tr>
-        </tbody>
-    </table>
-    </div>
+        <div class="col">
+            <table class="table table-striped table-sm">
+                <tbody>
+                <tr>
+                    <th scope="row">Studio:</th>
+                    <td><a href="{{ project.studio.get_absolute_url }}">{{ project.studio.name }}</a></td>
+                </tr>
+                <tr>
+                    <th scope="row">Director:</th>
+                    <td>{{ project.director.name }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Batches:</th>
+                    <td>{{ project.batch_count }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Files:</th>
+                    <td>{{ project.files_count }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Words:</th>
+                    <td>{{ project.word_count }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Characters:</th>
+                    <td>{{ project.char_count }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Actors:</th>
+                    <td>{{ project.actor_count }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">SFX:</th>
+                    <td>{{ project.sfx_note|linebreaksbr }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">TC:</th>
+                    <td>{{ project.tc_note|linebreaksbr }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
         <div class="col"></div>
     </div>
+    <div class="row align-items-center">
+        <div class="col-md-auto">
+            <h4>Attachments</h4>
+        </div>
+
+        {% if request.user|isRoboto %}
+            <div class="col btn-group">
+                <a role=button class="btn btn-outline-primary"
+                   href="{% url "attachment_upload" pk=project.id %}">Add Attachment</a>
+                <button type="button" class="btn btn-outline-danger disabled" onclick="delete_selected_attachments()"
+                        id="delete-attachment-btn">Delete Selected
+                </button>
+            </div>
+
+            {% if attachment_list %}
+                <table class="table table-borderless table-sm table-hover" id="attachment-table">
+                    <tbody>
+                    <tr>
+                        <th></th>
+                        <th scope="col">#</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Filename</th>
+                        <th scope="col"></th>
+                    </tr>
+
+                    {% for attachment in attachment_list %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" aria-label="delete_mark" class="delete-attachment-box"
+                                       id="{{ attachment.id }}">
+                            </td>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ attachment.description }}</td>
+                            <td><a href="{{ attachment.attachment.url }}">{{ attachment.get_filename_from_url }}</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+            </div>
+        {% endif %}
+    {# attachment list#}
+    {#    {% for doc in attachment_list %}#}
+    {#        <li>#}
+    {#            <a href="{{ doc.attachment.url }}">{{ doc.description }}</a>#}
+    {#            <small>"{{ doc.get_filename_from_url }}" (Uploaded at: {{ doc.uploaded_at }})</small>#}
+    {#        </li>#}
+    {#    {% endfor %}#}
+
+
     <hr>
     <div class="jumbotron robotorial border border-danger">
         <div class="container">
             <h3>Batches</h3>
-                <p class="lead">Tip: Only Batches w/o Characters and Sessions can be Deleted.</p>
+            <p class="lead">Tip: Only Batches w/o Characters and Sessions can be Deleted.</p>
         </div>
     </div>
 
@@ -84,26 +165,30 @@
             <h4>Batches</h4>
         </div>
         {% if request.user|isRoboto %}
-        <div class="col btn-group">
-            <button type="button" class="btn btn-outline-primary" data-toggle="collapse" data-target="#batchForm" aria-pressed="false" aria-expanded="false">Add New</button>
-            <button type="button" class="btn btn-outline-danger disabled" onclick="delete_selected_batches()" id="delete-batch-btn">Delete Selected</button>
-        </div>
+            <div class="col btn-group">
+                <button type="button" class="btn btn-outline-primary" data-toggle="collapse" data-target="#batchForm"
+                        aria-pressed="false" aria-expanded="false">Add New
+                </button>
+                <button type="button" class="btn btn-outline-danger disabled" onclick="delete_selected_batches()"
+                        id="delete-batch-btn">Delete Selected
+                </button>
+            </div>
         {% endif %}
     </div>
     {% load i18n widget_tweaks %}
-{#    {{ form.media }}#}
+    {#    {{ form.media }}#}
     <form action="" method="POST" id="batch-form">
         {% csrf_token %}
         {% if form.errors %}
-        <div class="form-row collapse show" id="batchForm">
+            <div class="form-row collapse show" id="batchForm">
         {% else %}
-        <div class="form-row collapse" id="batchForm">
+            <div class="form-row collapse" id="batchForm">
         {% endif %}
-            {% for field in form %}
+        {% for field in form %}
             {% if field.errors %}
                 <div class="form-group has-error col-md-2">
                     <label class="control-label" for="id_{{ field.name }}">{{ field.label }}</label>
-                        {{ field|attr:"class:form-control" }}
+                    {{ field|attr:"class:form-control" }}
                     <div class="alert alert-danger">
                         {% for error in  field.errors %}{{ error }}{% endfor %}
                     </div>
@@ -111,16 +196,17 @@
             {% else %}
                 <div class="form-group col-md-2">
                     <label class="control-label" for="id_{{ field.name }}">{{ field.label }}</label>
-                        {{ field|attr:"class:form-control" }}
+                    {{ field|attr:"class:form-control" }}
                 </div>
             {% endif %}
         {% endfor %}
-            <div class="form-group col-md-12">
-                <button type="submit" class="btn btn-primary" style="float: right">{% trans "Add" %}</button>
-                <a class="btn btn-secondary mr-1" href="{{ project.get_absolute_url }}" role="button" style="float: right">Cancel</a>
-            </div>
+        <div class="form-group col-md-12">
+            <button type="submit" class="btn btn-primary" style="float: right">{% trans "Add" %}</button>
+            <a class="btn btn-secondary mr-1" href="{{ project.get_absolute_url }}" role="button" style="float: right">Cancel</a>
+        </div>
         </div>
     </form>
+
     {% if batch_list %}
         <table class="table table-borderless table-sm table-hover" id="batch-table">
             <tbody>
@@ -137,97 +223,100 @@
                 <th scope="col"></th>
             </tr>
 
-        {% for batch in batch_list %}
-            <tr>
-                <td>
-                {% if batch.real_chars == 0 %}
-                    <input type="checkbox" aria-label="delete_mark" class="delete-batch-box" id="{{ batch.id }}">
-                {% else %}
-                    <input type="checkbox" disabled>
-                {% endif %}
-                </td>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ batch.name }}</td>
-                <td>{{ batch.start_date|date:"Y-m-d" }}</td>
-                <td>{{ batch.deadline|date:"Y-m-d" }}</td>
-                <td>{{ batch.files_count }}</td>
-                <td>{{ batch.word_count }}</td>
-                <td>{{ batch.real_chars }} / {{ batch.char_count }}</td>
-                <td>
-                    <a role="button" class="btn btn-sm btn-outline-info" href="{{ batch.get_absolute_url }}">View Details</a>
-                </td>
-                <td>
-                    <a role="button" class="btn btn-sm btn-outline-info" onclick="batch_quickedit({{ batch.id }})">QUICK EDIT</a>
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
+            {% for batch in batch_list %}
+                <tr>
+                    <td>
+                        {% if batch.real_chars == 0 %}
+                            <input type="checkbox" aria-label="delete_mark" class="delete-batch-box"
+                                   id="{{ batch.id }}">
+                        {% else %}
+                            <input type="checkbox" disabled>
+                        {% endif %}
+                    </td>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ batch.name }}</td>
+                    <td>{{ batch.start_date|date:"Y-m-d" }}</td>
+                    <td>{{ batch.deadline|date:"Y-m-d" }}</td>
+                    <td>{{ batch.files_count }}</td>
+                    <td>{{ batch.word_count }}</td>
+                    <td>{{ batch.real_chars }} / {{ batch.char_count }}</td>
+                    <td>
+                        <a role="button" class="btn btn-sm btn-outline-info" href="{{ batch.get_absolute_url }}">View
+                            Details</a>
+                    </td>
+                    <td>
+                        <a role="button" class="btn btn-sm btn-outline-info" onclick="batch_quickedit({{ batch.id }})">QUICK
+                            EDIT</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
         </table>
     {% else %}
-       <div class="alert alert-info">No batches added.</div>
+        <div class="alert alert-info">No batches added.</div>
     {% endif %}
 
-<!-- Modal -->
-<div class="modal fade" id="charModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content" id="charModal-content">
+    <!-- Modal -->
+    <div class="modal fade" id="charModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content" id="charModal-content">
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
 {% endblock %}
 {% block custom_script_end %}
     <script type="text/javascript">
         var timeOutHandler;
 
-        function batch_quickedit(batchid){
+        function batch_quickedit(batchid) {
             {#charid = $(this).attr('char');#}
-            console.log('clicked row for '+batchid);
-            $('#charModal-content').load("/robotron/project/"+batchid+"/edit_loader",function(){
+            console.log('clicked row for ' + batchid);
+            $('#charModal-content').load("/robotron/project/" + batchid + "/edit_loader", function () {
                 $('#charModal').modal({
                     show: true //Display loader!
                 });
             });
         }
 
-        function delete_selected_batches(){
-            if($('#batch-table input:checkbox:checked').length > 0){        
+        function delete_selected_batches() {
+            if ($('#batch-table input:checkbox:checked').length > 0) {
                 console.log('delete batches clicked');
 
 
                 // retrieve ids from checked boxes
                 var ids_for_del = '';
 
-                $('#batch-table input:checkbox:checked').each(function(){
-                   console.log('batch_id_for_del:', $(this).attr('id'));
-                      if(ids_for_del === '') {
-                          ids_for_del = '?ids='+$(this).attr('id')
-                      } else {
-                          ids_for_del = ids_for_del+','+$(this).attr('id')
-                      }
+                $('#batch-table input:checkbox:checked').each(function () {
+                    console.log('batch_id_for_del:', $(this).attr('id'));
+                    if (ids_for_del === '') {
+                        ids_for_del = '?ids=' + $(this).attr('id')
+                    } else {
+                        ids_for_del = ids_for_del + ',' + $(this).attr('id')
+                    }
                 });
                 console.log(ids_for_del);
-                tmpurl ="{% url "delete_selected_batches" %}"+ids_for_del;
+                tmpurl = "{% url "delete_selected_batches" %}" + ids_for_del;
                 console.log(tmpurl);
 
                 $.ajax({
-                  url:tmpurl,
-                    cache:false,
-                    beforeSend: function(){
-                        timeOutHandler = setTimeout(function(){
+                    url: tmpurl,
+                    cache: false,
+                    beforeSend: function () {
+                        timeOutHandler = setTimeout(function () {
                             $("#loadMe").modal({
-                              backdrop: "static", //remove ability to close modal with click
-                              keyboard: false, //remove option to close with keyboard
-                              show: true //Display loader!
+                                backdrop: "static", //remove ability to close modal with click
+                                keyboard: false, //remove option to close with keyboard
+                                show: true //Display loader!
                             });
-                        },500);
+                        }, 500);
 
                     },
-                    complete: function(){
+                    complete: function () {
                         clearTimeout(timeOutHander);
                         $("#loadMe").modal("hide");
                     },
-                    success:function(){
+                    success: function () {
                         console.log('del call successful');
                         window.location.reload();
                     },
@@ -235,7 +324,52 @@
             }
         }
 
-        $(document).ready(function() {
+        function delete_selected_attachments() {
+            if ($('#attachment-table input:checkbox:checked').length > 0) {
+                console.log('delete attachments clicked');
+
+                // retrieve ids from checked boxes
+                var ids_for_del = '';
+
+                $('#attachment-table input:checkbox:checked').each(function () {
+                    console.log('attachmenmt_id_for_del:', $(this).attr('id'));
+                    if (ids_for_del === '') {
+                        ids_for_del = '?ids=' + $(this).attr('id')
+                    } else {
+                        ids_for_del = ids_for_del + ',' + $(this).attr('id')
+                    }
+                });
+                console.log(ids_for_del);
+                tmpurl = "{% url "delete_selected_attachments" %}" + ids_for_del;
+                console.log(tmpurl);
+
+                $.ajax({
+                    url: tmpurl,
+                    cache: false,
+                    beforeSend: function () {
+                        timeOutHandler = setTimeout(function () {
+                            $("#loadMe").modal({
+                                backdrop: "static", //remove ability to close modal with click
+                                keyboard: false, //remove option to close with keyboard
+                                show: true //Display loader!
+                            });
+                        }, 500);
+
+                    },
+                    complete: function () {
+                        clearTimeout(timeOutHander);
+                        $("#loadMe").modal("hide");
+                    },
+                    success: function () {
+                        console.log('del call successful');
+                        window.location.reload();
+                    },
+                })
+            }
+        }
+
+
+        $(document).ready(function () {
             $("#just_load_please").on("click", function (e) {
                 console.log('dbg_btn_clicked');
                 e.preventDefault();
@@ -249,13 +383,22 @@
                 }, 3500);
             });
 
-            $(document).on('change','#batch-table input:checkbox', function(){
-                if($('#batch-table input:checkbox:checked').length > 0){
+            $(document).on('change', '#batch-table input:checkbox', function () {
+                if ($('#batch-table input:checkbox:checked').length > 0) {
                     console.log('cbox checked');
                     $('#delete-batch-btn').removeClass('disabled')
                 } else {
                     console.log('all cboxes unchecked');
                     $('#delete-batch-btn').addClass('disabled')
+                }
+                            });
+            $(document).on('change', '#attachment-table input:checkbox', function () {
+                if ($('#attachment-table input:checkbox:checked').length > 0) {
+                    console.log('cbox checked');
+                    $('#delete-attachment-btn').removeClass('disabled')
+                } else {
+                    console.log('all cboxes unchecked');
+                    $('#delete-attachment-btn').addClass('disabled')
                 }
             });
         });

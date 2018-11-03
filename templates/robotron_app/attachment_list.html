@@ -1,0 +1,19 @@
+{% extends "base_scripted.html" %}
+{% block title %}Attachments{% endblock %}
+
+
+{% block minicrumbs %}
+    <li class="breadcrumb-item">Attachments</li>
+{% endblock %}
+
+{% block content %}
+    {% if attachment_list %}
+        {% for doc in attachment_list %}
+            <li>
+                <a href="{{ doc.attachment.url }}">{{ doc.description }}</a>
+{#                <small>"{{ doc.attachment }}" (Uploaded at: {{ doc.uploaded_at }})</small>#}
+                <small>"{{ doc.get_filename_from_url }}" (Uploaded at: {{ doc.uploaded_at }})</small>
+            </li>
+        {% endfor %}
+    {% endif %}
+{% endblock %}

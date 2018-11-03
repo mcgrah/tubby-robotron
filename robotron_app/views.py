@@ -18,6 +18,9 @@ from robotron_app.forms import *
 from dal import autocomplete
 
 from django.forms.models import modelform_factory
+from django.core.files.storage import FileSystemStorage
+import os
+
 
 class ModelFormWidgetMixin(object):
     def get_form_class(self):
@@ -231,13 +234,19 @@ class ProjectDetailView(LoginRequiredMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super(ProjectDetailView, self).get_context_data(**kwargs)
         context['batch_list'] = Batch.objects.filter(project=context['project'])
+        context['attachment_list'] = Attachment.objects.filter(project=context['project'])
         return context
+
+
+class AttachmentListView(LoginRequiredMixin, generic.ListView):
+    model = Attachment
 
 
 @login_required
 def project_detail_view(request, pk):
     project = get_object_or_404(Project, pk=pk)
     batch_list = Batch.objects.annotate(real_chars=Count('character')).filter(project=project)
+    attachment_list = Attachment.objects.filter(project=project)
     # batch_list = Batch.objects.filter(project=project)
     # get existing batch number for auto-naming
     last_batch = 'Batch '+str(len(batch_list) + 1)
@@ -265,10 +274,12 @@ def project_detail_view(request, pk):
     context = {
         'project': project,
         'batch_list': batch_list,
+        'attachment_list': attachment_list,
         'form': new_batch_form,
         'total_chars': batch_list.aggregate(total_chars=Sum('char_count'))['total_chars'],
     }
     return render(request, 'robotron_app/project_detail.html', context=context)
+
 
 
 class BatchDetailView(LoginRequiredMixin, generic.DetailView):
@@ -699,11 +710,14 @@ def manage_asset(request):
     asset_formset1 = modelformset_factory(Actor, fields=('name',), extra=0, can_delete=True)
     asset_formset2 = modelformset_factory(Translator, fields=('name',), extra=0, can_delete=True)
     asset_formset3 = modelformset_factory(Director, fields=('name',), extra=0, can_delete=True)
+    asset_formset4 = modelformset_factory(Attachment, fields=('description', 'attachment', 'project'), extra=0, can_delete=True)
+    # asset_formset4 = modelformset_factory(Attachment, fields=('description', 'attachment', 'project',), extra=0, can_delete=True)
 
     context = {
         'formset_actor': asset_formset1,
         'formset_translator': asset_formset2,
         'formset_director': asset_formset3,
+        'formset_attachment': asset_formset4,
         'form_errors': 'none',
         'form_error_id': 'none'
     }
@@ -735,6 +749,14 @@ def manage_asset(request):
             except Exception as e:
                 context['form_error_id'] = type(e).__name__
                 context['form_errors'] = 'error_directors'
+        elif 'attachment_control' in request.POST:
+            formset_attachment = asset_formset4(request.POST)
+            try:
+                if formset_attachment.is_valid():
+                    formset_attachment.save()
+            except Exception as e:
+                context['form_error_id'] = type(e).__name__
+                context['form_errors'] = 'error_attachment'
         else:
             print('WTF')
 
@@ -853,6 +875,54 @@ def delete_selected_batches(request):
 
 
 @login_required
+def delete_selected_attachments(request):
+    # get list of ids from url and del all char records
+    ids = request.GET.get('ids', '')
+    id_list = ids.split(',')
+    print(id_list)
+    marked_for_del = Attachment.objects.filter(id__in=id_list)
+    for m in marked_for_del:
+        # call delete
+        filename = m.attachment.name
+        try:
+            m.delete()
+        except Exception as e:
+            print(e)
+            pass
+        finally:
+            # delete file for real not just database
+            print(filename)
+            # try:
+            #     os.remove(f'{filename}')
+            # except OSError:
+            #     pass
+            pass
+
+    return HttpResponse()
+
+
+@login_required
+def attachment_upload(request, pk):
+    project = Project.objects.get(id=pk)
+    if request.method == 'POST':
+        form = AttachmentForm(request.POST, request.FILES)
+        if form.is_valid():
+            new_doc = Attachment(
+                description=form.cleaned_data['description'],
+                attachment=request.FILES["file"],
+                project=project
+            )
+            new_doc.save()
+            return HttpResponseRedirect(project.get_absolute_url())
+            # redirect('/')
+    else:
+        form = AttachmentForm()
+    return render(request, 'attachment_upload.html', {
+        'form': form
+    })
+
+
+@login_required
 def delete_studio(request, pk):
     marked = Studio.objects.get(id=pk)
     try:
@@ -903,6 +973,7 @@ def error500(request, exception):
     }
     print('hit 500')
     return render(request, 'base_error.html', context=context)
+
 
 # def test400(request):
 #     raise PermissionDenied

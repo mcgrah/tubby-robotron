@@ -3,9 +3,11 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _
-from robotron_app.models import Actor, Studio, Director, Translator, Batch, Character
+from robotron_app.models import Actor, Studio, Director, Translator, Batch, Character, Attachment
+
 
 from dal import autocomplete
+
 
 class DateInput(forms.DateInput):
     input_type = 'date'
@@ -27,9 +29,19 @@ def validate_csv(file):
         raise ValidationError(error_msg)
 
 
-
 class UploadCSVForm(forms.Form):
     file = forms.FileField(validators=[validate_csv])
+
+
+# class AttachmentForm(forms.ModelForm):
+#     class Meta:
+#         model = Attachment
+#         fields = ('description', 'attachment', 'project')
+
+
+class AttachmentForm(forms.Form):
+    description = forms.CharField(min_length=1, required=True, label='Description')
+    file = forms.FileField(label='Attachment')
 
 
 class AddBatchForm(forms.Form):
