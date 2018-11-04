@@ -22,7 +22,7 @@
                 if($(this).parent().hasClass('event-holder')){
                     $(this).parent().removeClass('d-none')
                 } else {
-                    $(this).removeClass('invisible')
+                    $(this).removeClass('d-none')
                 }
             })
         }
@@ -34,7 +34,7 @@
                 if($(this).parent().hasClass('event-holder')){
                     $(this).parent().addClass('d-none')
                 } else {
-                    $(this).addClass('invisible')
+                    $(this).addClass('d-none')
                 }
             })
         }
@@ -50,6 +50,25 @@
                 translator_show(tid);
             })
         }
+
+        function recheck_weekends(){
+            var found = 0;
+            week_cols = $('.col.weekend');
+
+            week_cols.each(function(){
+                if ($(this).find(".card.text-center").length){
+                    console.log('found event in weekend column');
+                    found = 1;
+                }
+            });
+            if (found === 0){
+                console.log('hiding empty weekend columns');
+                week_cols.each(function() {
+                    $(this).addClass('d-none')
+                });
+            }
+        }
+
 {% if project %}
         function sess_quickedit(sessid){
             {#sessid = $(this).attr('data-sessid');#}
@@ -136,11 +155,13 @@
                             //pass monday date to week loader
 {% if project %}
                             $("#calendar_week_load_container").load("{% url "project_calendar_week_loader" pk=project.id %}"+'?mon='+monday_date,function(){
-                                recheck_hidden_translators()
+                                recheck_hidden_translators();
+                                recheck_weekends()
                             });
 {% else %}
                             $("#calendar_week_load_container").load("{% url "calendar_week_loader" %}"+'?mon='+monday_date,function(){
-                                recheck_hidden_translators()
+                                recheck_hidden_translators();
+                                recheck_weekends()
                             });
 {% endif %}
 

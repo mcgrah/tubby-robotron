@@ -58,17 +58,28 @@ def is_roboto(user):
     return user.groups.filter(name='Roboto Users').exists()
 
 
+def get_navbar_data():
+    all_projects = Project.objects.all()
+    navbar_data = {
+        'all_projects':all_projects
+    }
+    return navbar_data
+
 # Create your views here.
 @login_required
 @user_passes_test(is_roboto,login_url='projects',redirect_field_name=None)
 def index(request):
-    return render(request, 'index.html')
+    context = {}
+    context['navbar_data'] = get_navbar_data()
+    return render(request, 'index.html',context=context)
 
 
 @login_required
 @user_passes_test(is_roboto)
 def calendar_view(request):
-    return render(request, 'calendar.html')
+    context = {}
+    context['navbar_data'] = get_navbar_data()
+    return render(request, 'calendar.html',context=context)
 
 
 class StudioListView(LoginRequiredMixin, RobotoListView):
@@ -76,6 +87,10 @@ class StudioListView(LoginRequiredMixin, RobotoListView):
     paginate_by = 50
 
     queryset = Studio.objects.annotate(num_projects = Count('project'))
+    def get_context_data(self, **kwargs):
+        context = super(StudioListView, self).get_context_data(**kwargs)
+        context['navbar_data'] = get_navbar_data()
+        return context
 
 
 @login_required
@@ -98,6 +113,7 @@ def studio_create_view(request):
     context = {
         'form':form,
     }
+    context['navbar_data'] = get_navbar_data()
 
     return render(request, 'create_studio.html', context=context)
 
@@ -122,6 +138,10 @@ class ProjectCreateView(LoginRequiredMixin, ModelFormWidgetMixin, RobotoCreateVi
         'studio': autocomplete.ModelSelect2(url='studio-autocomplete')
     }
 
+    def get_context_data(self, **kwargs):
+        context = super(ProjectCreateView, self).get_context_data(**kwargs)
+        context['navbar_data'] = get_navbar_data()
+        return context
 
 class CharactersListView(generic.ListView):
     model = Character
@@ -136,8 +156,8 @@ class CharactersListView(generic.ListView):
         context['translator_list'] = Translator.objects.all()
         context['director_list'] = Director.objects.all()
         context['session_list'] = Session.objects.all()
+        context['navbar_data'] = get_navbar_data()
         return context
-
 
 
 class ProjectListView(LoginRequiredMixin, generic.ListView):
@@ -157,9 +177,18 @@ class ProjectListView(LoginRequiredMixin, generic.ListView):
             except ObjectDoesNotExist:
                 return Project.objects.none()
 
+    def get_context_data(self, **kwargs):
+        context = super(ProjectListView, self).get_context_data(**kwargs)
+        context['navbar_data'] = get_navbar_data()
+        return context
 
 class UserListView(LoginRequiredMixin, RobotoListView):
     model = User
+
+    def get_context_data(self, **kwargs):
+        context = super(UserListView, self).get_context_data(**kwargs)
+        context['navbar_data'] = get_navbar_data()
+        return context
 
 
 @login_required
@@ -173,6 +202,7 @@ def userlist_view(request):
     context = {
         'user_list':users
     }
+    context['navbar_data'] = get_navbar_data()
     return render(request, 'auth/user_list.html', context=context)
 
 
@@ -182,6 +212,7 @@ class StudioDetailView(LoginRequiredMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super(StudioDetailView, self).get_context_data(**kwargs)
         context['project_list'] = Project.objects.filter(studio=context['studio'])
+        context['navbar_data'] = get_navbar_data()
         return context
 
 
@@ -196,6 +227,10 @@ class StudioUpdateView(LoginRequiredMixin, UpdateView):
         'note'
     ]
 
+    def get_context_data(self, **kwargs):
+        context = super(StudioUpdateView, self).get_context_data(**kwargs)
+        context['navbar_data'] = get_navbar_data()
+        return context
 
 class ProjectUpdateView(LoginRequiredMixin, ModelFormWidgetMixin, UpdateView):
     model = Project
@@ -217,6 +252,10 @@ class ProjectUpdateView(LoginRequiredMixin, ModelFormWidgetMixin, UpdateView):
         'studio': autocomplete.ModelSelect2(url='studio-autocomplete')
     }
 
+    def get_context_data(self, **kwargs):
+        context = super(ProjectUpdateView, self).get_context_data(**kwargs)
+        context['navbar_data'] = get_navbar_data()
+        return context
 
 class ProjectUpdateViewMini(LoginRequiredMixin, ModelFormWidgetMixin, UpdateView):
     model = Project
@@ -236,6 +275,7 @@ class ProjectDetailView(LoginRequiredMixin, generic.DetailView):
         context = super(ProjectDetailView, self).get_context_data(**kwargs)
         context['batch_list'] = Batch.objects.filter(project=context['project'])
         context['attachment_list'] = Attachment.objects.filter(project=context['project'])
+        context['navbar_data'] = get_navbar_data()
         return context
 
 
@@ -279,6 +319,7 @@ def project_detail_view(request, pk):
         'form': new_batch_form,
         'total_chars': batch_list.aggregate(total_chars=Sum('char_count'))['total_chars'],
     }
+    context['navbar_data'] = get_navbar_data()
     return render(request, 'robotron_app/project_detail.html', context=context)
 
 
@@ -290,6 +331,7 @@ class BatchDetailView(LoginRequiredMixin, generic.DetailView):
         context['session_list'] = Session.objects.filter(batch=context['batch'])
         context['character_list'] = Character.objects.filter(batch=context['batch'])
         context['form'] = AddCharacterForm()
+        context['navbar_data'] = get_navbar_data()
 
         for c in context['character_list']:
             session_count = Session.objects.filter(character=c).count()
@@ -345,7 +387,8 @@ def batch_detail_view(request, pk):
                             character=Character.objects.get(id=char),
                             day=session_form.cleaned_data['new_session_day'],
                             hour=session_form.cleaned_data['new_session_hour'],
-                            duration=session_form.cleaned_data['new_session_duration'],
+                            # duration=session_form.cleaned_data['new_session_duration'],
+                            duration_blocks=session_form.cleaned_data['new_session_duration_blocks'],
                             director=session_form.cleaned_data['new_session_director'],
                             translator=session_form.cleaned_data['new_session_translator'],
                         )
@@ -447,6 +490,7 @@ def batch_detail_view(request, pk):
         session_count = Session.objects.filter(character=c).count()
         setattr(c, 'session_count', session_count)
 
+    context['navbar_data'] = get_navbar_data()
     return render(request, 'robotron_app/batch_detail.html', context=context)
 
 
@@ -468,6 +512,10 @@ class BatchDetailUpdateView(LoginRequiredMixin, UpdateView):
         'deadline': forms.DateInput(attrs={'class': 'datepicker'}),
     }
 
+    def get_context_data(self, **kwargs):
+        context = super(BatchDetailUpdateView, self).get_context_data(**kwargs)
+        context['navbar_data'] = get_navbar_data()
+        return context
 
 class BatchDetailUpdateViewMini(LoginRequiredMixin, UpdateView):
     model = Batch
@@ -499,6 +547,7 @@ class CharacterDetailView(LoginRequiredMixin, ModelFormWidgetMixin, generic.Deta
     def get_context_data(self, **kwargs):
         context = super(CharacterDetailView, self).get_context_data(**kwargs)
         context['session_list'] = Session.objects.filter(character=context['character'])
+        context['navbar_data'] = get_navbar_data()
         return context
 
 
@@ -531,7 +580,8 @@ class SessionDetailUpdateViewMini(LoginRequiredMixin, ModelFormWidgetMixin, Upda
     fields = [
         'day',
         'hour',
-        'duration',
+        # 'duration',
+        'duration_blocks',
         'director',
         'translator'
     ]
@@ -540,6 +590,7 @@ class SessionDetailUpdateViewMini(LoginRequiredMixin, ModelFormWidgetMixin, Upda
           'translator': autocomplete.ModelSelect2(url='translator-autocomplete'),
           'day': forms.DateInput(attrs={'class': 'datepicker'}),
           'hour': forms.TimeInput(),
+        'duration_blocks':forms.Select(choices=Session.DURATION_CHOICES)
     }
 
     def get_success_url(self, **kwargs):
@@ -561,6 +612,11 @@ class SessionDetailUpdateCalendar(SessionDetailUpdateViewMini):
 
 class SessionDetailUpdateProjectCalendar(SessionDetailUpdateViewMini):
     template_name = 'session_loader_pcal.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(SessionDetailUpdateProjectCalendar, self).get_context_data(**kwargs)
+        context['navbar_data'] = get_navbar_data()
+        return context
 
     def get_success_url(self, **kwargs):
         context = super(SessionDetailUpdateProjectCalendar, self).get_context_data(**kwargs)
@@ -591,6 +647,7 @@ class CharacterDetailUpdateView(LoginRequiredMixin, ModelFormWidgetMixin, Update
     def get_context_data(self, **kwargs):
         context = super(CharacterDetailUpdateView, self).get_context_data(**kwargs)
         context['session_list'] = Session.objects.filter(character=context['character'])
+        context['navbar_data'] = get_navbar_data()
         return context
 
 
@@ -653,7 +710,8 @@ def manage_char_session(request, pk):
         fields=(
             'day',
             'hour',
-            'duration',
+                                                     # 'duration',
+                                                     'duration_blocks',
             'director',
             'translator'
         ),
@@ -672,7 +730,14 @@ def manage_char_session(request, pk):
             return HttpResponseRedirect(character.get_absolute_url())
     else:
         formset = SessionInlineFormset(instance=character)
-    return render(request, 'manage_sessions.html', {'formset': formset, 'character': character})
+
+    context = {
+        'formset': formset,
+        'character': character
+    }
+    context['navbar_data'] = get_navbar_data()
+
+    return render(request, 'manage_sessions.html',context=context )
 
 
 @login_required
@@ -702,7 +767,13 @@ def manage_batch_characters(request, pk):
             return HttpResponseRedirect(batch.get_absolute_url())
     else:
         formset = CharInlineFormset(instance=batch)
-    return render(request, 'manage_characters.html', {'formset': formset, 'batch': batch})
+
+    context = {
+        'formset': formset,
+        'batch': batch
+    }
+    context['navbar_data'] = get_navbar_data()
+    return render(request, 'manage_characters.html', context=context)
 
 
 @login_required
@@ -760,6 +831,7 @@ def manage_asset(request):
         else:
             print('WTF')
 
+    context['navbar_data'] = get_navbar_data()
     return render(request, 'manage_assets.html', context=context)
 
 

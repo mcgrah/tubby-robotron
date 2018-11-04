@@ -11,6 +11,7 @@
 
     <h2>Character: <strong>{{ character.name }}</strong></h2>	
     {% load i18n widget_tweaks %}
+    {% load filters %}
     <p>
     <div class="row">
         <div class="col-6">
@@ -152,7 +153,8 @@
                 <td>{{ forloop.counter }}</td>
                 <td>{{ session.day|date:"d-m-Y"}}</td>
                 <td>{{ session.hour|time:"H:i" }}</td>
-                <td>{{ session.duration }}</td>
+{#                <td>{{ session.duration }}</td>#}
+                <td>{{ session.duration_blocks|durationMin }}</td>
                 <td>{{ session.director.name }}</td>
                 <td>{{ session.translator.name }}</td>
             </tr>

@@ -85,6 +85,7 @@
         </button>
 {#        <button type="button" class="btn btn-outline-danger" onclick="nuke_chars()" id="nuke-char-btn">NUKE Actors - DEBUG</button>#}
         {% load i18n widget_tweaks %}
+        {% load filters %}
     </div>
 </div>
 
@@ -222,14 +223,16 @@
                         <div class="col-3"><label for="inputState">{{ session_form.new_session_translator.label }}</label></div>
                         <div class="col"><label for="inputState">{{ session_form.new_session_day.label }}</label></div>
                         <div class="col"><label for="inputState">{{ session_form.new_session_hour.label }}</label></div>
-                        <div class="col"><label for="inputState">{{ session_form.new_session_duration.label }}</label></div>
+{#                        <div class="col"><label for="inputState">{{ session_form.new_session_duration.label }}</label></div>#}
+                        <div class="col"><label for="inputState">{{ session_form.new_session_duration_blocks.label }}</label></div>
                     </div>
                     <div class="row">
                         <div class="col-3">{{ session_form.new_session_director|attr:"class:form-control" }}</div>
                         <div class="col-3">{{ session_form.new_session_translator|attr:"class:form-control" }}</div>
                         <div class="col">{{ session_form.new_session_day|attr:"class:form-control"}}</div>
                         <div class="col">{{ session_form.new_session_hour|attr:"class:form-control"}}</div>
-                        <div class="col">{{ session_form.new_session_duration|attr:"class:form-control"}}</div>
+{#                        <div class="col">{{ session_form.new_session_duration|attr:"class:form-control"}}</div>#}
+                        <div class="col">{{ session_form.new_session_duration_blocks|attr:"class:form-control"}}</div>
                     </div>
                     {% if session_form.errors %}
                         <div class="row">
@@ -270,8 +273,8 @@
                                 {% endif %}
                             </div>
                             <div class="col">
-                                {% if session_form.new_session_duration.errors %}
-                                    {% for error in session_form.new_session_duration.errors %}
+                                {% if session_form.new_session_duration_blocks.errors %}
+                                    {% for error in session_form.new_session_duration_blocks.errors %}
                                         <div class="alert alert-danger">
                                                 {{ error }}
                                              </div>
@@ -404,7 +407,8 @@
                 <td>{{ session.character.actor.name }}</td>
                 <td>{{ session.day|date:"d-m-Y"}}</td>
                 <td>{{ session.hour|time:"H:i" }}</td>
-                <td>{{ session.duration|default_if_none:'' }}</td>
+{#                <td>{{ session.duration|default_if_none:'' }}</td>#}
+                <td>{{ session.duration_blocks|durationMin|default_if_none:'' }}</td>
                 <td>{{ session.director.name }}</td>
                 <td>{{ session.translator.name }}</td>
                 <td><a role="button" class="btn btn-sm btn-outline-info" onclick="sess_quickedit({{ session.id }})">QUICK EDIT</a></td>

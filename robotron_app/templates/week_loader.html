@@ -1,65 +1,26 @@
 {#{{ calendar_week }}#}
 {% load filters %}
+
 <div class="row flex-nowrap" id="calendar_week">
     <div class="col-1 border-right" id="hour_column" style="background-color: rgba(108, 117, 125, 0.15)">
         <div class="row h6 justify-content-center m-0 pb-1"></div>
         <div class="row h6 justify-content-center m-0 pb-1"></div>
-        <div class="row">7:00</div>
-        <div class="row small">7:15</div>
-        <div class="row small">7:30</div>
-        <div class="row small">7:45</div>
-        <div class="row">8:00</div>
-        <div class="row small">8:15</div>
-        <div class="row small">8:30</div>
-        <div class="row small">8:45</div>
-        <div class="row">9:00</div>
-        <div class="row small">9:15</div>
-        <div class="row small">9:30</div>
-        <div class="row small">9:45</div>
-        <div class="row">10:00</div>
-        <div class="row small">10:15</div>
-        <div class="row small">10:30</div>
-        <div class="row small">10:45</div>
-        <div class="row">11:00</div>
-        <div class="row small">11:15</div>
-        <div class="row small">11:30</div>
-        <div class="row small">11:45</div>
-        <div class="row">12:00</div>
-        <div class="row small">12:15</div>
-        <div class="row small">12:30</div>
-        <div class="row small">12:45</div>
-        <div class="row">13:00</div>
-        <div class="row small">13:15</div>
-        <div class="row small">13:30</div>
-        <div class="row small">13:45</div>
-        <div class="row">14:00</div>
-        <div class="row small">14:15</div>
-        <div class="row small">14:30</div>
-        <div class="row small">14:45</div>
-        <div class="row">15:00</div>
-        <div class="row small">15:15</div>
-        <div class="row small">15:30</div>
-        <div class="row small">15:45</div>
-        <div class="row">16:00</div>
-        <div class="row small">16:15</div>
-        <div class="row small">16:30</div>
-        <div class="row small">16:45</div>
-        <div class="row">17:00</div>
-        <div class="row small">17:15</div>
-        <div class="row small">17:30</div>
-        <div class="row small">17:45</div>
-        <div class="row">18:00</div>
-        <div class="row small">18:15</div>
-        <div class="row small">18:30</div>
-        <div class="row small">18:45</div>
-        <div class="row">19:00</div>
-        <div class="row small">19:15</div>
-        <div class="row small">19:30</div>
-        <div class="row small">19:45</div>
-        <div class="row">20:00</div>
-        <div class="row small">20:15</div>
-        <div class="row small">20:30</div>
-        <div class="row small">20:45</div>
+        {% for val in 24|get_range %}
+            {% if val < 7 %}
+                {% if rare_hours %}
+                    <div class="row rare-hours">{{ val }}:00</div>
+                    <div class="row small rare-hours">{{ val }}:15</div>
+                    <div class="row small rare-hours">{{ val }}:30</div>
+                    <div class="row small rare-hours">{{ val }}:45</div>
+                {% endif %}
+            {% else %}
+                <div class="row">{{ val }}:00</div>
+                <div class="row small">{{ val }}:15</div>
+                <div class="row small">{{ val }}:30</div>
+                <div class="row small">{{ val }}:45</div>
+            {% endif %}
+        {% endfor %}
+
     </div>
     <div class="col p-0 border-right">
         <div class="row h6 border-bottom justify-content-center m-0 pb-1">{{ mon_date|date:"d.m" }}</div>
@@ -86,12 +47,12 @@
         <div class="row h6 border-bottom justify-content-center m-0 pb-1">Fri</div>
         {{ fri_events }}
     </div>
-    <div class="col p-0 border-right" style="background-color: rgba(108, 117, 125, 0.15)">
+    <div class="col p-0 border-right weekend" style="background-color: rgba(108, 117, 125, 0.15)">
         <div class="row h6 border-bottom justify-content-center m-0 pb-1">{{ mon_date|addDays:5|date:"d.m" }}</div>
         <div class="row h6 border-bottom justify-content-center m-0 pb-1">Sat</div>
         {{ sat_events }}
     </div>
-    <div class="col p-0">
+    <div class="col p-0 weekend">
         <div class="row h6 border-bottom justify-content-center m-0 pb-1">{{ mon_date|addDays:6|date:"d.m" }}</div>
         <div class="row h6 border-bottom justify-content-center m-0 pb-1">Sun</div>
         {{ sun_events }}

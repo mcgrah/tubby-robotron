@@ -3,7 +3,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _
-from robotron_app.models import Actor, Studio, Director, Translator, Batch, Character, Attachment
+from robotron_app.models import Actor, Studio, Director, Translator, Batch, Character, Attachment, Session
 
 
 from dal import autocomplete
@@ -125,7 +125,8 @@ class AddSessionForm(forms.Form):
                                          widget=forms.DateInput(attrs={'class': 'datepicker'}))
     new_session_hour = forms.TimeField(required=False, label='Time',
                                          widget=forms.TimeInput())
-    new_session_duration = forms.IntegerField(min_value=0, initial=0, required=False, label='Duration')
+    # new_session_duration = forms.IntegerField(min_value=0, initial=0, required=False, label='Duration')
+    new_session_duration_blocks = forms.ChoiceField(required=False, initial=0, label='Duration (min)', choices=Session.DURATION_CHOICES)
     # auto as well?
     new_session_director = forms.ModelChoiceField(
         queryset=Director.objects.all(),

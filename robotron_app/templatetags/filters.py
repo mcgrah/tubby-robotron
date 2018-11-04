@@ -1,6 +1,7 @@
 import datetime
 from django import template
 from robotron_app.models import Studio
+from math import floor
 register = template.Library()
 
 @register.filter
@@ -29,3 +30,20 @@ def hasStudio(user):
         print(e)
         pass
     return None
+
+@register.filter
+def durationMin(int):
+    h = floor(int/4)
+    mins = (int - h*4) * 15
+    if mins > 0 and h > 0:
+        return f'{h}h {mins} min'
+    elif h > 0:
+        return f'{h}h'
+    elif mins > 0:
+        return f'{mins} min'
+    else:
+        return '--'
+
+@register.filter
+def get_range(i):
+    return range(i)

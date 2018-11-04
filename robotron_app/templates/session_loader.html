@@ -17,11 +17,30 @@
             <tr><th scope="row">Actor: </th><td>{{ session.character.actor.name }}</td></tr>
             <tr><th scope="row">Date: </th><td>{{ form.day|attr:"class:form-control form-control-sm" }}</td></tr>
             <tr><th scope="row">Hour: </th><td>{{ form.hour|attr:"class:form-control form-control-sm" }}</td></tr>
-            <tr><th scope="row">Duration (h): </th><td>{{ form.duration|attr:"class:form-control form-control-sm" }}</td></tr>
+{#            <tr><th scope="row">Duration (h): </th><td>{{ form.duration|attr:"class:form-control form-control-sm" }}</td></tr>#}
+            <tr><th scope="row">Duration: </th><td>{{ form.duration_blocks|attr:"class:form-control form-control-sm" }}</td></tr>
             <tr><th scope="row">Director: </th><td>{{ form.director|attr:"class:form-control form-control-sm" }}</td></tr>
             <tr><th scope="row">Translator: </th><td>{{ form.translator|attr:"class:form-control form-control-sm" }}</td></tr>
             </tbody>
             </table>
+            {% if form.errors %}
+                <div>PANICPANIC</div>
+                {% for f in form.errors %}
+                    <p>{{ f }}</p>
+                {% endfor %}
+                {% if form.duration_blocks.errors %}
+                    <p>PANICPANIC3</p>
+                    {% for err in form.duration_blocks.errors %}
+                        <p>{{ err }}</p>
+                    {% endfor %}
+                {% endif %}
+            {% endif %}
+            {% if form.non_field_errors %}
+                <div>PANICPANIC2</div>
+                {% for f in form.non_field_errors %}
+                    <p>{{ f }}</p>
+                {% endfor %}
+            {% endif %}
         </div>
         <div class="modal-footer">
         <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>

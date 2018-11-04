@@ -174,6 +174,17 @@ class Session(models.Model):
         null=True, blank=True,
     )
 
+    # duration switched from hours to quarters (x * 4) - 03.11.2018
+    DURATION_CHOICES = (
+        (0,'-'),
+        (1,'15 min'),(2,'30 min'),(3,'45 min'),(4,'60 min (1h)'),
+        (5,'1h 15 min'),(6,'1h 30 min'),(7,'1h 45 min'),(8,'2h'),
+        (9,'2h 15 min'),(10,'2h 30 min'),(11,'2h 45 min'),(12,'3h'),
+        (13,'3h 15 min'),(14,'3h 30 min'),(15,'3h 45 min'),(16,'4h'),
+        (17,'4h 15 min'),(18,'4h 30 min'),(19,'4h 45 min'),(20,'5h'),
+    )
+    duration_blocks = models.SmallIntegerField(choices=DURATION_CHOICES,default=0)
+
     def get_absolute_url(self):
         return reverse('session', args=[str(self.id)])
 
