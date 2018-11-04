@@ -9,11 +9,10 @@
 {##}
 {% block content %}
     <div class="jumbotron robotorial border border-danger">
-        <div class="container">
-            <h3>Assets Managing page</h3>
-            <p class="lead">On this page Roboto Users can edit and remove unused entries for Actors, Directors or
-                Translators. <br>Only unassigned Assets can be removed.</br></p>
-        </div>
+      <div class="container">
+        <h3>Assets Managing page</h3>
+        <p class="lead">On this page Roboto Users can edit and remove unused entries for Actors, Directors or Translators. <br>Only unassigned Assets can be removed.</br></p>
+      </div>
     </div>
     <h2>Assets</h2>
     <div id="accordion">
@@ -35,47 +34,45 @@
 
             <div class="card-body">
                 <div class="row align-items-center">
-                    {% if formset_translator|length > 0 %}
+                {% if formset_translator|length > 0 %}
 
-                        <form method="post" class="container">
-                            {% csrf_token %}
-                            {{ formset_translator.management_form }}
-                            <div class="row">
-                                <div class="col-6">Translator Name</div>
-                                <div class="col-5" data-toggle="tooltip" title="Assigned Translators cannot be deleted">
-                                    Delete *
-                                </div>
-                            </div>
-
-                            {% for form in formset_translator %}
-                                <div class="d-none">{{ form.id }}</div>
-                                <div class="row">
-                                    <div class="col-6">{{ form.name|attr:"class:form-control" }}</div>
-                                    <div class="col-3">{{ form.DELETE|attr:"class:btn"|attr:"class:btn-danger" }}</div>
-                                </div>
-                            {% endfor %}
-
-
-                            <div class="row">
-                                <div class="col-md">
-                                    <button type="submit" class="btn btn-primary float-lg-right">Update</button>
-                                    <a class="btn btn-secondary float-lg-right mr-1" href="." role="button">Undo
-                                        Changes</a>
-                                    <input type="text" name="translators_control" value="1" class="invisible">
-                                </div>
-                            </div>
-                            {% if form_errors == 'error_translators' %}
-                                <div class="row">
-                                    <div class="alert alert-danger col-md-8 align-content-lg-center">
-                                        ERROR: Selected Translator is assigned to a session and cannot be deleted.
-                                    </div>
-                                </div>
-                            {% endif %}
-                        </form>
-                    {% else %}
-                        <div class="alert alert-info">
-                            No records in the database.
+                    <form method="post" class="container">
+                        {% csrf_token %}
+                        {{ formset_translator.management_form }}
+                        <div class="row">
+                            <div class="col-6">Translator Name</div>
+                            <div class="col-5" data-toggle="tooltip" title="Assigned Translators cannot be deleted">Delete *</div>
                         </div>
+
+                        {% for form in formset_translator %}
+                            <div class="d-none">{{ form.id }}</div>
+                            <div class="row">
+                                <div class="col-6">{{ form.name|attr:"class:form-control" }}</div>
+                                <div class="col-3">{{ form.DELETE|attr:"class:btn"|attr:"class:btn-danger" }}</div>
+                            </div>
+                        {% endfor %}
+
+
+                        <div class="row">
+                            <div class="col-md">
+                                <button type="submit" class="btn btn-primary float-lg-right">Update</button>
+                                <a class="btn btn-secondary float-lg-right mr-1" href="." role="button">Undo
+                                    Changes</a>
+                                <input type="text" name="translators_control" value="1" class="invisible">
+                            </div>
+                        </div>
+                        {% if form_errors == 'error_translators' %}
+                            <div class="row">
+                                <div class="alert alert-danger col-md-8 align-content-lg-center">
+                                    ERROR: Selected Translator is assigned to a session and cannot be deleted.
+                                </div>
+                            </div>
+                        {% endif %}
+                    </form>
+                    {% else %}
+                    <div class="alert alert-info">
+                    No records in the database.
+                    </div>
                     {% endif %}
                 </div>
             </div>
@@ -101,43 +98,41 @@
                     <div class="card-body">
                         <div class="row align-items-center">
                             {% if formset_director|length > 0 %}
-                                <form method="post" class="container">
-                                    {% csrf_token %}
-                                    {{ formset_director.management_form }}
-                                    <div class="row">
-                                        <div class="col-6">Director Name</div>
-                                        <div class="col-3" data-toggle="tooltip"
-                                             title="Assigned Directors cannot be deleted">Delete *
-                                        </div>
-                                    </div>
-                                    {% for form in formset_director %}
-                                        <div class="d-none">{{ form.id }}</div>
-                                        <div class="row">
-                                            <div class="col-6">{{ form.name|attr:"class:form-control" }}</div>
-                                            <div class="col-3">{{ form.DELETE|attr:"class:btn"|attr:"class:btn-danger" }}</div>
-                                        </div>
-                                    {% endfor %}
-                                    <div class="row">
-                                        <div class="col-md">
-                                            <button type="submit" class="btn btn-primary float-lg-right">Update</button>
-                                            <a class="btn btn-secondary float-lg-right mr-1" href="." role="button">Undo
-                                                Changes</a>
-                                            <input type="text" name="directors_control" value="1" class="invisible">
-                                        </div>
-                                    </div>
-                                    {% if form_errors == 'error_directors' %}
-                                        <div class="row">
-                                            <div class="alert alert-danger col-md-8 align-content-lg-center">
-                                                ERROR: Selected Director is assigned to a session and cannot be deleted.
-                                            </div>
-                                        </div>
-                                    {% endif %}
-
-                                </form>
-                            {% else %}
-                                <div class="alert alert-info">
-                                    No records in the database.
+                            <form method="post" class="container">
+                                {% csrf_token %}
+                                {{ formset_director.management_form }}
+                                <div class="row">
+                                    <div class="col-6">Director Name</div>
+                                    <div class="col-3" data-toggle="tooltip" title="Assigned Directors cannot be deleted">Delete *</div>
                                 </div>
+                                {% for form in formset_director %}
+                                    <div class="d-none">{{ form.id }}</div>
+                                    <div class="row">
+                                        <div class="col-6">{{ form.name|attr:"class:form-control" }}</div>
+                                        <div class="col-3">{{ form.DELETE|attr:"class:btn"|attr:"class:btn-danger" }}</div>
+                                    </div>
+                                {% endfor %}
+                                <div class="row">
+                                    <div class="col-md">
+                                        <button type="submit" class="btn btn-primary float-lg-right">Update</button>
+                                        <a class="btn btn-secondary float-lg-right mr-1" href="." role="button">Undo
+                                            Changes</a>
+                                        <input type="text" name="directors_control" value="1" class="invisible">
+                                    </div>
+                                </div>
+                                {% if form_errors == 'error_directors' %}
+                                    <div class="row">
+                                        <div class="alert alert-danger col-md-8 align-content-lg-center">
+                                            ERROR: Selected Director is assigned to a session and cannot be deleted.
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                            </form>
+                            {% else %}
+                            <div class="alert alert-info">
+                            No records in the database.
+                            </div>
                             {% endif %}
                         </div>
                     </div>
@@ -163,44 +158,40 @@
                         <div class="card-body">
                             <div class="row align-items-center">
                                 {% if formset_actor|length > 0 %}
-                                    <form method="post" class="container">
-                                        {% csrf_token %}
-                                        {{ formset_actor.management_form }}
-                                        <div class="row">
-                                            <div class="col-6">Actor Name</div>
-                                            <div class="col-3" data-toggle="tooltip"
-                                                 title="Assigned Actors cannot be deleted">Delete *
-                                            </div>
-                                        </div>
-                                        {% for form in formset_actor %}
-                                            <div class="d-none">{{ form.id }}</div>
-                                            <div class="row">
-                                                <div class="col-6">{{ form.name|attr:"class:form-control" }}</div>
-                                                <div class="col-3">{{ form.DELETE|attr:"class:btn"|attr:"class:btn-danger" }}</div>
-                                            </div>
-                                        {% endfor %}
-                                        <div class="row">
-                                            <div class="col-md">
-                                                <button type="submit" class="btn btn-primary float-lg-right">Update
-                                                </button>
-                                                <a class="btn btn-secondary float-lg-right mr-1" href="." role="button">Undo
-                                                    Changes</a>
-                                                <input type="text" name="actors_control" value="1" class="invisible">
-                                            </div>
-                                        </div>
-                                        {% if form_errors == 'error_actors' %}
-                                            <div class="row">
-                                                <div class="alert alert-danger col-md-8 align-content-lg-center">
-                                                    ERROR: Selected Actor is assigned to a session and cannot be
-                                                    deleted.
-                                                </div>
-                                            </div>
-                                        {% endif %}
-                                    </form>
-                                {% else %}
-                                    <div class="alert alert-info">
-                                        No records in the database.
+                                <form method="post" class="container">
+                                    {% csrf_token %}
+                                    {{ formset_actor.management_form }}
+                                    <div class="row">
+                                        <div class="col-6">Actor Name</div>
+                                        <div class="col-3" data-toggle="tooltip" title="Assigned Actors cannot be deleted">Delete *</div>
                                     </div>
+                                    {% for form in formset_actor %}
+                                        <div class="d-none">{{ form.id }}</div>
+                                        <div class="row">
+                                            <div class="col-6">{{ form.name|attr:"class:form-control" }}</div>
+                                            <div class="col-3">{{ form.DELETE|attr:"class:btn"|attr:"class:btn-danger" }}</div>
+                                        </div>
+                                    {% endfor %}
+                                    <div class="row">
+                                        <div class="col-md">
+                                            <button type="submit" class="btn btn-primary float-lg-right">Update</button>
+                                            <a class="btn btn-secondary float-lg-right mr-1" href="." role="button">Undo
+                                                Changes</a>
+                                            <input type="text" name="actors_control" value="1" class="invisible">
+                                        </div>
+                                    </div>
+                                    {% if form_errors == 'error_actors' %}
+                                        <div class="row">
+                                            <div class="alert alert-danger col-md-8 align-content-lg-center">
+                                                ERROR: Selected Actor is assigned to a session and cannot be deleted.
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </form>
+                                {% else %}
+                                <div class="alert alert-info">
+                                No records in the database.
+                                </div>
                                 {% endif %}
                             </div>
                         </div>
@@ -208,10 +199,10 @@
                         </div>
                     </div>
                 </div>
-                <script>
-                    $(document).ready(function () {
-                        $('[data-toggle="tooltip"]').tooltip();
-                    });
+<script>
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+});
 
-                </script>
+    </script>
 {% endblock %}

@@ -33,12 +33,6 @@ class UploadCSVForm(forms.Form):
     file = forms.FileField(validators=[validate_csv])
 
 
-# class AttachmentForm(forms.ModelForm):
-#     class Meta:
-#         model = Attachment
-#         fields = ('description', 'attachment', 'project')
-
-
 class AttachmentForm(forms.Form):
     description = forms.CharField(min_length=1, required=True, label='Description')
     file = forms.FileField(label='Attachment')

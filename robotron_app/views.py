@@ -282,7 +282,6 @@ def project_detail_view(request, pk):
     return render(request, 'robotron_app/project_detail.html', context=context)
 
 
-
 class BatchDetailView(LoginRequiredMixin, generic.DetailView):
     model = Batch
 
