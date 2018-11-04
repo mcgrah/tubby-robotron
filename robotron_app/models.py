@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.conf import settings
+from urllib.parse import urlparse
 
 
 # =======================
@@ -68,8 +69,27 @@ class Character(models.Model):
         return f'{self.batch.project.name} {self.batch.name} {self.name}'
 
 
+class Attachment(models.Model):
+    description = models.CharField(max_length=255, blank=True)
+    attachment = models.FileField(upload_to='documents/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    project = models.ForeignKey(
+        'Project', on_delete=models.PROTECT,
+    )
 
-# =======================
+    def get_absolute_url(self):
+        return reverse('document', args=[str(self.id)])
+
+    def get_filename_from_url(self):
+        url = urlparse(f'html://+{self.attachment}')
+        filename = f'{url.path}'
+        return filename[1:]
+
+    def __str__(self):
+        return f'{self.description} {self.attachment} {self.uploaded_at} {self.project.id}'
+
+
+# ======================
 # main models - should have detail view pages
 # =======================
 class Studio(models.Model):

@@ -31,6 +31,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('robotron/', include('robotron_app.urls')),
+    url(r'^progressbarupload/', include('progressbarupload.urls')),
     url(r'^favicon\.ico$', RedirectView.as_view(url='/static/favicon.ico')),
     url(
             r'^actor-autocomplete/$',
@@ -58,6 +59,7 @@ urlpatterns = [
 
 # for debug only
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 
 
 # urlpatterns += [
 #     path('404/',test404),
@@ -65,3 +67,4 @@ urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 #     path('400/',test400),
 #     path('500/',test500),
 # ]
+

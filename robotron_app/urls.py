@@ -8,6 +8,8 @@ urlpatterns = [
     path('studio/create_studio/', views.studio_create_view, name='create_studio'),
     path('studio/<int:pk>/update/', views.StudioUpdateView.as_view(), name='update_studio'),
 
+    path('attachments/', views.AttachmentListView.as_view(),  name='attachments'),
+
     path('projects/', views.ProjectListView.as_view(), {}, name='projects'),
     path('projects/create/',views.ProjectCreateView.as_view(),name='create_project'),
 
@@ -15,6 +17,9 @@ urlpatterns = [
     path('project/<int:pk>/update/', views.ProjectUpdateView.as_view(), name='update_project'),
     path('project/<int:pk>/updatemini/', views.ProjectUpdateViewMini.as_view(), name='update_project_mini'),
     path('project/<int:pk>/edit_loader/', views.BatchDetailUpdateViewMini.as_view(), name='batch_loader'),
+
+    path('project/<int:pk>/upload/', views.attachment_upload, name='attachment_upload'),
+
     path('batch/<int:pk>/', views.batch_detail_view, name='batch'),
     path('batch/<int:pk>/update/', views.BatchDetailUpdateView.as_view(), name='update_batch'),
     path('batch/<int:pk>/update_characters/', views.manage_batch_characters, name='manage_batch_characters'),
@@ -38,8 +43,6 @@ urlpatterns = [
 
     # path('users/', views.UserListView.as_view(), {}, name='users'),
     path('users/', views.userlist_view, {}, name='users'),
-
-
 ]
 # functions only:
 urlpatterns += [
@@ -49,6 +52,8 @@ urlpatterns += [
     path('delete_selected_chars/', views.delete_selected_chars, name='delete_selected_chars'),
     path('delete_selected_sessions/', views.delete_selected_sessions, name='delete_selected_sessions'),
     path('delete_selected_batches/', views.delete_selected_batches, name='delete_selected_batches'),
+    path('delete_selected_attachments/', views.delete_selected_attachments, name='delete_selected_attachments'),
     path('studio/<int:pk>/delete/', views.delete_studio, name='delete_studio'),
     path('project/<int:pk>/delete/', views.delete_project, name='delete_project'),
+    path('project/<int:pk>/export/', views.export_project, name='export_project'),
 ]

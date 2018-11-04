@@ -51,7 +51,6 @@
                             {% if request.user|isRoboto %}
                                 <a role=button class="btn btn-outline-primary"
                                    href="{% url "update_project" pk=project.id %}">Edit</a>
-
                                 {% if project.num_batches > 0 %}
                                     <button type="button" class="btn btn-outline-secondary" disabled>Archive</button>
                                 {% else %}
@@ -60,6 +59,8 @@
                                 {% endif %}
                                 <a role=button class="btn btn-outline-primary"
                                    href="{% url "project_calendar" pk=project.id %}">View Calendar</a>
+                                <a role=button class="btn btn-outline-primary"
+                                   href="{% url "export_project" pk=project.id %}">Export</a>
                             {% endif %}
                         </div>
                     </div>
