@@ -55,4 +55,5 @@ urlpatterns += [
     path('delete_selected_attachments/', views.delete_selected_attachments, name='delete_selected_attachments'),
     path('studio/<int:pk>/delete/', views.delete_studio, name='delete_studio'),
     path('project/<int:pk>/delete/', views.delete_project, name='delete_project'),
+    path('project/<int:pk>/export/', views.export_project, name='export_project'),
 ]

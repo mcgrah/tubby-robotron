@@ -20,6 +20,7 @@ from dal import autocomplete
 from django.forms.models import modelform_factory
 from django.core.files.storage import FileSystemStorage
 import os
+import xlwt
 
 
 class ModelFormWidgetMixin(object):
@@ -973,6 +974,136 @@ def error500(request, exception):
     }
     print('hit 500')
     return render(request, 'base_error.html', context=context)
+
+
+def export_project(request, pk):
+    project = get_object_or_404(Project, pk=pk)
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = f'attachment; filename="{project.name}.xls"'
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet(f'PROJECT "{project.name}"')
+    ws.col(0).width = 0x0d00 + 2000
+    ws.col(1).width = 0x0d00 + 5000
+
+    font_style = xlwt.XFStyle()
+    font_style.font.bold = True
+    font_style.font.height = 240
+
+    row_captions = ['Project', 'Studio', 'Director', 'Batches', 'Files', 'Words', 'Characters', 'Actors', 'SFX', 'TC',]
+    row_data = [project.name, project.studio.name, project.director.name, project.batch_count, project.files_count, project.word_count, project.char_count, project.actor_count, project.sfx_note, project.tc_note,]
+
+    col_num = 0
+    for row_num in range(len(row_captions)):
+        ws.write(row_num, col_num, row_captions[row_num], font_style)
+
+    font_style = xlwt.XFStyle()
+    font_style.font.bold = False
+    font_style.font.height = 240
+
+    col_num = 1
+    for row_num in range(len(row_data)):
+        ws.write(row_num, col_num, row_data[row_num], font_style)
+
+    batches = Batch.objects.filter(project=project)
+
+    font_style_bold2 = xlwt.XFStyle()
+    font_style_bold2.font.bold = True
+    font_style_bold2.font.height = 240
+
+    font_style_plain2 = xlwt.XFStyle()
+    font_style_plain2.font.bold = False
+    font_style_plain2.font.height = 240
+
+
+    font_style_bold = xlwt.XFStyle()
+    font_style_bold.font.bold = True
+
+    font_style_plain = xlwt.XFStyle()
+    font_style_plain.font.bold = False
+
+    for batch in batches:
+        # zero row number for each batch
+        row_num, col_num = 0, 0
+
+        ws_batch = wb.add_sheet(f'BATCH "{batch.name}"')
+        ws_batch.col(col_num).width = 0x0d00 + 2000
+        ws_batch.col(col_num+1).width = 0x0d00 + 1500
+        ws_batch.col(col_num+2).width = 0x0d00 + 500
+        ws_batch.col(col_num+3).width = 0x0d00 + 500
+        ws_batch.col(col_num+4).width = 0x0d00 + 500
+        ws_batch.col(col_num+5).width = 0x0d00 + 2000
+        ws_batch.col(col_num+6).width = 0x0d00 + 2000
+
+        ws_batch.write(row_num, col_num, 'Name', font_style_bold2)
+        ws_batch.write(row_num, col_num+1, f'{batch.name}', font_style_plain2)
+
+        row_num += 1
+        ws_batch.write(row_num, col_num, 'Start Date', font_style_bold2)
+        ws_batch.write(row_num, col_num+1, f'{batch.start_date}', font_style_plain2)
+
+        row_num += 1
+        ws_batch.write(row_num, col_num, 'Deadline', font_style_bold2)
+        ws_batch.write(row_num, col_num+1, f'{batch.deadline}', font_style_plain2)
+
+        row_num += 1
+        ws_batch.write(row_num, col_num, 'Files', font_style_bold2)
+        ws_batch.write(row_num, col_num+1, batch.files_count, font_style_plain2)
+
+        row_num += 1
+        ws_batch.write(row_num, col_num, 'Words', font_style_bold2)
+        ws_batch.write(row_num, col_num+1, batch.word_count, font_style_plain2)
+
+        row_num += 1
+        ws_batch.write(row_num, col_num, 'Characters', font_style_bold2)
+        ws_batch.write(row_num, col_num+1, batch.char_count, font_style_plain2)
+
+        # print all characters for each batch
+        row_num += 5
+        ws_batch.write(row_num, col_num, 'CHARACTERS', font_style_bold2)
+        row_num += 1
+        characters_columns = ['Character', 'Actor', 'Files', 'Delivery Date', 'Delivery Time', 'Comments', 'Sessions', ]
+        characters = Character.objects.filter(batch=batch)
+        for col_num in range(len(characters_columns)):
+            ws_batch.write(row_num, col_num, characters_columns[col_num], font_style_bold)
+
+        col_num = 0
+        row_num += 1
+        idx = 0
+
+        for idx, char in enumerate(characters):
+            ws_batch.write(row_num + idx, col_num, f'{char.name}', font_style_plain)
+            ws_batch.write(row_num + idx, col_num+1, f'{char.actor}', font_style_plain)
+            ws_batch.write(row_num + idx, col_num+2, char.files_count, font_style_plain)
+            ws_batch.write(row_num + idx, col_num+3, f'{char.delivery_date}', font_style_plain)
+            ws_batch.write(row_num + idx, col_num+4, f'{char.delivery_time}', font_style_plain)
+            ws_batch.write(row_num + idx, col_num+5, f'{char.char_note}', font_style_plain)
+
+            sessions = Session.objects.filter(batch=batch, character=char)
+            ws_batch.write(row_num + idx, col_num+6, len(sessions), font_style_plain)
+
+        # print all sessions for each batch
+        row_num += idx + 5
+        col_num = 0
+        ws_batch.write(row_num, col_num, 'SESSIONS', font_style_bold2)
+        row_num += 1
+        sessions_columns = ['Character', 'Actor', 'Day', 'Hour', 'Duration', 'Director', 'Translator', ]
+        sessions = Session.objects.filter(batch=batch)
+        for col_num in range(len(sessions_columns)):
+            ws_batch.write(row_num, col_num, sessions_columns[col_num], font_style_bold)
+
+        col_num = 0
+        row_num += 1
+        for idx, session in enumerate(sessions):
+            ws_batch.write(row_num + idx, col_num, f'{session.character.name}', font_style_plain)
+            ws_batch.write(row_num + idx, col_num+1, f'{session.character.actor}', font_style_plain)
+            ws_batch.write(row_num + idx, col_num+2, f'{session.day}', font_style_plain)
+            ws_batch.write(row_num + idx, col_num+3, f'{session.hour}', font_style_plain)
+            ws_batch.write(row_num + idx, col_num+4, f'{session.duration}', font_style_plain)
+            ws_batch.write(row_num + idx, col_num+5, f'{session.director}', font_style_plain)
+            ws_batch.write(row_num + idx, col_num+6, f'{session.translator}', font_style_plain)
+
+    wb.save(response)
+    return response
 
 
 # def test400(request):

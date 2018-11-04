@@ -1,6 +1,7 @@
 from django.contrib import admin
 from robotron_app.models import *
 
+
 # Register your models here.
 admin.site.register(TranslationString)
 admin.site.register(Actor)
