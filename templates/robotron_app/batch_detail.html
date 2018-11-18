@@ -28,31 +28,58 @@
 {% endblock %}
 
 {% block content %}
+    <div class="accordion" id="accordionExample">
+        <div class="card">
+            <div class="card-header" id="headingOne">
+                <h5 class="mb-0">
+                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne"
+                            aria-expanded="true" aria-controls="collapseOne">
+                        <h4>Project: <strong>{{ batch.project.name }}</strong>, Batch: <strong>{{ batch.name }}</strong></h4>
+                    </button>
+                            <a role=button class="btn btn-outline-primary" href="{% url "update_batch" pk=batch.id %}">Edit
+                                Batch Details</a>
+                </h5>
+            </div>
 
-    <div class="row align-items-center">
-        <div class="col-md-auto">
-            <h4>Project: <strong>{{ batch.project.name }}</strong></h4>
-            <h4>Batch: <strong>{{ batch.name }}</strong></h4>
+            <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <table class="table table-striped table-sm">
+                                <tbody>
+                                <tr>
+                                    <th scope="row">Name:</th>
+                                    <td>{{ batch.name }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Start Date:</th>
+                                    <td>{{ batch.start_date }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Deadline:</th>
+                                    <td>{{ batch.deadline }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Files:</th>
+                                    <td>{{ batch.files_count }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Wordcount:</th>
+                                    <td>{{ batch.word_count }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Characters:</th>
+                                    <td>{{ batch.char_count }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col"></div>
+                    </div>
+
+                </div>
+            </div>
         </div>
-        <div class="col">
-            <a role=button class="btn btn-outline-primary" href="{% url "update_batch" pk=batch.id %}">Edit Batch Details</a>
-        </div>
-    </div>
-    <hr>
-    <div class="row">
-        <div class="col">
-            <table class="table table-striped table-sm">
-                <tbody>
-                    <tr><th scope="row">Name: </th><td>{{ batch.name }}</td></tr>
-                    <tr><th scope="row">Start Date: </th><td>{{ batch.start_date }}</td></tr>
-                    <tr><th scope="row">Deadline: </th><td>{{ batch.deadline }}</td></tr>
-                    <tr><th scope="row">Files: </th><td>{{ batch.files_count }}</td></tr>
-                    <tr><th scope="row">Wordcount: </th><td>{{ batch.word_count }}</td></tr>
-                    <tr><th scope="row">Characters: </th><td>{{ batch.char_count }}</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="col"></div>
     </div>
 
 <hr class="fat-hr">
@@ -106,7 +133,7 @@
                             {% endfor %}
                           </div>
                         {% endif %}
-                        <h6>Add Single Character</h6>
+                    <h5>Add Single Character</h5>
                             <div class="form-row">
                                 {% for field in form %}
                                     {% if "actor" in field.name %}
