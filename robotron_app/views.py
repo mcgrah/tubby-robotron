@@ -16,6 +16,7 @@ from robotron_app.models import *
 from robotron_app.forms import *
 # autocomplete
 from dal import autocomplete
+import json
 
 from django.forms.models import modelform_factory
 from django.core.files.storage import FileSystemStorage
@@ -1048,11 +1049,37 @@ def error500(request, exception):
 
 
 def export_project(request, pk):
+
+    def duration_blocks_to_hr_string(duration_block):
+        minutes = (int(duration_block) % 4) * 15
+        hr = int(int(duration_block) / 4)
+        if minutes < 10:
+            return f'{hr}:0{minutes}'
+        else:
+            return f'{hr}:{minutes}'
+
+    def duration_blocks_to_minutes(duration_block):
+        minutes = (int(duration_block) % 4) * 15
+        hr = int(int(duration_block) / 4) * 60
+        print(int(hr + minutes))
+        return int(hr + minutes)
+
+    def duration_minutes_to_hours(duration_minutes):
+        minutes = (int(duration_minutes) % 60)
+        hr = int(int(duration_minutes) / 60)
+        if minutes < 10:
+            return f'{hr}:0{minutes}'
+        else:
+            return f'{hr}:{minutes}'
+
     project = get_object_or_404(Project, pk=pk)
     response = HttpResponse(content_type='application/ms-excel')
     response['Content-Disposition'] = f'attachment; filename="{project.name}.xls"'
     wb = xlwt.Workbook(encoding='utf-8')
     ws = wb.add_sheet(f'PROJECT "{project.name}"')
+
+    stats_json = {}
+
     ws.col(0).width = 0x0d00 + 2000
     ws.col(1).width = 0x0d00 + 5000
 
@@ -1091,7 +1118,7 @@ def export_project(request, pk):
 
     font_style_plain = xlwt.XFStyle()
     font_style_plain.font.bold = False
-
+    ws_stats = wb.add_sheet(f'STATS')
     for batch in batches:
         # zero row number for each batch
         row_num, col_num = 0, 0
@@ -1169,9 +1196,59 @@ def export_project(request, pk):
             ws_batch.write(row_num + idx, col_num+1, f'{session.character.actor}', font_style_plain)
             ws_batch.write(row_num + idx, col_num+2, f'{session.day}', font_style_plain)
             ws_batch.write(row_num + idx, col_num+3, f'{session.hour}', font_style_plain)
-            ws_batch.write(row_num + idx, col_num+4, f'{session.duration}', font_style_plain)
+
+            ws_batch.write(row_num + idx, col_num+4, duration_blocks_to_hr_string(f'{session.duration_blocks}'), font_style_plain)
             ws_batch.write(row_num + idx, col_num+5, f'{session.director}', font_style_plain)
             ws_batch.write(row_num + idx, col_num+6, f'{session.translator}', font_style_plain)
+
+            if 'actor' not in stats_json:
+                stats_json['actor'] = {}
+            try:
+                stats_json['actor'][f'{session.character.actor}'] = int(stats_json['actor'][f'{session.character.actor}']) + duration_blocks_to_minutes(f'{session.duration_blocks}')
+            except:
+                stats_json['actor'][f'{session.character.actor}'] = duration_blocks_to_minutes(f'{session.duration_blocks}')
+
+            if 'director' not in stats_json:
+                stats_json['director'] = {}
+            try:
+                stats_json['director'][f'{session.director}'] = int(stats_json['director'][f'{session.director}']) + duration_blocks_to_minutes(f'{session.duration_blocks}')
+            except:
+                stats_json['director'][f'{session.director}'] = duration_blocks_to_minutes(f'{session.duration_blocks}')
+
+            if 'translator' not in stats_json:
+                stats_json['translator'] = {}
+            try:
+                stats_json['translator'][f'{session.translator}'] = int(stats_json['translator'][f'{session.translator}']) + duration_blocks_to_minutes(f'{session.duration_blocks}')
+            except:
+                stats_json['translator'][f'{session.translator}'] = duration_blocks_to_minutes(f'{session.duration_blocks}')
+
+    print(stats_json)
+
+    ws_stats.write(1, 1, "Actors", font_style_bold)
+    ws_stats.write(1, 2, "Hours", font_style_bold)
+    ws_stats.write(1, 4, "Directors", font_style_bold)
+    ws_stats.write(1, 5, "Hours", font_style_bold)
+    ws_stats.write(1, 7, "Roboto", font_style_bold)
+    ws_stats.write(1, 8, "Hours", font_style_bold)
+
+    ws_stats.col(1).width = 3328 + 2000
+    ws_stats.col(2).width = 3328
+    # ws_stats.col(3).width = 3328 + 100
+    ws_stats.col(4).width = 3328 + 2000
+    ws_stats.col(5).width = 3328
+    # ws_stats.col(6).width = 3328 + 100
+    ws_stats.col(7).width = 3328 + 2000
+    ws_stats.col(8).width = 3328
+
+    for idx, actor in enumerate(stats_json['actor']):
+        ws_stats.write(idx + 2, 1, actor, font_style_plain)
+        ws_stats.write(idx + 2, 2, duration_minutes_to_hours(stats_json['actor'][actor]), font_style_plain)
+    for idx, director in enumerate(stats_json['director']):
+        ws_stats.write(idx + 2, 4, director, font_style_plain)
+        ws_stats.write(idx + 2, 5, duration_minutes_to_hours(stats_json['director'][director]), font_style_plain)
+    for idx, translator in enumerate(stats_json['translator']):
+        ws_stats.write(idx + 2, 7, translator, font_style_plain)
+        ws_stats.write(idx + 2, 8, duration_minutes_to_hours(stats_json['translator'][translator]), font_style_plain)
 
     wb.save(response)
     return response

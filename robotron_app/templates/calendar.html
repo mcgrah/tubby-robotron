@@ -210,7 +210,7 @@
 {% block content %}
 {% load filters %}
     {% if project %}
-        <div class="col-lg-12 col-lg-offset-3 text-center"><h2>Calendar: <strong>{{ project.name }}</strong></h2></div>
+        <div class="col-lg-12 col-lg-offset-3 text-center"><h2>Calendar: <strong>{{ project.name }}</strong>   <a role=button class="btn btn-sm btn-outline-secondary"href="{% url "export_project" pk=project.id %}">Export project</a></h2></div>
         {% else %}
         <div class="col-lg-12 col-lg-offset-3 text-center"><h2>Calendar: <strong>All Projects</strong></h2></div>
     {% endif %}
@@ -225,6 +225,7 @@
 {#        {% endfor %}#}
 {#    {% endwith %}#}
     <div class="row justify-content-center mb-2">
+                Translators:
         <div class="btn-group-sm" role="group" aria-label="Basic example">
           <button type="button" class="btn btn-sm btn-outline-secondary" onclick="select_all_trans()">Select All</button>
           <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselect_all_trans()">Deselect All</button>
