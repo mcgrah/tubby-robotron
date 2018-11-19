@@ -145,14 +145,16 @@ def create_user(request):
         if form.is_valid():
             user = form.save()
             user.refresh_from_db()
-            profile_form = ProfileForm(request.POST, instance=user.userprofile)
+            profile_form = ProfileForm(request.POST, instance=user.userprofile)            
+            
+            profile_form.full_clean()
+            profile_form.save()
+            # set group if necessary
+            user.refresh_from_db()
             if user.userprofile.studio.name == 'ROBOTO' or user.userprofile.studio.name == 'ROBOTO Translators':
                 user_group = Group.objects.get(name='Roboto Users')
             else:
                 user_group = Group.objects.get(name='Studio Users')
-            profile_form.full_clean()
-            profile_form.save()
-            # set group if necessary
             user_group.user_set.add(user)
             messages.success(request,'user created')
             return redirect('users')
