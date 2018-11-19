@@ -1300,7 +1300,6 @@ def export_project(request, pk):
     def duration_blocks_to_minutes(duration_block):
         minutes = (int(duration_block) % 4) * 15
         hr = int(int(duration_block) / 4) * 60
-        print(int(hr + minutes))
         return int(hr + minutes)
 
     def duration_minutes_to_hours(duration_minutes):
@@ -1460,8 +1459,6 @@ def export_project(request, pk):
                 stats_json['translator'][f'{session.translator}'] = int(stats_json['translator'][f'{session.translator}']) + duration_blocks_to_minutes(f'{session.duration_blocks}')
             except:
                 stats_json['translator'][f'{session.translator}'] = duration_blocks_to_minutes(f'{session.duration_blocks}')
-
-    print(stats_json)
 
     ws_stats.write(1, 1, "Actors", font_style_bold)
     ws_stats.write(1, 2, "Hours", font_style_bold)
