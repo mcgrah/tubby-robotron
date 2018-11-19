@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load staticfiles %}
+{% load filters %}
 <html lang="en">
 
 <head>
@@ -39,6 +40,7 @@
          <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <ul class="navbar-nav">
                 <li class="nav-item"><a class="nav-link" href='{% url "index" %}'>Home</a></li>
+{% if request.user|isRoboto and not request.user|isTranslator %}
                 <li class="nav-item"><a class="nav-link" href='{% url "studios" %}'>Studios</a></li>
                 <li class="nav-item dropdown">
                     <button type="button" id="navbarDropdown" class="btn  btn-dark dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -49,7 +51,11 @@
                         <a class="dropdown-item" href='{% url "create_studio" %}'>Add New Studio</a>
                     </div>
                 </li>
+{% endif %}
+{% if not request.user|isTranslator %}
                 <li class="nav-item"><a class="nav-link" href='{% url "projects" %}'>Projects</a></li>
+{% endif %}
+{% if request.user|isRoboto and not request.user|isTranslator %}
                 <li class="nav-item dropdown">
                     <button type="button" id="navbarDropdown2" class="btn  btn-dark dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <span class="sr-only">Toggle Dropdown</span>
@@ -59,6 +65,8 @@
                         <a class="dropdown-item" href="{% url "create_project" %}">Add New Project</a>
                     </div>
                 </li>
+{% endif %}
+{% if request.user|isRoboto %}
                 <li class="nav-item"><a class="nav-link" href='{% url "calendar" %}'>Project Calendars</a></li>
                 <li class="nav-item dropdown">
                     <button type="button" id="navbarDropdown3" class="btn  btn-dark dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -70,24 +78,28 @@
                         {% endfor %}
                     </div>
                 </li>
+{% endif %}
                 <li class="nav-item"><button type="button" class="btn btn-outline-warning" data-toggle="modal" data-target="#changelogModal">CHANGELOG</button></li>
 {#                <li class="nav-item"><button type="button" class="btn btn-outline-secondary" id="just_load_please">DEBUG Loader</button></li>#}
             </ul>
             </div>
         </div>
         <div class="col-md-2">
-            <div class="float-right">
-            <ul class="navbar-nav">
+            <div class="float-right btn-group" role="group">
             {% if user.is_authenticated %}
                 {% if request.user.is_staff %}
-                    <li class="nav-item"><a role="button" class="btn btn-outline-success " id="staff" href="{% url "logout" %}">USER: {{ user.get_username }} [STAFF]</a></li>
+                    <a role="button" class="btn btn-outline-success " id="staff" href="{% url "profile" %}?next={{ request.path|urlencode }}">USER: {{ user.get_username }} [STAFF]</a>
+                {% elif request.user|isTranslator %}
+                    <a role="button" class="btn btn-outline-info" href="{% url "profile" %}?next={{ request.path|urlencode }}">USER: {{ user.get_username }} [ROBOTO_TR]</a>
+                {% elif request.user|isRoboto %}
+                    <a role="button" class="btn btn-outline-info" href="{% url "profile" %}?next={{ request.path|urlencode }}">USER: {{ user.get_username }} [ROBOTO]</a>
                 {% else %}
-                    <li class="nav-item"><a role="button" class="btn btn-outline-danger" id="staff" href="{% url "logout" %}">USER: {{ user.get_username }} </a></li>
+                    <a role="button" class="btn btn-outline-danger" href="{% url "profile" %}?next={{ request.path|urlencode }}">USER: {{ user.get_username }} [STUDIO]</a>
                 {% endif %}
+                    <a role="button" class="btn btn-outline-danger" href="{% url "logout" %}">LOGOUT</a>
             {% else %}
-                <li class="nav-item"><a role="button" class="btn btn-outline-danger" href="{% url "login" %}">LOGIN</a></li>
+                <a role="button" class="btn btn-outline-danger" href="{% url "login" %}">LOGIN</a>
             {% endif %}
-            </ul>
             </div>
         </div>
     </div>
@@ -103,6 +115,15 @@
             </ol>
         </div>
     {% endblock %}
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li class="alert alert-{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
 
     {% block login_content %}
     {% endblock %}
@@ -171,6 +192,16 @@
         </button>
       </div>
       <div class="modal-body">
+          <h6>19 November 2018</h6>
+          <ul class="small">
+              <li>added Stats tab to Exported Projects</li>
+              <li>fixed overflowing text in Calendar event cards</li>
+              <li>added Users management functionality</li>
+              <li>deleted Sessions are now archived instead of permanently removed</li>
+              <li>[WIP] deleted Sessions can be viewed under Assets tab</li>
+              <li>[WIP] tweaked views and permissions per User category (Studio, Roboto, Translators)</li>
+          </ul>
+          <hr class="slim-hr">
           <h6>04 November 2018</h6>
           <ul class="small">
               <li>added Export Project functionality</li>

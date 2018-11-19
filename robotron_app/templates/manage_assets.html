@@ -17,6 +17,33 @@
     <h2>Assets</h2>
     <div id="accordion">
         <div class="card">
+            <div class="card-header" id="headingSessions">
+                <button class="btn btn-primary collapsed" data-toggle="collapse"
+                        data-target="#collapseSessions"
+                        aria-expanded="false" aria-controls="collapseSessions">
+                    Deleted Sessions
+                </button>
+            </div>
+            <div id="collapseSessions" class="collapse" aria-labelledby="headingSessions"
+                     data-parent="#accordion">
+                <div class="card-body">
+                    {% if deleted_sessions|length > 0 %}
+                        <ul class="list-group">
+                        {% for s in deleted_sessions %}
+                            <li class="list-group-item">{{ s.character.name }} {{ s.character.actor.name }} {{ s.day }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <div class="alert alert-info">
+                            No deleted sessions in the database.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="accordion">
+        <div class="card">
             <div class="card-header" id="headingTranslators">
                 <button class="btn btn-primary collapsed" data-toggle="collapse"
                         data-target="#collapseTranslators"

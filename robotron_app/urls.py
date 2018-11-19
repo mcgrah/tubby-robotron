@@ -31,6 +31,7 @@ urlpatterns = [
     path('character/<int:pk>/update_sessions/', views.manage_char_session, name='manage_char_sessions'),
     # path('character/<int:pk>/edit_loader/', views.character_loader, name='character_loader'),
     path('character/<int:pk>/edit_loader/', views.CharacterDetailUpdateViewMini.as_view(), name='character_loader'),
+    path('character/<int:pk>/edit_loader_mini/', views.CharacterDetailUpdateStudioMini.as_view(), name='character_loader_mini'),
 
     path('assets', views.manage_asset, name='assets'),
     path('calendar/', calendar.calendar_current, name='calendar'),
@@ -43,6 +44,12 @@ urlpatterns = [
 
     # path('users/', views.UserListView.as_view(), {}, name='users'),
     path('users/', views.userlist_view, {}, name='users'),
+    path('users/create/', views.create_user, name='create_user'),
+
+
+    path('profile/', views.update_profile, name='profile'),
+    path('profile/<int:pk>', views.update_profile, name='user_profile'),
+    path('profile/change_password',views.password_modal,name='change_password')
 ]
 # functions only:
 urlpatterns += [
@@ -56,4 +63,14 @@ urlpatterns += [
     path('studio/<int:pk>/delete/', views.delete_studio, name='delete_studio'),
     path('project/<int:pk>/delete/', views.delete_project, name='delete_project'),
     path('project/<int:pk>/export/', views.export_project, name='export_project'),
+    path('users/<int:pk>/deactivate/', views.deactivate_user, name='deactivate_user'),
+    path('users/<int:pk>/activate/', views.activate_user, name='activate_user'),
+    path('users/<int:pk>/delete/', views.delete_user, name='delete_user'),
+]
+# manual error redirects:
+urlpatterns += [
+    path('404/',views.error404, name='404'),
+    path('403/',views.error403, name='403'),
+    path('400/',views.error400, name='400'),
+    path('500/',views.error500, name='500'),
 ]

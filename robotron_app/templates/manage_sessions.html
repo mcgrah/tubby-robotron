@@ -1,5 +1,6 @@
 {% extends "base_scripted.html"%}
 {% block pageScript %}
+{% load filters %}
 <script>
         $( function() {
             $("input[id*='-day']").each(function(){
@@ -38,7 +39,6 @@
                     <h4>Details</h4>
                 </div>
             </div>
-            <p>
         <table class="table table-sm">
         <tbody>
             <tr><th scope="row">Batch: </th><td>{{ character.batch.name }}</td></tr>
@@ -57,7 +57,7 @@
             <h4>Sessions</h4>
         </div>
     </div>
-    <p>
+
 		<form method="post">
 		<hr>
 
@@ -81,12 +81,13 @@
                 <div class="col-1">{{ forloop.counter }}</div>
                 <div class="col-2">{{ form.day|attr:"class:form-control" }}</div>
                 <div class="col-1">{{ form.hour|attr:"class:form-control" }}</div>
-{#                <div class="col-1">{{ form.duration|attr:"class:form-control" }}</div>#}
                 <div class="col-2">{{ form.duration_blocks|attr:"class:form-control" }}</div>
-{#                add for admin / user diffs#}
-{#                <div class="col-3">{{ form.director|attr:"class:form-control"|attr:"disabled:true"}}</div>#}
                 <div class="col-3">{{ form.director|attr:"class:form-control"}}</div>
+{% if request.user|isRoboto %}
                 <div class="col-3">{{ form.translator|attr:"class:form-control"}}</div>
+{% else %}
+                <div class="col-3">{{ form.translator|attr:"class:form-control"|attr:"disabled"}}</div>
+{% endif %}
             </div>
             {% if form.non_field_errors %}
                 <div class="row justify-content-start align-items-center alert alert-danger">

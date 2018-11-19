@@ -1,12 +1,8 @@
 {% extends "base.html"%}
 {% load static %}
-
+{% load filters %}
 
 {% block pageScript %}
-
-{#        {{ form.media }}#}
-{#        {{ file_form.media }}#}
-{#        {{ session_form.media }}#}
 {% endblock %}
 
 {% block title %}{{ batch.project.name }}: {{ batch.name }}{% endblock %}
@@ -19,12 +15,13 @@
 {% endblock %}
 
 {% block page_alerts %}
+{% if request.user|isRoboto %}
     {% if  batch.char_filecount != batch.files_count  %}
     <div class="alert alert-warning">
         <p>! Number of character files different than declared: (current: {{ batch.char_filecount }}, expected: {{ batch.files_count }} )</p>
     </div>
     {% endif %}
-
+{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -35,7 +32,9 @@
             <h4>Batch: <strong>{{ batch.name }}</strong></h4>
         </div>
         <div class="col">
+{% if request.user|isRoboto %}
             <a role=button class="btn btn-outline-primary" href="{% url "update_batch" pk=batch.id %}">Edit Batch Details</a>
+{% endif %}
         </div>
     </div>
     <hr>
@@ -59,7 +58,13 @@
     <div class="jumbotron robotorial border border-danger">
         <div class="container">
             <h3>Characters</h3>
+{% if request.user|isRoboto %}
                 <p class="lead">You can add multiple Characters simply importing CSV file. You can even auto assign Actor to each Character you import by creating coma separated CSV file with rows like this: <i>"Character,Actor Name"</i></p>
+{% else %}
+                <p class="lead">You can edit all sessions for a given Character from its Details page.<br>
+                        'Edit ALL Actors' allows for bulk change Actors for all Characters in this Batch.
+                    </p>
+{% endif %}
         </div>
     </div>
 
@@ -68,28 +73,38 @@
         <h4>Characters</h4>
     </div>
     <div class="btn-group">
+{% if request.user|isRoboto %}
         <button class="btn btn-outline-primary" type="button" data-toggle="collapse" data-target="#target1" aria-expanded="false">
             Add Character
         </button>
         <button class="btn btn-outline-primary" type="button" data-parent="#two-form" data-toggle="collapse" data-target="#target2" aria-expanded="false">
         Import Characters (CSV)
         </button>
+{% endif %}
         <button disabled id="create-sessions-btn" class="btn btn-outline-primary" type="button" data-parent="#two-form" data-toggle="collapse" data-target="#target3" aria-expanded="false">
             Create Sessions for selected Characters
         </button>
+
         <a class="btn btn-outline-primary" role="button" href="{% url "manage_batch_characters" pk=batch.id %}">
+{% if request.user|isRoboto %}
             Edit ALL
+{% else %}
+        Edit ALL Actors
+{% endif %}
         </a>
+
+{% if request.user|isRoboto %}
         <button disabled type="button" class="btn btn-outline-danger" onclick="delete_selected_chars()" id="delete-char-btn">
             Delete selected
         </button>
+{% endif %}
 {#        <button type="button" class="btn btn-outline-danger" onclick="nuke_chars()" id="nuke-char-btn">NUKE Actors - DEBUG</button>#}
         {% load i18n widget_tweaks %}
-        {% load filters %}
     </div>
 </div>
 
     <div id="two-form">
+{% if request.user|isRoboto %}
         <form action="" method="POST">
             {% csrf_token %}
                 <div class="panel">
@@ -196,6 +211,7 @@
                 </div>
 
         </form>
+{% endif %}
         <!-- MANUAL FORM PLACEMENT !-->
         <form action="" method="POST" id="session_defaults">
             {% csrf_token %}
@@ -220,7 +236,9 @@
                     </div>
                     <div class="row">
                         <div class="col-3"><label for="inputState">{{ session_form.new_session_director.label }}</label></div>
+{% if request.user|isRoboto %}
                         <div class="col-3"><label for="inputState">{{ session_form.new_session_translator.label }}</label></div>
+{% endif %}
                         <div class="col"><label for="inputState">{{ session_form.new_session_day.label }}</label></div>
                         <div class="col"><label for="inputState">{{ session_form.new_session_hour.label }}</label></div>
 {#                        <div class="col"><label for="inputState">{{ session_form.new_session_duration.label }}</label></div>#}
@@ -228,7 +246,9 @@
                     </div>
                     <div class="row">
                         <div class="col-3">{{ session_form.new_session_director|attr:"class:form-control" }}</div>
+{% if request.user|isRoboto %}
                         <div class="col-3">{{ session_form.new_session_translator|attr:"class:form-control" }}</div>
+{% endif %}
                         <div class="col">{{ session_form.new_session_day|attr:"class:form-control"}}</div>
                         <div class="col">{{ session_form.new_session_hour|attr:"class:form-control"}}</div>
 {#                        <div class="col">{{ session_form.new_session_duration|attr:"class:form-control"}}</div>#}
@@ -282,15 +302,7 @@
                                 {% endif %}
                             </div>
                         </div>
-{#                         {% for field in session_form %}#}
-{#                             {% if field.errors %}#}
-{#                                {% for error in field.errors %}#}
-{#                                    <div class="row justify-content-start align-items-center alert alert-danger">#}
-{#                                        {{ field.label }}: {{ error }}#}
-{#                                    </div>#}
-{#                                {% endfor %}#}
-{#                            {% endif %}#}
-{#                         {% endfor %}#}
+
                     {% endif %}
                     <div class="row mt-2">
                         <div class="col">
@@ -327,11 +339,7 @@
             {% for char in character_list %}
                 <tr class="char-row" >
                 <td class="align-middle">
-{#                {% if char.session_count == 0 %}#}
                     <input type="checkbox" aria-label="delete_mark" class="delete-char-box" id="{{ char.id }}">
-{#                {% else %}#}
-{#                    <input type="checkbox" disabled>#}
-{#                {% endif %}#}
                 </td>
                 <td class="align-middle">{{ char.name }}</td>
 {#                <td>{{ char.actor.surname }} {{ char.actor.name }}</td>#}
@@ -371,7 +379,12 @@
     <div class="jumbotron robotorial border border-danger">
         <div class="container">
             <h3>Sessions</h3>
-                <p class="lead">You can create New Sesion out of every Selected Character. You will be asked to fill some extra details like who will be directing this Session(s) or when they going to start.<br>You can assign Translator from Roboto at this point or later using Quick Edit or digging into Character Details.</p>
+                <p class="lead">You can create New Session out of every Selected Character in the panel above.
+                    You will be asked to fill some extra details like who will be directing this Session(s) or when they going to start.<br>
+{% if request.user|isRoboto %}
+                    You can assign Translator from Roboto at this point or later using Quick Edit or digging into Character Details.
+{% endif %}
+                </p>
         </div>
     </div>
 
@@ -379,9 +392,11 @@
     <div class="col-md-auto">
         <h4>Sessions</h4>
     </div>
+{% if request.user|isRoboto %}
     <button disabled type="button" class="btn btn-outline-danger" onclick="delete_selected_sessions()" id="delete-session-btn">Delete selected</button>
     <button type="button" class="btn btn-outline-primary" onclick="generate_new_sessions()">Initialize Sessions - DEBUG</button>
     <button type="button" class="btn btn-outline-primary" onclick="nuke_empty_sessions()">NUKE Sessions - DEBUG</button>
+{% endif %}
     </div>
         <hr>
     {% if session_list %}
@@ -402,7 +417,11 @@
         <tbody>
         {% for session in session_list %}
             <tr class="session-row">
+{% if request.user|isRoboto %}
                 <td><input type="checkbox" aria-label="delete_mark_sess" class="delete-session-box" id="{{ session.id }}"></td>
+{% else %}
+    <td></td>
+{% endif %}
                 <td>{{ session.character.name }}</td>
                 <td>{{ session.character.actor.name }}</td>
                 <td>{{ session.day|date:"d-m-Y"}}</td>
@@ -612,7 +631,11 @@
         function char_quickedit(charid){
             {#charid = $(this).attr('char');#}
             console.log('clicked row for '+charid);
-            $('#charModal-content').load("/robotron/character/"+charid+"/edit_loader",function(){
+{% if request.user|isRoboto %}
+    $('#charModal-content').load("/robotron/character/"+charid+"/edit_loader",function(){
+{% else %}
+    $('#charModal-content').load("/robotron/character/"+charid+"/edit_loader_mini",function(){
+{% endif %}
                 $('#charModal').modal({
                     show: true //Display loader!
                 });

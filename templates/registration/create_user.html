@@ -1,0 +1,125 @@
+{% extends "base_scripted.html"%}
+{% block title %}Create New User{% endblock %}
+
+{% block minicrumbs %}
+<li class="breadcrumb-item"><a href="{% url "users" %}">Users</a></li>
+<li class="breadcrumb-item active" aria-current="page">Create New</li>
+{% endblock %}
+
+{% block content %}
+    <h4>Create New User</h4>
+    <hr class="slim-hr">
+
+    <form method="post">
+    {% csrf_token %}
+    {% load i18n widget_tweaks %}
+    {% if user_form.non_field_errors or profile_form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">
+        {% for error in user_form.non_field_errors %}{{ error }}{% endfor %}
+        {% for error in profile_form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+    {% endif %}
+        <div class="form-group row">
+            <label for="{{ user_form.username.id_for_label }}" class="col-sm-2 col-form-label">
+                {{ user_form.username.label }}:
+            </label>
+            <div class="col-sm-4">
+                {{ user_form.username|attr:"class:form-control" }}
+            </div>
+            <div class="col-sm-6 form-text text-muted small">
+                {{ user_form.username.help_text }}
+            </div>
+        </div>
+    {% if user_form.username.errors %}
+        <div class="form-group row alert alert-danger">
+        {% for error in user_form.username.errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+        </div>
+    {% endif %}
+
+        <div class="form-group row">
+            <label for="{{ user_form.email.id_for_label }}" class="col-sm-2 col-form-label">
+                {{ user_form.email.label }}:
+            </label>
+            <div class="col-sm-4">
+                {{ user_form.email|attr:"class:form-control" }}
+            </div>
+            <div class="col-sm-6 form-text text-muted small">
+                {{ user_form.email.help_text }}
+            </div>
+        </div>
+    {% if user_form.email.errors %}
+        <div class="form-group row alert alert-danger">
+        {% for error in user_form.email.errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+        </div>
+    {% endif %}
+
+        <div class="form-group row">
+            <div class="col-sm-6">
+                <div class="row">
+                    <label for="{{ user_form.password1.id_for_label }}" class="col-sm-4 col-form-label">
+                        {{ user_form.password1.label }}:
+                    </label>
+                    <div class="col-sm">
+                        {{ user_form.password1|attr:"class:form-control" }}
+                    </div>
+                </div>
+                <div class="row pt-1">
+                    <label for="{{ user_form.password2.id_for_label }}" class="col-sm-4 col-form-label">
+                        {{ user_form.password2.label }}:
+                    </label>
+                    <div class="col-sm">
+                        {{ user_form.password2|attr:"class:form-control" }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm form-text text-muted small">
+                {{ user_form.password1.help_text }}
+            </div>
+        </div>
+    {% if user_form.password1.errors %}
+        <div class="form-group row alert alert-danger">
+        {% for error in user_form.password1.errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+        </div>
+    {% endif %}
+    {% if user_form.password2.errors %}
+        <div class="form-group row alert alert-danger">
+        {% for error in user_form.password2.errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+        </div>
+    {% endif %}
+
+        <div class="form-group row">
+            <label for="{{ profile_form.studio.id_for_label }}" class="col-sm-2 col-form-label">
+                {{ profile_form.studio.label }}:
+            </label>
+            <div class="col-sm-4">
+                {{ profile_form.studio|attr:"class:form-control" }}
+            </div>
+            <div class="col-sm-6 form-text text-muted small">
+{#                {{ profile_form.studio.help_text }}#}
+                User will have access only to the projects of given studio.
+            </div>
+        </div>
+    {% if profile_form.studio.errors %}
+        <div class="form-group row alert alert-danger">
+        {% for error in profile_form.studio.errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+        </div>
+    {% endif %}
+        <div class="form-group row justify-content-start">
+            <div class="col">
+            <a class="btn btn-secondary mr-1 float-left" href="{% url 'users' %}" role="button">Cancel</a>
+            <button type="submit" class="btn btn-primary float-left">{% trans "Create User" %}</button>
+            </div>
+            <div class="col-2"></div>
+        </div>
+    </form>
+{% endblock%}

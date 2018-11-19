@@ -1,12 +1,38 @@
 import datetime
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from django.db import models
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _
-from robotron_app.models import Actor, Studio, Director, Translator, Batch, Character, Attachment, Session
-
-
+from robotron_app.models import Actor, Studio, Director, Translator, Session, UserProfile
 from dal import autocomplete
+
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ('email','username')
+
+
+class ProfileForm(forms.ModelForm):
+    studio = forms.ModelChoiceField(
+        queryset=Studio.objects.all(),
+        widget=autocomplete.ModelSelect2(url='studio-autocomplete'),
+        label='Studio',
+        required=False
+    )
+    class Meta:
+        model = UserProfile
+        fields = ('studio',)
+
+
+class CreateUserForm(UserCreationForm):
+    email = forms.EmailField(max_length=254, required=False, help_text='Optional, but used for password reset requests.')
+    class Meta:
+        model = User
+        fields = ('username','email','password1','password2')
 
 
 class DateInput(forms.DateInput):

@@ -32,7 +32,10 @@
                           <span class="badge badge-secondary">{{ studio.num_projects }}</span>
                       {% endif %}
 
-                      {{ studio.name }} ( {{ studio.email }})
+                      {{ studio.name }}
+                  {% if studio.email %}
+                      ( {{ studio.email }})
+                  {% endif %}
                   </a>
                   </div>
                   <div class="col-sm">

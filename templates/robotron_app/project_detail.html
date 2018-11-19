@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-
+{% load filters %}
 
 {% block pageScript %}
     <script>
@@ -25,6 +25,7 @@
 {% endblock %}
 
 {% block page_alerts %}
+{% if request.user|isRoboto %}
     <div class="alert alert-warning">
         {% if  project.batch_count != batch_list.count %}
             <p>! Number of batches different than declared: (current: {{ batch_list.count }},
@@ -35,9 +36,9 @@
                 (current: {{ total_chars|default_if_none:0 }}, expected: {{ project.char_count }} )</p>
         {% endif %}
     </div>
+{% endif %}
 {% endblock %}
 {% block content %}
-    {% load filters %}
     <div class="row align-items-center">
         <div class="col-md-auto">
             <h4>Project: <strong>{{ project.name }}</strong></h4>
@@ -50,8 +51,10 @@
                 {% else %}
                     <a role=button class="btn btn-outline-primary" href="{% url "update_project_mini" pk=project.id %}">Edit</a>
                 {% endif %}
+{% if request.user|isRoboto %}
                 <a role=button class="btn btn-outline-primary"
                    href="{% url "project_calendar" pk=project.id %}">View Calendar</a>
+{% endif %}
                 <a role=button class="btn btn-outline-primary"
                    href="{% url "export_project" pk=project.id %}">Export</a>
 
@@ -117,35 +120,42 @@
                         id="delete-attachment-btn">Delete Selected
                 </button>
             </div>
-
-            {% if attachment_list %}
-                <table class="table table-borderless table-sm table-hover" id="attachment-table">
-                    <tbody>
-                    <tr>
-                        <th></th>
-                        <th scope="col">#</th>
-                        <th scope="col">Description</th>
-                        <th scope="col">Filename</th>
-                        <th scope="col"></th>
-                    </tr>
-
-                    {% for attachment in attachment_list %}
-                        <tr>
-                            <td>
-                                <input type="checkbox" aria-label="delete_mark" class="delete-attachment-box"
-                                       id="{{ attachment.id }}">
-                            </td>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ attachment.description }}</td>
-                            <td><a href="{{ attachment.attachment.url }}">{{ attachment.get_filename_from_url }}</a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            {% endif %}
-            </div>
         {% endif %}
+    </div>
+        {% if attachment_list %}
+            <table class="table table-borderless table-sm table-hover" id="attachment-table">
+                <tbody>
+                <tr>
+                    <th></th>
+                    <th scope="col">#</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Filename</th>
+                    <th scope="col"></th>
+                </tr>
+
+                {% for attachment in attachment_list %}
+                    <tr>
+{% if request.user|isRoboto %}
+                        <td>
+                            <input type="checkbox" aria-label="delete_mark" class="delete-attachment-box"
+                                   id="{{ attachment.id }}">
+                        </td>
+{% else %}
+                        <td></td>
+{% endif %}
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ attachment.description }}</td>
+                        <td><a href="{{ attachment.attachment.url }}">{{ attachment.get_filename_from_url }}</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="alert alert-info">No attachments added.</div>
+        {% endif %}
+
+
     {# attachment list#}
     {#    {% for doc in attachment_list %}#}
     {#        <li>#}
@@ -178,6 +188,7 @@
             </div>
         {% endif %}
     </div>
+    {% if request.user|isRoboto %}
     {% load i18n widget_tweaks %}
     {#    {{ form.media }}#}
     <form action="" method="POST" id="batch-form">
@@ -209,7 +220,7 @@
         </div>
         </div>
     </form>
-
+    {% endif %}
     {% if batch_list %}
         <table class="table table-borderless table-sm table-hover" id="batch-table">
             <tbody>
@@ -228,6 +239,7 @@
 
             {% for batch in batch_list %}
                 <tr>
+{% if request.user|isRoboto %}
                     <td>
                         {% if batch.real_chars == 0 %}
                             <input type="checkbox" aria-label="delete_mark" class="delete-batch-box"
@@ -236,7 +248,10 @@
                             <input type="checkbox" disabled>
                         {% endif %}
                     </td>
-                    <td>{{ forloop.counter }}</td>
+{% else %}
+    <td></td>
+{% endif %}
+                    <td>{{ forloop.counter }}.</td>
                     <td>{{ batch.name }}</td>
                     <td>{{ batch.start_date|date:"Y-m-d" }}</td>
                     <td>{{ batch.deadline|date:"Y-m-d" }}</td>
@@ -247,10 +262,14 @@
                         <a role="button" class="btn btn-sm btn-outline-info" href="{{ batch.get_absolute_url }}">View
                             Details</a>
                     </td>
+{% if request.user|isRoboto %}
                     <td>
                         <a role="button" class="btn btn-sm btn-outline-info" onclick="batch_quickedit({{ batch.id }})">QUICK
                             EDIT</a>
                     </td>
+{% else %}
+    <td></td>
+{% endif %}
                 </tr>
             {% endfor %}
             </tbody>
@@ -258,7 +277,7 @@
     {% else %}
         <div class="alert alert-info">No batches added.</div>
     {% endif %}
-
+{% if request.user|isRoboto %}
     <!-- Modal -->
     <div class="modal fade" id="charModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -266,9 +285,12 @@
             </div>
         </div>
     </div>
-
+{% endif %}
 {% endblock %}
+
 {% block custom_script_end %}
+{% if request.user|isRoboto %}
+
     <script type="text/javascript">
         var timeOutHandler;
 
@@ -407,6 +429,8 @@
         });
 
     </script>
+{% endif %}
 {% endblock %}
+
 {% block after_bootstrap %}
 {% endblock %}

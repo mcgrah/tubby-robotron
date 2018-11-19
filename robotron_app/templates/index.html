@@ -1,4 +1,5 @@
 {% extends "base_scripted.html" %}
+{% load filters %}
 {% block title %}RoboTRON{% endblock %}
 
 {% block breadcrumb %}
@@ -21,6 +22,13 @@
     </div>
     <div class="panel panel-primary">
         <div class="panel-body">
+{% if request.user|isTranslator %}
+    <div class="row justify-content-center">
+        <a href="{% url "calendar" %}"
+       class="btn btn-info btn-lg d-flex align-items-center justify-content-center"
+       role="button">Calendar</a>
+    </div>
+{% else %}
             <div class="row">
 
                 <div class="col-md-4">
@@ -40,7 +48,6 @@
                 </div>
             </div>
             <div class="row">
-
                 <div class="col-md-4">
                     <a href="{% url "calendar" %}"
                        class="btn btn-info btn-lg d-flex align-items-center justify-content-center"
@@ -52,7 +59,7 @@
                        role="button">Assets</a>
                 </div>
             </div>
-
+{% endif %}
         </div>
     </div>
 

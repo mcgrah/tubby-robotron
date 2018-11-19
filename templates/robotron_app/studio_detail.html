@@ -1,9 +1,15 @@
 {% extends "base_scripted.html"%}
+{% load filters %}
 {% block title %}Studio: {{ studio.name }}{% endblock %}
 
 {% block minicrumbs %}
+{% if request.user|isRoboto %}
     <li class="breadcrumb-item"><a href="{% url "studios" %}">Studios</a></li>
+{% else %}
+    <li class="breadcrumb-item active">Studios</li>
+{% endif %}
     <li class="breadcrumb-item active" aria-current="page">{{ studio.name }}</li>
+
 {% endblock %}
 
 {% block content %}
@@ -41,9 +47,17 @@
        <div class="alert alert-info">This studio has no associated projects.</div>
     {% endif %}
     <hr>
-    <h6>Current Active User:</h6>
-    {% if studio.user %}
-        <div>{{ studio.user }}</div>
+    <h6>Current Users:</h6>
+    {% if user_list %}
+        <div class="list-group">
+        {% for user in user_list %}
+            <div class="row align-items-center">
+                <div class="col-sm-6">
+                    <a href="{% url 'user_profile' pk=user.id %}?next={{ request.path|urlencode }}" class="list-group-item list-group-item-action">{{ user.username }}</a>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
     {% else %}
        <div class="alert alert-info">No users added to this account.</div>
     {% endif %}

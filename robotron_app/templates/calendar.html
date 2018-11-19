@@ -1,5 +1,5 @@
 {% extends "base.html"%}
-
+{% load filters %}
 {% block pageScript %}
     <script>
         function select_all_trans(){
@@ -200,9 +200,14 @@
 
 {% block minicrumbs %}
     {% if project %}
+    {% if request.user|isTranslator %}
+        <li class="breadcrumb-item active">Projects</li>
+        <li class="breadcrumb-item active">{{ project.name }}</li>
+    {% else %}
         <li class="breadcrumb-item"><a href="{% url "projects" %}">Projects</a></li>
         <li class="breadcrumb-item"><a href="{% url 'project' pk=project.id %}">{{ project.name }}</a></li>
-        <li class="breadcrumb-item"><a href="{% url 'project_calendar' pk=project.id %}">{{ project.name }} Calendar</a></li>
+    {% endif %}
+        <li class="breadcrumb-item active">{{ project.name }} Calendar</li>
     {% else %}
         <li class="breadcrumb-item"><a href="{% url 'calendar' %}">Calendar</a></li>
     {% endif %}

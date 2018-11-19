@@ -1,5 +1,6 @@
 {% extends "base_scripted.html"%}
 {% block pageScript %}
+{% load filters %}
 <script>
         $( function() {
             $("input[id*='-delivery_date']").each(function(){
@@ -73,14 +74,21 @@
             <div class="row justify-content-start align-items-center">
                 <div class="col d-none">{{ form.id }}</div>
                 <div class="col-1 p-0">{{ forloop.counter }}</div>
+{% if request.user|isRoboto %}
                 <div class="col-3 p-0">{{ form.name|attr:"class:form-control"}}</div>
-{#                add for admin / user diffs#}
-{#                <div class="col-3">{{ form.actor|attr:"class:form-control"|attr:"disabled:true"}}</div>#}
+{% else %}
+                <div class="col-3">{{ form.instance.name}}</div>
+{% endif %}
                 <div class="col-3 p-0">{{ form.actor|attr:"class:form-control"}}</div>
+{% if request.user|isRoboto %}
                 <div class="col-2 p-0">{{ form.files_count|attr:"class:form-control" }}</div>
                 <div class="col-2 p-0">{{ form.delivery_date|attr:"class:form-control" }}</div>
                 <div class="col-1 p-0">{{ form.delivery_time|attr:"class:form-control" }}</div>
-
+{% else %}
+                <div class="col-2">{{ form.instance.files_count }}</div>
+                <div class="col-2">{{ form.instance.delivery_date|date:"Y-m-d"  }}</div>
+                <div class="col-1">{{ form.instance.delivery_time|time:"H:i"  }}</div>
+{% endif %}
 
 
             </div>

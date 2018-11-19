@@ -8,17 +8,28 @@
     {% if form %}
 {#        {{ form.media }}#}
         {% load i18n widget_tweaks %}
-        <form method="POST" action="{% url "character_loader" pk=character.id %}">
+        <form method="POST" action="{% url "character_loader_mini" pk=character.id %}">
         {% csrf_token %}
         <div class="modal-body" >
             <table class="table table-sm table-borderless">
             <tbody>
-            <tr><th scope="row">Character: </th><td>{{ form.name|attr:"class:form-control form-control-sm" }}</td></tr>
-            <tr><th scope="row">Actor: </th><td>{{ form.actor|attr:"class:form-control form-control-sm" }}</td></tr>
-            <tr><th scope="row">Files: </th><td>{{ form.files_count|attr:"class:form-control form-control-sm" }}</td></tr>
-            <tr><th scope="row">Delivery Date: </th><td>{{ form.delivery_date|attr:"class:form-control form-control-sm" }}</td></tr>
-            <tr><th scope="row">Delivery Time: </th><td>{{ form.delivery_time|attr:"class:form-control form-control-sm" }}</td></tr>
-            <tr><th scope="row">Comments: </th><td>{{ form.char_note|attr:"class:form-control form-control-sm"|attr:"rows:3" }}</td></tr>
+            <tr><th scope="row">Character: </th>
+                <td>{% if mini %}{{ character.name }}{% else %}{{ form.name|attr:"class:form-control form-control-sm" }}{% endif %}</td>
+            </tr>
+            <tr><th scope="row">Actor: </th>
+                <td>{{ form.actor|attr:"class:form-control form-control-sm" }}</td></tr>
+            <tr><th scope="row">Files: </th>
+                <td>{% if mini %}{{ character.files_count }}{% else %}{{ form.files_count|attr:"class:form-control form-control-sm" }}{% endif %}</td>
+            </tr>
+            <tr><th scope="row">Delivery Date: </th>
+                <td>{% if mini %}{{ character.delivery_date|date:"Y-m-d" }}{% else %}{{ form.delivery_date|attr:"class:form-control form-control-sm" }}{% endif %}</td>
+            </tr>
+            <tr><th scope="row">Delivery Time: </th>
+                <td>{% if mini %}{{ character.delivery_time|time:"H:i" }}{% else %}{{ form.delivery_time|attr:"class:form-control form-control-sm" }}{% endif %}</td>
+            </tr>
+            <tr><th scope="row">Comments: </th>
+                <td>{% if mini %}{{ character.char_note|linebreaksbr }}{% else %}{{ form.char_note|attr:"class:form-control form-control-sm"|attr:"rows:3" }}{% endif %}</td>
+                    </tr>
             </tbody>
             </table>
         </div>

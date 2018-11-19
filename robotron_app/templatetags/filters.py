@@ -18,16 +18,32 @@ def addDays(date,days):
 def isRoboto(user):
     if user.is_superuser:
         return True
-    return user.groups.filter(name='Roboto Users').exists()
+    try:
+        validator = user.userprofile.studio.name
+    except AttributeError:
+        validator = ''
+    if validator == 'ROBOTO' or validator == 'ROBOTO Translators':
+        return True
+    return False
+
+@register.filter
+def isTranslator(user):
+    try:
+        validator = user.userprofile.studio.name
+    except AttributeError:
+        validator = ''
+    if validator == 'ROBOTO Translators':
+        return True
+    return False
 
 @register.filter
 def hasStudio(user):
     try:
         studio = Studio.objects.get(user=user)
-        print(f'found: {studio}')
+        # print(f'found: {studio}')
         return studio
     except Exception as e:
-        print(e)
+        # print(e)
         pass
     return None
 

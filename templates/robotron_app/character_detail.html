@@ -19,10 +19,12 @@
                 <div class="col-md-auto">
                     <h4>Details</h4>
                 </div>
+{% if request.user|isRoboto %}
                 <div class="col">
                     <button type="button" class="btn btn-outline-primary" data-toggle="collapse"
                        data-target="#updateForm" aria-pressed="false" href="#">ADMIN - Edit</button>
                 </div>
+{% endif %}
             </div>
             <br>
         <table class="table table-sm">
@@ -37,6 +39,7 @@
         </table>
         </div>
         <div class="col">
+{% if request.user|isRoboto %}
             {# make this one container for editable form? #}
             {% if form %}
 {#                {{ form.media }}#}
@@ -115,6 +118,7 @@
                     </div>
                 </form>
             {% endif %}
+{% endif %}
         </div>
         <div class="col"></div>
     </div>

@@ -1,4 +1,4 @@
-{% extends "base_scripted.html" %}
+{% extends "base.html" %}
 {% block title %}Users{% endblock %}
 
 {% block minicrumbs %}
@@ -9,22 +9,23 @@
     {% load filters %}
     <div class="jumbotron robotorial border border-danger">
       <div class="container">
-        <h3>Users List [WIP - not active]</h3>
-        <p class="lead">Here are listed all Users with their respective Groups.<br>
-            You can Add new Users here and associate them with a respective Studio.<br>
-            Currently only one User can be assigned to a Studio. Roboto Users can access all Projects and Studios.
+        <h3>Users List</h3>
+        <p class="lead">Here all Users with their respective Studios are listed.
+            You can create new users or edit existing ones.<br>
+            User can be assigned to only one Studio. Roboto Users can access all Projects and Studios.<br>
+            Roboto Translators are limited to Calendar views.
         </p>
       </div>
     </div>
-<div class="row align-items-center">
-    <div class="col-md-auto">
-    <h2>Users</h2>
+    <div class="row align-items-center">
+        <div class="col-md-auto">
+        <h3>Active users</h3>
+        </div>
+        <div class="col">
+            <a role="button" class="btn btn-outline-primary" href="{% url "create_user" %}" disabled>Add New</a>
+        </div>
     </div>
-    <div class="col">
-        <button class="btn btn-outline-primary" href="#" disabled>Add New</button>
-    </div>
-    </div>
-    {% if user_list %}
+    {% if active_users %}
         <td class="container">
         <table class="table table-hover table-striped table-borderless">
         <thead>
@@ -34,28 +35,147 @@
             <th>Studio</th>
         </tr>
         </thead>
-          {% for user in user_list %}
+          {% for user in active_users %}
               {% if user.is_superuser %}
               {% else %}
               <tr>
                 <td>{{ user.username }}</td>
                 <td>{{ user.email }}</td>
-                {% if user|isRoboto %}
-                    <td class="border border-success">::ROBOTO::</td>
-                {% elif user|hasStudio == None %}
-                    <td>--</td>
-                {% else %}
-                <td>{{ user|hasStudio }}</td>
-                {% endif %}
-                      <td><div class="btn-group" role="group">
-                          <button class="btn btn-outline-primary" href="#" disabled>Edit</button>
-                          <button class="btn btn-outline-danger" href="#" disabled>Delete</button>
-                      </div></td>
+                <td>{{ user.userprofile.studio.name }}</td>
+                <td><div class="btn-group" role="group">
+                  <a role='button' class="btn btn-outline-primary" href="{% url 'user_profile' pk=user.id %}?next={{ request.path|urlencode }}">Edit</a>
+                  <button role='button' class="btn btn-outline-danger" onclick="deactivate_user({{ user.id }})">Delete</button>
+                </div></td>
               </tr>
               {% endif %}
           {% endfor %}
         </table>
     {% else %}
-       <div class="alert alert-info">There are no users in the database.</div>
+       <div class="alert alert-info">There are no active users in the database.</div>
+    {% endif %}
+<hr class="slim-hr">
+    <div class="jumbotron robotorial border border-danger">
+      <div class="container">
+        <h3>Handling Deletion</h3>
+        <p class="lead">
+            Deleting Active Users will mark them as Inactive which makes logging in impossible.<br>
+            Deleting Inactive Users will remove them permanently.<br>
+            THIS ACTION CANNOT BE UNDONE.
+        </p>
+      </div>
+    </div>
+<div class="row align-items-center">
+    <div class="col-md-auto">
+        <h3>Inactive users</h3>
+    </div>
+</div>
+    {% if inactive_users %}
+        <td class="container">
+        <table class="table table-hover table-striped table-borderless">
+        <thead>
+        <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Studio</th>
+        </tr>
+        </thead>
+          {% for user in inactive_users %}
+              {% if user.is_superuser %}
+              {% else %}
+              <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.userprofile.studio.name }}</td>
+                <td><div class="btn-group" role="group">
+                  <a role='button' class="btn btn-outline-primary" href="{% url 'user_profile' pk=user.id %}?next={{ request.path|urlencode }}">Edit</a>
+                  <button class="btn btn-outline-primary" onclick="activate_user({{ user.id }})">Reactivate</button>
+                  <button class="btn btn-outline-danger" onclick="delete_user({{ user.id }})">DELETE</button>
+                </div></td>
+              </tr>
+              {% endif %}
+          {% endfor %}
+        </table>
+    {% else %}
+       <div class="alert alert-info">There are no inactive users in the database.</div>
     {% endif %}
 {% endblock %}
+{% block custom_script_end %}
+<script type="text/javascript">
+    var timeOutHandler;
+
+    function deactivate_user(userid){
+        console.log('deactivation initialized');
+        $.ajax({
+            url:"/robotron/users/"+userid+"/deactivate",
+            beforeSend: function(){
+                timeOutHandler = setTimeout(function(){
+                    $("#loadMe").modal({
+                      backdrop: "static", //remove ability to close modal with click
+                      keyboard: false, //remove option to close with keyboard
+                      show: true //Display loader!
+                    });
+                },1000);
+
+            },
+            complete: function(){
+                clearTimeout(timeOutHander);
+                $("#loadMe").modal("hide");
+            },
+            success:function(){
+                console.log('deactivation successful');
+                window.location.reload();
+            },
+        })
+    }
+
+    function activate_user(userid){
+        console.log('activation initialized');
+        $.ajax({
+            url:"/robotron/users/"+userid+"/activate",
+            beforeSend: function(){
+                timeOutHandler = setTimeout(function(){
+                    $("#loadMe").modal({
+                      backdrop: "static", //remove ability to close modal with click
+                      keyboard: false, //remove option to close with keyboard
+                      show: true //Display loader!
+                    });
+                },1000);
+
+            },
+            complete: function(){
+                clearTimeout(timeOutHander);
+                $("#loadMe").modal("hide");
+            },
+            success:function(){
+                console.log('activation successful');
+                window.location.reload();
+            },
+        })
+    }
+
+    function delete_user(userid){
+        console.log('user delete initialized');
+        $.ajax({
+            url:"/robotron/users/"+userid+"/delete",
+            beforeSend: function(){
+                timeOutHandler = setTimeout(function(){
+                    $("#loadMe").modal({
+                      backdrop: "static", //remove ability to close modal with click
+                      keyboard: false, //remove option to close with keyboard
+                      show: true //Display loader!
+                    });
+                },1000);
+
+            },
+            complete: function(){
+                clearTimeout(timeOutHander);
+                $("#loadMe").modal("hide");
+            },
+            success:function(){
+                console.log('delete successful');
+                window.location.reload();
+            },
+        })
+    }
+</script>
+{% endblock%}

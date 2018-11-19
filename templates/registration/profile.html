@@ -1,0 +1,71 @@
+{% extends "base.html"%}
+{% load filters %}
+{% block content %}
+<form method="post">
+    {% load i18n widget_tweaks %}
+    {% csrf_token %}
+    <div class="form-group row">
+        <label for="id_username" class="col-sm-2 col-form-label">Username:</label>
+        <div class="col-sm-4">
+            {{ user_form.username|attr:"class:form-control" }}
+        </div>
+        <div class="col-sm-6 form-text text-muted small">
+            {{ user_form.username.help_text }}
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="id_email" class="col-sm-2 col-form-label"> Email:</label>
+        <div class="col-sm-4">
+            {{ user_form.email|attr:"class:form-control" }}
+        </div>
+        <div class="col-sm-6 form-text text-muted small">
+            {{ user_form.email.help_text }}
+        </div>
+    </div>
+{% if profile_form %}
+    <div class="form-group row">
+        <label for="id_studio" class="col-sm-2 col-form-label">{{ profile_form.studio.label }}:</label>
+        <div class="col-sm-6">
+            {% if request.user|isRoboto %}
+                {{ profile_form.studio|attr:"class:form-control" }}
+            {% else %}
+                {{ profile_form.studio|attr:"class:form-control-plaintext"|attr:"readonly"|attr:"disabled" }}
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+    {% if do_pass %}
+    <div class="form-group row">
+        <label for="dummy_pass" class="col-sm-2 col-form-label">Password:</label>
+        <div class="col-sm-6">
+            <button type="button" class="btn btn-outline-info mb-2" onclick="change_password()">Change Password</button>
+        </div>
+    </div>
+    {% endif %}
+  <input type="hidden" name="next" value="{{ request.GET.next }}">
+  <button type="submit" class="btn btn-primary float-left">Save changes</button>
+</form>
+{% if do_pass %}
+<!-- Modal -->
+<div class="modal fade" id="passModal" role="dialog" aria-labelledby="passModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" id="passModal-content">
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+{% if do_pass %}
+{% block custom_script_end %}
+
+<script type="text/javascript">
+    function change_password(){
+        $('#passModal-content').load("{% url 'change_password' %}",function(){
+            $('#passModal').modal({
+                show: true //Display loader!
+            });
+        });
+    }
+</script>
+{% endblock %}
+{% endif %}

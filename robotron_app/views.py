@@ -6,9 +6,13 @@ from django.views import generic
 from django.views.generic.edit import UpdateView
 from django.shortcuts import get_object_or_404, redirect
 from django.forms import inlineformset_factory, modelformset_factory
+from django.contrib import messages
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse
+from django.db import transaction
 from django.db.models import Sum, Q, Count
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User, Group
@@ -33,7 +37,14 @@ class RobotoUpdateView(UserPassesTestMixin, UpdateView):
     def test_func(self):
         if self.request.user.is_superuser:
             return True
-        return self.request.user.groups.filter(name='Roboto Users').exists()
+        # return self.request.user.groups.filter(name='Roboto Users').exists()
+        try:
+            validator = self.request.user.userprofile.studio.name
+        except AttributeError:
+            validator = ''
+        if validator == 'ROBOTO' or validator == 'ROBOTO Translators':
+            return True
+        return False
 
 
 class RobotoCreateView(UserPassesTestMixin, generic.CreateView):
@@ -41,7 +52,14 @@ class RobotoCreateView(UserPassesTestMixin, generic.CreateView):
     def test_func(self):
         if self.request.user.is_superuser:
             return True
-        return self.request.user.groups.filter(name='Roboto Users').exists()
+        # return self.request.user.groups.filter(name='Roboto Users').exists()
+        try:
+            validator = self.request.user.userprofile.studio.name
+        except AttributeError:
+            validator = ''
+        if validator == 'ROBOTO' or validator == 'ROBOTO Translators':
+            return True
+        return False
 
 
 class RobotoListView(UserPassesTestMixin, generic.ListView):
@@ -49,13 +67,28 @@ class RobotoListView(UserPassesTestMixin, generic.ListView):
     def test_func(self):
         if self.request.user.is_superuser:
             return True
-        return self.request.user.groups.filter(name='Roboto Users').exists()
+        # return self.request.user.groups.filter(name='Roboto Users').exists()
+        try:
+            validator = self.request.user.userprofile.studio.name
+        except AttributeError:
+            validator = ''
+        if validator == 'ROBOTO' or validator == 'ROBOTO Translators':
+            return True
+        return False
 
 
 def is_roboto(user):
     if user.is_superuser:
         return True
-    return user.groups.filter(name='Roboto Users').exists()
+    # return user.groups.filter(name='Roboto Users').exists()
+    try:
+        validator = user.userprofile.studio.name
+    except AttributeError:
+        validator = ''
+    if validator == 'ROBOTO' or validator == 'ROBOTO Translators':
+        return True
+    return False
+
 
 
 def get_navbar_data():
@@ -75,11 +108,119 @@ def index(request):
 
 
 @login_required
-@user_passes_test(is_roboto)
+@user_passes_test(is_roboto,login_url='403',redirect_field_name=None)
 def calendar_view(request):
     context = {}
     context['navbar_data'] = get_navbar_data()
     return render(request, 'calendar.html',context=context)
+
+
+def password_modal(request):
+    if request.method == 'POST':
+        pass_form = PasswordChangeForm(request.user, request.POST)
+        if pass_form.is_valid():
+            user = pass_form.save()
+            update_session_auth_hash(request, user)
+            return redirect('profile')
+        else:
+            messages.error(request, 'Password requirements not met.')
+            return redirect('profile')
+    else:
+        pass_form = PasswordChangeForm(request.user)
+
+    context = {
+        'pass_form': pass_form
+    }
+
+    return render(request, 'registration/change_password.html', context=context)
+
+@transaction.atomic
+@login_required
+@user_passes_test(is_roboto,login_url='403',redirect_field_name=None)
+def create_user(request):
+    if request.method == 'POST':
+        form = CreateUserForm(request.POST)
+        profile_form = ProfileForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            user.refresh_from_db()
+            profile_form = ProfileForm(request.POST, instance=user.userprofile)
+            if user.userprofile.studio.name == 'ROBOTO' or user.userprofile.studio.name == 'ROBOTO Translators':
+                user_group = Group.objects.get(name='Roboto Users')
+            else:
+                user_group = Group.objects.get(name='Studio Users')
+            profile_form.full_clean()
+            profile_form.save()
+            # set group if necessary
+            user_group.user_set.add(user)
+            messages.success(request,'user created')
+            return redirect('users')
+        else:
+            messages.error(request, 'some errors occurred')
+    else:
+        form = CreateUserForm()
+        profile_form = ProfileForm()
+
+    context = {
+        'user_form':form,
+        'profile_form':profile_form,
+    }
+    context['navbar_data'] = get_navbar_data()
+
+    return render(request, 'registration/create_user.html',context=context)
+
+
+@transaction.atomic
+@login_required
+def update_profile(request, pk=-1):
+    if pk == -1:
+        user_edit = request.user
+        do_pass = True
+    else:
+        user_edit = User.objects.get(id=pk)
+        do_pass = False
+
+    if request.method == 'POST':
+        next = request.POST.get('next', '/')
+        user_form = UserForm(request.POST, instance=user_edit)
+        if is_roboto(request.user):
+            profile_form = ProfileForm(request.POST, instance=user_edit.userprofile)
+            if user_form.is_valid() and profile_form.is_valid():
+                user_form.save()
+                profile_form.save()
+                # check group
+                if is_roboto(user_edit):
+                    if not user_edit.groups.filter(name='Roboto Users').exists():
+                        Group.objects.get(name='Roboto Users').user_set.add(user_edit)
+                else:
+                    if not user_edit.groups.filter(name='Studio Users').exists():
+                        Group.objects.get(name='Studio Users').user_set.add(user_edit)
+                return redirect(next)
+            else:
+                messages.error(request,'Some errors occurred.')
+        else:
+            if user_form.is_valid():
+               user_form.save()
+               return redirect(next)
+            else:
+                messages.error(request,'Some errors occurred.')
+
+    else:
+        user_form = UserForm(instance=user_edit)
+        if is_roboto(request.user):
+            profile_form = ProfileForm(instance=user_edit.userprofile)
+
+    context = {
+        'user_form': user_form,
+        'do_pass': do_pass
+    }
+
+    if is_roboto(request.user):
+        context['profile_form'] = profile_form
+
+    context['navbar_data'] = get_navbar_data()
+
+    return render(request, 'registration/profile.html',context=context)
 
 
 class StudioListView(LoginRequiredMixin, RobotoListView):
@@ -94,7 +235,7 @@ class StudioListView(LoginRequiredMixin, RobotoListView):
 
 
 @login_required
-@user_passes_test(is_roboto)
+@user_passes_test(is_roboto,login_url='403',redirect_field_name=None)
 def studio_create_view(request):
     if request.method == 'POST':
         form = AddStudioForm(request.POST)
@@ -155,7 +296,7 @@ class CharactersListView(generic.ListView):
         context['actor_list'] = Actor.objects.all()
         context['translator_list'] = Translator.objects.all()
         context['director_list'] = Director.objects.all()
-        context['session_list'] = Session.objects.all()
+        context['session_list'] = Session.active.all()
         context['navbar_data'] = get_navbar_data()
         return context
 
@@ -172,7 +313,7 @@ class ProjectListView(LoginRequiredMixin, generic.ListView):
             return Project.objects.annotate(num_batches=Count('batch'))
         else:
             try:
-                user_studio = Studio.objects.get(user=this_user)
+                user_studio = this_user.userprofile.studio
                 return Project.objects.filter(studio=user_studio)
             except ObjectDoesNotExist:
                 return Project.objects.none()
@@ -188,21 +329,23 @@ class UserListView(LoginRequiredMixin, RobotoListView):
     def get_context_data(self, **kwargs):
         context = super(UserListView, self).get_context_data(**kwargs)
         context['navbar_data'] = get_navbar_data()
+        context['active_users'] = User.objects.filter(is_active=True)
+        context['inactive_users'] = User.objects.filter(is_active=False)
         return context
 
 
 @login_required
-@user_passes_test(is_roboto)
+@user_passes_test(is_roboto,login_url='403',redirect_field_name=None)
 def userlist_view(request):
     users = User.objects.all()
-    for u in users:
-        print(u)
-        print(u.is_superuser)
 
     context = {
         'user_list':users
     }
     context['navbar_data'] = get_navbar_data()
+    context['active_users'] = users.filter(is_active=True)
+    context['inactive_users'] = users.filter(is_active=False)
+
     return render(request, 'auth/user_list.html', context=context)
 
 
@@ -212,13 +355,16 @@ class StudioDetailView(LoginRequiredMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super(StudioDetailView, self).get_context_data(**kwargs)
         context['project_list'] = Project.objects.filter(studio=context['studio'])
+        context['user_list'] = User.objects.filter(userprofile__studio=context['studio'])
         context['navbar_data'] = get_navbar_data()
         return context
 
 
 class StudioUpdateView(LoginRequiredMixin, UpdateView):
+
     model = Studio
     template_name_suffix = '_update'
+
     fields = [
         'name',
         'address',
@@ -229,10 +375,13 @@ class StudioUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(StudioUpdateView, self).get_context_data(**kwargs)
+        if context['studio'].name == 'ROBOTO' or context['studio'].name == 'ROBOTO Translators':
+            context['disable_name'] = True
         context['navbar_data'] = get_navbar_data()
         return context
 
-class ProjectUpdateView(LoginRequiredMixin, ModelFormWidgetMixin, UpdateView):
+
+class ProjectUpdateView(LoginRequiredMixin, ModelFormWidgetMixin, RobotoUpdateView):
     model = Project
     template_name_suffix = '_update'
     fields = [
@@ -328,13 +477,13 @@ class BatchDetailView(LoginRequiredMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(BatchDetailView, self).get_context_data(**kwargs)
-        context['session_list'] = Session.objects.filter(batch=context['batch'])
+        context['session_list'] = Session.active.filter(batch=context['batch'])
         context['character_list'] = Character.objects.filter(batch=context['batch'])
         context['form'] = AddCharacterForm()
         context['navbar_data'] = get_navbar_data()
 
         for c in context['character_list']:
-            session_count = Session.objects.filter(character=c).count()
+            session_count = Session.active.filter(character=c).count()
             setattr(c, 'session_count', session_count)
 
         return context
@@ -477,7 +626,7 @@ def batch_detail_view(request, pk):
 
     context = {
         'batch': batch,
-        'session_list': Session.objects.filter(batch=batch),
+        'session_list': Session.active.filter(batch=batch),
         'character_list': Character.objects.filter(batch=batch),
         'form': new_char_form,
         'file_form':file_form,
@@ -487,14 +636,14 @@ def batch_detail_view(request, pk):
         context['errors'] = error_msg
 
     for c in context['character_list']:
-        session_count = Session.objects.filter(character=c).count()
+        session_count = Session.active.filter(character=c).count()
         setattr(c, 'session_count', session_count)
 
     context['navbar_data'] = get_navbar_data()
     return render(request, 'robotron_app/batch_detail.html', context=context)
 
 
-class BatchDetailUpdateView(LoginRequiredMixin, UpdateView):
+class BatchDetailUpdateView(LoginRequiredMixin, RobotoUpdateView):
     model = Batch
     template_name_suffix = '_update'
 
@@ -517,7 +666,7 @@ class BatchDetailUpdateView(LoginRequiredMixin, UpdateView):
         context['navbar_data'] = get_navbar_data()
         return context
 
-class BatchDetailUpdateViewMini(LoginRequiredMixin, UpdateView):
+class BatchDetailUpdateViewMini(LoginRequiredMixin, RobotoUpdateView):
     model = Batch
     template_name = 'batch_loader.html'
 
@@ -546,12 +695,12 @@ class CharacterDetailView(LoginRequiredMixin, ModelFormWidgetMixin, generic.Deta
 
     def get_context_data(self, **kwargs):
         context = super(CharacterDetailView, self).get_context_data(**kwargs)
-        context['session_list'] = Session.objects.filter(character=context['character'])
+        context['session_list'] = Session.active.filter(character=context['character'])
         context['navbar_data'] = get_navbar_data()
         return context
 
 
-class CharacterDetailUpdateViewMini(LoginRequiredMixin, ModelFormWidgetMixin, UpdateView):
+class CharacterDetailUpdateViewMini(LoginRequiredMixin, ModelFormWidgetMixin, RobotoUpdateView):
     model = Character
     template_name = 'character_loader.html'
     fields = [
@@ -570,6 +719,27 @@ class CharacterDetailUpdateViewMini(LoginRequiredMixin, ModelFormWidgetMixin, Up
 
     def get_success_url(self, **kwargs):
         context = super(CharacterDetailUpdateViewMini, self).get_context_data(**kwargs)
+        return_batch = Batch.objects.get(character=context['character'])
+        return return_batch.get_absolute_url()+"#char-section"
+
+
+class CharacterDetailUpdateStudioMini(LoginRequiredMixin, ModelFormWidgetMixin, UpdateView):
+    model = Character
+    template_name = 'character_loader.html'
+    fields = [
+        'actor',
+    ]
+    widgets = {
+        'actor': autocomplete.ModelSelect2(url='actor-autocomplete'),
+    }
+
+    def get_context_data(self, **kwargs):
+        context = super(CharacterDetailUpdateStudioMini, self).get_context_data(**kwargs)
+        context['mini'] = True
+        return context
+
+    def get_success_url(self, **kwargs):
+        context = super(CharacterDetailUpdateStudioMini, self).get_context_data(**kwargs)
         return_batch = Batch.objects.get(character=context['character'])
         return return_batch.get_absolute_url()+"#char-section"
 
@@ -646,7 +816,7 @@ class CharacterDetailUpdateView(LoginRequiredMixin, ModelFormWidgetMixin, Update
 
     def get_context_data(self, **kwargs):
         context = super(CharacterDetailUpdateView, self).get_context_data(**kwargs)
-        context['session_list'] = Session.objects.filter(character=context['character'])
+        context['session_list'] = Session.active.filter(character=context['character'])
         context['navbar_data'] = get_navbar_data()
         return context
 
@@ -710,8 +880,8 @@ def manage_char_session(request, pk):
         fields=(
             'day',
             'hour',
-                                                     # 'duration',
-                                                     'duration_blocks',
+             # 'duration',
+             'duration_blocks',
             'director',
             'translator'
         ),
@@ -743,23 +913,35 @@ def manage_char_session(request, pk):
 @login_required
 def manage_batch_characters(request, pk):
     batch = Batch.objects.get(pk=pk)
-    CharInlineFormset = inlineformset_factory(
-        Batch, Character,
-        fields=(
-            'name',
-            'files_count',
-            'actor',
-            'delivery_date',
-            'delivery_time',
-            'char_note'
-        ),
-        widgets={
-            'actor': autocomplete.ModelSelect2(url='actor-autocomplete'),
-            'delivery_date': forms.DateInput(attrs={'class': 'datepicker'}),
-            'delivery_time': forms.TimeInput(),
-        },
-        extra=0
-    )
+    if is_roboto(request.user):
+        CharInlineFormset = inlineformset_factory(
+            Batch, Character,
+            fields=(
+                'name',
+                'files_count',
+                'actor',
+                'delivery_date',
+                'delivery_time',
+                'char_note'
+            ),
+            widgets={
+                'actor': autocomplete.ModelSelect2(url='actor-autocomplete'),
+                'delivery_date': forms.DateInput(attrs={'class': 'datepicker'}),
+                'delivery_time': forms.TimeInput(),
+            },
+            extra=0
+        )
+    else:
+        CharInlineFormset = inlineformset_factory(
+            Batch, Character,
+            fields=(
+                'actor',
+            ),
+            widgets={
+                'actor': autocomplete.ModelSelect2(url='actor-autocomplete'),
+            },
+            extra=0
+        )
     if request.method == "POST":
         formset = CharInlineFormset(request.POST, instance=batch)
         if formset.is_valid():
@@ -777,6 +959,7 @@ def manage_batch_characters(request, pk):
 
 
 @login_required
+@user_passes_test(is_roboto,login_url='403',redirect_field_name=None)
 def manage_asset(request):
     asset_formset1 = modelformset_factory(Actor, fields=('name',), extra=0, can_delete=True)
     asset_formset2 = modelformset_factory(Translator, fields=('name',), extra=0, can_delete=True)
@@ -832,6 +1015,7 @@ def manage_asset(request):
             print('WTF')
 
     context['navbar_data'] = get_navbar_data()
+    context['deleted_sessions'] = Session.objects.filter(marked_delete=True)
     return render(request, 'manage_assets.html', context=context)
 
 
@@ -855,7 +1039,7 @@ def generate_new_sessions(request, batch_id):
     characters = Character.objects.filter(batch=batch).filter(actor__isnull=False)
     bulk_list = []
     for char in characters:
-        s_count = Session.objects.filter(character=char).count()
+        s_count = Session.active.filter(character=char).count()
         if s_count > 0:
             pass
         else:
@@ -871,8 +1055,9 @@ def generate_new_sessions(request, batch_id):
 
 
 @login_required
+@user_passes_test(is_roboto,login_url='403',redirect_field_name=None)
 def nuke_empty_sessions(request):
-    nuke_this = Session.objects.filter(translator__isnull=True)
+    nuke_this = Session.active.filter(translator__isnull=True)
     if nuke_this.exists():
         nuke_this._raw_delete(nuke_this.db)
 
@@ -882,6 +1067,7 @@ def nuke_empty_sessions(request):
 
 
 @login_required
+@user_passes_test(is_roboto,login_url='403',redirect_field_name=None)
 def nuke_chars(request):
     nuke_this_char = Character.objects.filter(files_count__isnull=True)
     if nuke_this_char.exists():
@@ -893,6 +1079,7 @@ def nuke_chars(request):
 
 
 @login_required
+@user_passes_test(is_roboto,login_url='403',redirect_field_name=None)
 def delete_selected_chars(request):
     # get list of ids from url and del all char records
     ids = request.GET.get('ids', '')
@@ -911,16 +1098,19 @@ def delete_selected_chars(request):
 
 
 @login_required
+@transaction.atomic
 def delete_selected_sessions(request):
     # get list of ids from url and del all char records
     ids = request.GET.get('ids', '')
     id_list = ids.split(',')
     print(id_list)
-    marked_for_del = Session.objects.filter(id__in=id_list)
+    marked_for_del = Session.active.filter(id__in=id_list)
     for m in marked_for_del:
         # call delete
         try:
-            m.delete()
+            # m.delete()
+            m.marked_delete = True
+            m.save()
         except Exception as e:
             print(e)
             pass
@@ -929,6 +1119,7 @@ def delete_selected_sessions(request):
 
 
 @login_required
+@user_passes_test(is_roboto,login_url='403',redirect_field_name=None)
 def delete_selected_batches(request):
     # get list of ids from url and del all char records
     ids = request.GET.get('ids', '')
@@ -947,6 +1138,7 @@ def delete_selected_batches(request):
 
 
 @login_required
+@user_passes_test(is_roboto,login_url='403',redirect_field_name=None)
 def delete_selected_attachments(request):
     # get list of ids from url and del all char records
     ids = request.GET.get('ids', '')
@@ -974,6 +1166,7 @@ def delete_selected_attachments(request):
 
 
 @login_required
+@user_passes_test(is_roboto,login_url='403',redirect_field_name=None)
 def attachment_upload(request, pk):
     project = Project.objects.get(id=pk)
     if request.method == 'POST':
@@ -995,6 +1188,7 @@ def attachment_upload(request, pk):
 
 
 @login_required
+@user_passes_test(is_roboto,login_url='403',redirect_field_name=None)
 def delete_studio(request, pk):
     marked = Studio.objects.get(id=pk)
     try:
@@ -1007,6 +1201,7 @@ def delete_studio(request, pk):
 
 
 @login_required
+@user_passes_test(is_roboto,login_url='403',redirect_field_name=None)
 def delete_project(request, pk):
     marked = Project.objects.get(id=pk)
     try:
@@ -1017,29 +1212,71 @@ def delete_project(request, pk):
 
     return HttpResponseRedirect(reverse('projects'))
 
+
+@login_required
+@user_passes_test(is_roboto,login_url='403',redirect_field_name=None)
+def deactivate_user(request, pk):
+    marked = User.objects.get(id=pk)
+    try:
+        marked.is_active = False
+        marked.save()
+    except Exception as e:
+        print(e)
+        messages.error(request,'some errors occurred: '+str(e))
+        pass
+    return HttpResponseRedirect(reverse('users'))
+
+
+@login_required
+@user_passes_test(is_roboto,login_url='403',redirect_field_name=None)
+def activate_user(request, pk):
+    marked = User.objects.get(id=pk)
+    try:
+        marked.is_active = True
+        marked.save()
+    except Exception as e:
+        print(e)
+        messages.error(request,'some errors occurred: '+str(e))
+        pass
+    return HttpResponseRedirect(reverse('users'))
+
+
+@login_required
+@user_passes_test(is_roboto,login_url='403',redirect_field_name=None)
+def delete_user(request, pk):
+    marked = User.objects.get(id=pk)
+    try:
+        marked.delete()
+        messages.success(request,'User deleted.')
+    except Exception as e:
+        print(e)
+        messages.error(request, 'some errors occurred: ' + str(e))
+        pass
+    return HttpResponseRedirect(reverse('users'))
+
 # ERROR HANDLERS
-def error404(request, exception):
+def error404(request, exception=''):
     context = {
         'code':'404'
     }
     print('hit 404')
     return render(request,'base_error.html',context=context)
 
-def error403(request, exception):
+def error403(request, exception=''):
     context = {
         'code': '403'
     }
     print('hit 403')
     return render(request, 'base_error.html', context=context)
 
-def error400(request, exception):
+def error400(request, exception=''):
     context = {
         'code': '400'
     }
     print('hit 400')
     return render(request, 'base_error.html', context=context)
 
-def error500(request, exception):
+def error500(request, exception=''):
     context = {
         'code': '500'
     }
@@ -1149,7 +1386,7 @@ def export_project(request, pk):
             ws_batch.write(row_num + idx, col_num+4, f'{char.delivery_time}', font_style_plain)
             ws_batch.write(row_num + idx, col_num+5, f'{char.char_note}', font_style_plain)
 
-            sessions = Session.objects.filter(batch=batch, character=char)
+            sessions = Session.active.filter(batch=batch, character=char)
             ws_batch.write(row_num + idx, col_num+6, len(sessions), font_style_plain)
 
         # print all sessions for each batch
@@ -1158,7 +1395,7 @@ def export_project(request, pk):
         ws_batch.write(row_num, col_num, 'SESSIONS', font_style_bold2)
         row_num += 1
         sessions_columns = ['Character', 'Actor', 'Day', 'Hour', 'Duration', 'Director', 'Translator', ]
-        sessions = Session.objects.filter(batch=batch)
+        sessions = Session.active.filter(batch=batch)
         for col_num in range(len(sessions_columns)):
             ws_batch.write(row_num, col_num, sessions_columns[col_num], font_style_bold)
 

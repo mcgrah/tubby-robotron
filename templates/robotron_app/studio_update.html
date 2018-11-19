@@ -25,6 +25,8 @@
                 <div class="col-sm-8">
                 {% if field.name == 'address' or  field.name == 'note'%}
                     {{ field|attr:"class:form-control"|attr:"rows:5" }}
+                {% elif field.name == 'name' and disable_name %}
+                    {{ field|attr:"class:form-control-plaintext"|attr:"readonly" }}
                 {% else %}
                     {{ field|attr:"class:form-control" }}
                 {% endif %}

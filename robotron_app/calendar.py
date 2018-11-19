@@ -13,15 +13,22 @@ import json
 def is_roboto(user):
     if user.is_superuser:
         return True
-    return user.groups.filter(name='Roboto Users').exists()
+    # return user.groups.filter(name='Roboto Users').exists()
+    try:
+        validator = user.userprofile.studio.name
+    except AttributeError:
+        validator = ''
+    if validator == 'ROBOTO' or validator == 'ROBOTO Translators':
+        return True
+    return False
 
 
 def get_sessions_for_range(start_date, end_date, pk=None):
     if pk is None:
-        range_sessions = Session.objects.filter(day__range=(start_date, end_date)).order_by('day').order_by('hour')
+        range_sessions = Session.active.filter(day__range=(start_date, end_date)).order_by('day').order_by('hour')
     else:
         selected_project = Project.objects.get(id=pk)
-        range_sessions = Session.objects.filter(batch__project=selected_project).filter(
+        range_sessions = Session.active.filter(batch__project=selected_project).filter(
             day__range=(start_date, end_date)).order_by('day').order_by('hour')
 
     # only sessions with actual content
@@ -100,10 +107,10 @@ def get_sessions_for_range(start_date, end_date, pk=None):
 
 def get_sessions_for_month(month, pk=None):
     if pk is None:
-        month_sessions = Session.objects.filter(day__month=month).filter(day__isnull=False).order_by('day', 'hour')
+        month_sessions = Session.active.filter(day__month=month).filter(day__isnull=False).order_by('day', 'hour')
     else:
         selected_project = Project.objects.get(id=pk)
-        month_sessions = Session.objects.filter(batch__project=selected_project).filter(day__month=month).filter(
+        month_sessions = Session.active.filter(batch__project=selected_project).filter(day__month=month).filter(
             day__isnull=False).order_by('day', 'hour')
 
     # only sessions with actual content
@@ -593,7 +600,7 @@ def generate_month_manual(year_number=(datetime.now().year), month_number=(datet
 
 
 @login_required
-@user_passes_test(is_roboto)
+@user_passes_test(is_roboto,login_url='403',redirect_field_name=None)
 def calendar_current(request, pk=None):
     today = datetime.now()
     if pk == None:
@@ -603,7 +610,7 @@ def calendar_current(request, pk=None):
 
 
 @login_required
-@user_passes_test(is_roboto)
+@user_passes_test(is_roboto,login_url='403',redirect_field_name=None)
 def calendar(request, year, month, pk=None):
     if pk == None:
         manual_calendar = generate_month_manual(year, month)

@@ -2,6 +2,9 @@ from django.db import models
 from django.urls import reverse
 from django.conf import settings
 from urllib.parse import urlparse
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 # =======================
@@ -14,6 +17,23 @@ class TranslationString(models.Model):
 
     def __str__(self):
         return f'{self.key} EN: {self.english} PL: {self.polish}'
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    studio = models.ForeignKey('Studio', on_delete=models.PROTECT, null=True, blank=True)
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.userprofile.save()
+
 
 
 class Persona(models.Model):
@@ -93,12 +113,12 @@ class Attachment(models.Model):
 # main models - should have detail view pages
 # =======================
 class Studio(models.Model):
-    name = models.CharField(null=False, blank=False, max_length=128)
+    name = models.CharField(null=False, blank=False, max_length=128, unique=True)
     address = models.TextField(null=True, blank=True)
     telephone = models.CharField(null=True, blank=True, max_length=20)
     email = models.EmailField(null=True, blank=True)
     note = models.TextField(null=True, blank=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, null=True, blank=True)
+    # user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, null=True, blank=True)
 
     class Meta:
         ordering = ['name']
@@ -107,7 +127,10 @@ class Studio(models.Model):
         return reverse('studio', args=[str(self.id)])
 
     def __str__(self):
-        return f'{self.name} ({self.email})'
+        if self.email == '':
+            return f'{self.name}'
+        else:
+            return f'{self.name} ({self.email})'
 
 
 class Project(models.Model):
@@ -155,6 +178,10 @@ class Batch(models.Model):
         return f'{self.project.name} {self.name}'
 
 
+class CustomManager(models.Manager):
+    def get_queryset(self):
+        return super(CustomManager, self).get_queryset().filter(marked_delete=False)
+
 class Session(models.Model):
     batch = models.ForeignKey('Batch', on_delete=models.PROTECT, null=False, blank=False)
     character = models.ForeignKey(
@@ -184,6 +211,11 @@ class Session(models.Model):
         (17,'4h 15 min'),(18,'4h 30 min'),(19,'4h 45 min'),(20,'5h'),
     )
     duration_blocks = models.SmallIntegerField(choices=DURATION_CHOICES,default=0)
+
+    # fake delete
+    marked_delete = models.BooleanField(null=False, blank=False,default=False)
+    active = CustomManager()
+    objects = models.Manager()
 
     def get_absolute_url(self):
         return reverse('session', args=[str(self.id)])
