@@ -244,19 +244,11 @@ def generate_weekday_events(weekday, event_list, rare_hours=True):
         category = 't-' + str(event['event_category'])
         sid = event['event_id']
 
-        tooltip_text = f'<p><strong>{time}</strong></p><p>{translator}</p><p>{character}<br>{actor}</p>'
-
+        tooltip_text = f'<p><strong>{time}</strong></p><p>Translator: {translator}</p><p>Actor: {actor}<br>Character: {character}</p>'
         # tooltip_text = mark_safe(tooltip_text)
-
-        text += f'<div class="card text-center small {category}" data-session="{sid}" ' \
-                f'onclick="sess_quickedit({sid})" data-html="true" data-toggle="tooltip" title="{tooltip_text}" ' \
-                f'style="height:{height}px">\n'
+        text += f'<div class="card text-center small {category}" data-session="{sid}" onclick="sess_quickedit({sid})" data-html="true" data-toggle="tooltip" title="{tooltip_text}" style="height:{height}px">\n'
         text += '<div class="card-body event-body">\n'
-        text += f'<p class="card-title">{time}</p>\n'
-        text += f'<p class="card-subtitle">{translator}</p>\n'
-        text += '<hr class="slim-hr">\n'
-        text += f'<p class="card-text">{character}<br>{actor}</p>\n'
-        text += '</div></div>\n'
+        text += f'<p class="b" style="height:{str(height*0.8)}px; overflow: hidden;">{time}<br><br>Translator: <strong>{translator}</strong><br>Actor: <strong>{actor}</strong><br>Character: <strong>{character}</strong></p></div></div>\n'
         print(f'[BUILDER] making event card of {int(event["event_timeblocks"])} blocks')
         return text
 
