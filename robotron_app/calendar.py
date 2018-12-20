@@ -252,77 +252,102 @@ def generate_weekday_events(weekday, event_list, rare_hours=True):
         print(f'[BUILDER] making event card of {int(event["event_timeblocks"])} blocks')
         return text
 
-    def generate_event_column(num, ids, startblock, endblock):
+    def generate_event_column(events, startblock, endblock):
         # generate column split into num parts, for listed events
-        print(f'[DEBUG]:COLUMN: num:{num} ids:{ids} start:{startblock} end:{endblock}')
         text = ''
-        col_i = 1
         height = (endblock - startblock) * 20
         text += f'<div class="row flex-nowrap pl-3 pr-3" style="height{height}:px">\n'
-        while col_i <= num:
+        for event in events:
             # make column, generate padded content
-            event = weekday_events[ids[col_i - 1]]
-            print(f'[DEBUG]: generating event {ids[col_i-1]} in column {num}')
             text += '<div class="col p-0 event-holder">\n'
             text += generate_event_padded(startblock, endblock, event)
             text += '</div>\n'
-            col_i = col_i + 1
         text += '</div>\n'
         return text
 
-    # pajiiti quick way, to fix tomorrow
+    # pajiiti quick way, to fix 'tomorrow'
     def unique(list1):
         lset = set(list1)
         unique_list = (list(lset))
         return unique_list
 
-    def conflict_duo(range1, range2):
-        # returns start / end of split column or 0 if no overlap
-        ranges = []
-        ranges += range1
-        ranges += range2
+    def conflict_check_pc(events):
+        global_events = []
 
-        elems = len(ranges)
-        unique_elems = len(unique(ranges))
+        for i in range(0, 96):
+            global_events.append({'events_count': 0,
+                                  'start_block': 0,
+                                  'end_block': 0,
+                                  'events': [],
+                                  'colliding_events': []})
 
-        if elems == unique_elems:
-            return 0
-        else:
-            result = []
-            result.append(range1[0])
-            result.append(range2[-1])
-            return result
+        global_event_start, global_event_stop, min_global_event_start = 0, 0, 0
 
-    def conflict_duo_ev(event1, event2):
-        start1 = int(get_start_block(event1['event_hour']))
-        start2 = int(get_start_block(event2['event_hour']))
-        end1 = int(start1 + event1['event_timeblocks'])
-        end2 = int(start2 + event2['event_timeblocks'])
-        range1 = range(start1, end1)
-        range2 = range(start2, end2)
-        return conflict_duo(range1, range2)
+        for e in events:
+            local_event_start = int(get_start_block(events[e]['event_hour']))
+            local_event_stop = local_event_start + events[e]['event_timeblocks']
 
-    def conflict_loop(i, j):
-        # for j events, check for conflicts starting with i-th event
-        main_e = weekday_events[i]
-        events_left = j - i
-        split_column = [-1, 0]
-        while i < j:
-            comp_e = weekday_events[i + 1]
-            collide = conflict_duo_ev(main_e, comp_e)
-            if collide > 0:
-                start1 = int(get_start_block(main_e['event_hour']))
-                start2 = int(get_start_block(comp_e['event_hour']))
-                end1 = int(start1 + main_e['event_timeblocks'])
-                end2 = int(start2 + comp_e['event_timeblocks'])
-                if end2 > end1:
-                    # if comp ends later, switch places
-                    main_e = weekday_events[j]
-                    i = j
-                else:
-                    i = i + 1
+            for h in range(local_event_start, local_event_stop):
+                print(e)
+                global_events[h]['events'].append(events[e])
 
-        return split_column
+                global_events[h]['colliding_events'].append(events[e])
+
+            if global_events[local_event_start]['events_count'] == 0:
+                start_block = local_event_start
+                global_event_start = local_event_start
+                global_event_stop = local_event_stop
+                min_global_event_start = local_event_start
+            else:
+                for g in range(0, local_event_start):
+                    if global_events[g]['events_count'] != 0:
+                        global_event_start = g
+                        break
+
+                for g in range(global_event_start, 96):
+                    if global_events[g]['events_count'] == 0:
+                        global_event_stop = g
+                        break
+
+            if min_global_event_start > global_event_start:
+                global_event_start = min_global_event_start
+
+            if global_event_stop < local_event_stop:
+                global_event_stop = local_event_stop
+
+            end_block = global_event_stop
+
+            new_global_even_count = global_events[global_event_start]['events_count'] + 1
+
+            for g in range(global_event_start, global_event_stop):
+                global_events[g]['events_count'] = new_global_even_count
+                global_events[g]['start_block'] = start_block
+                global_events[g]['end_block'] = end_block
+
+        # add collinding events to each node
+        for x in global_events:
+            local_events = []
+            for k in range(x['start_block'], x['end_block']):
+                for ev in global_events[k]['events']:
+                    if ev not in local_events:
+                        local_events.append(ev)
+            for a in local_events:
+                if a not in x['colliding_events']:
+                    x['colliding_events'].append(a)
+
+        # create only events
+        global_mini_table = []
+        i = 0
+        while i < 96:
+            if len(global_events[i]['colliding_events']) > 0:
+                global_mini_table.append({'colliding_events': global_events[i]['colliding_events'],
+                                          'start_block': global_events[i]['start_block'],
+                                          'end_block': global_events[i]['end_block']})
+                i += global_events[i]['end_block'] - global_events[i]['start_block']
+            else:
+                i += 1
+
+        return global_mini_table
 
     def conflict_check():
         ranges = []
@@ -336,17 +361,14 @@ def generate_weekday_events(weekday, event_list, rare_hours=True):
             # endblock = endblock + 1
 
             taken_blocks = range(startblock, endblock)
-            print(f'event takes following blocks: {taken_blocks}')
             ranges += taken_blocks
 
         elems = len(ranges)
         unique_elems = len(unique(ranges))
 
-        print(f'[DEBUG] list elements: {elems}, unique: {unique_elems}')
         # if all are unique, there is no conflict
-        if (elems == unique_elems):
+        if elems == unique_elems:
             return False
-
         return True
 
     column = ''
@@ -381,104 +403,30 @@ def generate_weekday_events(weekday, event_list, rare_hours=True):
         column += generate_empty_block(blocks_left)
 
     # case 2: multiple events, conflicts present
-    elif (conflict_check()):
+    elif conflict_check():
         # padding the first block
         e = weekday_events[1]
         pad_block = get_start_block(e['event_hour'])
 
         if pad_block != 0:
             column += generate_empty_block(pad_block)
-            blocks_left = blocks_left - pad_block
 
         # each event has to be checked with all following events, except the last one
-        collider = -1
-        for w in weekday_events:
-            if collider < w <= len(weekday_events):
-                print(f'[DEBUG] running checks for {w}')
-                event_ids = []
-                event_ids.append(w)
-                e = weekday_events[w]
-                events_left = event_num - w
-                split_column = [-1, 0]
-                i = 1
-                while i <= events_left:
-                    e_next = weekday_events[w + i]
-                    collide = conflict_duo_ev(e, e_next)
-                    # print(collide)
-                    if collide == 0:
-                        print(f'[DEBUG]: NO CONFLICT between {w} and {w+i}')
-                        print(f'last found column blocks: {split_column}, collider: {collider}')
-                        i = i + 1
-                        # if no column blocks, event can be built alone else chained
-                        break
-                    else:
-                        print(f'[DEBUG]: {w} COLLIDES with {w+i}')
-                        collider = w + i
-                        event_ids.append(w + i)
-                        if split_column[0] == -1:
-                            split_column[0] = collide[0]
-                        elif collide[0] < split_column[0]:
-                            split_column[0] = collide[0]
+        mini_weekday_events_map = conflict_check_pc(weekday_events)
 
-                        if collide[1] > split_column[1]:
-                            split_column[1] = collide[1]
-                        # swap places?
-                        if i + 1 <= events_left:
-                            start1 = int(get_start_block(e['event_hour']))
-                            start2 = int(get_start_block(e_next['event_hour']))
-                            end1 = int(start1 + e['event_timeblocks'])
-                            end2 = int(start2 + e_next['event_timeblocks'])
-                            if end2 > end1:
-                                # nested additional check
-                                collide2 = conflict_duo_ev(e_next, weekday_events[w + i + 1])
-                                if collide2 != 0:
-                                    print(f'[DEBUGDEBUG]: {w+i} COLLIDES with {w+i+1}')
-                                    collider = w + i + 1
-                                    event_ids.append(w + i + 1)
-                                    if collide2[0] < split_column[0]:
-                                        split_column[0] = collide2[0]
+        old_end_block = 0
+        for w in mini_weekday_events_map:
+            start_block = w['start_block']
+            end_block = w['end_block']
 
-                                    if collide2[1] > split_column[1]:
-                                        split_column[1] = collide2[1]
-                    i = i + 1
+            if old_end_block == 0:
+                old_end_block = end_block
 
-                    print(f'current column blocks: {split_column}')
-                # do we need empty block before anything?
+            if old_end_block < start_block:
+                column += generate_empty_block(start_block - old_end_block)
+                old_end_block = end_block
 
-                # clear ids to be sure
-                event_ids = (list(set(event_ids)))
-
-                print(f'[DEBUG]: we are at {int(blocks_total - blocks_left)} block')
-                if (len(event_ids) > 1):
-                    # content inside column is padded, but no column itself
-                    diff = split_column[0] - int(blocks_total - blocks_left)
-                    print(f'[DEBUG] column diff is {diff}')
-                    if diff > 0:
-                        column += generate_empty_block(diff)
-                        blocks_left = blocks_left - diff
-                    column += generate_event_column(len(event_ids), event_ids, split_column[0], split_column[1])
-                    blocks_left = blocks_left - (split_column[1] + 1 - split_column[0])
-
-                else:
-                    # single event, needs manual padding?
-                    start = get_start_block(e['event_hour'])
-                    print(f'[DEBUG] start is {start}')
-                    diff = start - int(blocks_total - blocks_left)
-                    # diff = int(56 - blocks_left) - start
-                    print(f'[DEBUG] diff is {diff}')
-                    if diff == 0:
-                        column += generate_event_block(e)
-                        blocks_left = blocks_left - e['event_timeblocks']
-                    elif diff < 0:
-                        # should not happen
-                        print('[ERROR] wrong event order for')
-                        print(e)
-                        raise KeyError
-                    else:
-                        column += generate_empty_block(diff)
-                        blocks_left = blocks_left - diff
-                        column += generate_event_block(e)
-                        blocks_left = blocks_left - e['event_timeblocks']
+            column += generate_event_column(w['colliding_events'], start_block, end_block)
 
     # case 3: multiple events, no conflict found
     else:
