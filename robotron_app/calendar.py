@@ -282,15 +282,16 @@ def generate_weekday_events(weekday, event_list, rare_hours=True):
                                   'colliding_events': []})
 
         global_event_start, global_event_stop, min_global_event_start = 0, 0, 0
-
+        print(events)
         for e in events:
+
             local_event_start = int(get_start_block(events[e]['event_hour']))
             local_event_stop = local_event_start + events[e]['event_timeblocks']
+            if local_event_stop > 96:
+                local_event_stop = 96
 
             for h in range(local_event_start, local_event_stop):
-                print(e)
                 global_events[h]['events'].append(events[e])
-
                 global_events[h]['colliding_events'].append(events[e])
 
             if global_events[local_event_start]['events_count'] == 0:
@@ -324,7 +325,7 @@ def generate_weekday_events(weekday, event_list, rare_hours=True):
                 global_events[g]['start_block'] = start_block
                 global_events[g]['end_block'] = end_block
 
-        # add collinding events to each node
+        # add colliding events to each node
         for x in global_events:
             local_events = []
             for k in range(x['start_block'], x['end_block']):
