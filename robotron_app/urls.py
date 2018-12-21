@@ -1,5 +1,5 @@
 from django.urls import path
-from robotron_app import views, calendar
+from robotron_app import views, calendar, stats
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -38,6 +38,8 @@ urlpatterns = [
     path('calendar/<int:year>/<int:month>/', calendar.calendar, name='calendar_range'),
     path('project/<int:pk>/calendar/', calendar.calendar_current, name='project_calendar'),
     path('project/<int:pk>/calendar/<int:year>/<int:month>/', calendar.calendar, name='project_calendar_range'),
+
+    path('project/<int:pk>/stats/', stats.stats_current, name='project_stats'),
 
     path('calendar/calendar_week', calendar.calendar_week, name='calendar_week_loader'),
     path('project/<int:pk>/calendar/calendar_week', calendar.calendar_week, name='project_calendar_week_loader'),
