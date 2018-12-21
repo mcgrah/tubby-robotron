@@ -57,7 +57,10 @@
 {% endif %}
                 <a role=button class="btn btn-outline-primary"
                    href="{% url "export_project" pk=project.id %}">Export</a>
-
+                {% if request.user|isRoboto %}
+                <a role=button class="btn btn-outline-primary"
+                   href="{% url "project_stats" pk=project.id %}">Stats</a>
+                {%  endif %}
             </div>
         </div>
     </div>

@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load filters %}
+{% block pageScript %}
+{% endblock %}
+
+{% if project %}
+{% else %}
+{% endif %}
+
+{% block title %}
+    {% if project %}
+        Stats: {{ project.name }}
+    {% else %}
+        Stats
+    {% endif %}
+{% endblock %}
+
+{% block minicrumbs %}
+    <li class="breadcrumb-item"><a href="{{ project.get_absolute_url }}">{{ project.name }}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Stats</li>
+{% endblock %}
+{% block content %}
+{% load filters %}
+
+{#    row_captions = ['Project', 'Studio', 'Director', 'Batches', 'Files', 'Words', 'Characters', 'Actors', 'SFX', 'TC', ]#}
+{#        row_data = [project.name, project.studio.name, project.director.name, project.batch_count, project.files_count,#}
+{#                project.word_count, project.char_count, project.actor_count, project.sfx_note, project.tc_note, ]#}
+
+
+{#            characters_columns = ['Character', 'Actor', 'Files', 'Delivery Date', 'Delivery Time', 'Comments', 'Sessions', ]#}
+{#        sessions_columns = ['Character', 'Actor', 'Day', 'Hour', 'Duration', 'Director', 'Translator', ]#}
+
+{% if project %}
+    <div class="col-lg-12 col-lg-offset-3 text-center"><h2>Stats for: <strong>{{ project.name }}</strong> <a
+            role=button class="btn btn-sm btn-outline-secondary" href="{% url "export_project" pk=project.id %}">Export
+        project</a></h2></div>
+{% else %}
+    <div class="col-lg-12 col-lg-offset-3 text-center"><h2>Stats for: <strong>All Projects</strong></h2></div>
+{% endif %}
+<br>
+
+<table class="table table-hover table-striped table-borderless">
+    <thead>
+    </thead>
+    <tr>
+        <th style="width: 36.66%">Batches</th>
+        <th>Sessions</th>
+    </tr>
+
+    <tr>
+        <td>{{ project_details.0 }}</td>
+        <td>{{ project_details.1 }}</td>
+    </tr>
+
+</table>
+
+
+<h3>Actors</h3>
+<table class="table table-hover table-striped table-borderless">
+    <thead>
+    <tr>
+        <th style="width: 36.66%">Name</th>
+        <th>Hours spent</th>
+    </tr>
+    </thead>
+    {% for item in project_stats.actors %}
+        <tr>
+            <td>
+                {% if item.1 == 'None' %}
+                    UNASSIGNED
+                {% else %}
+                    {{ item.1 }}
+                {% endif %}
+            </td>
+
+            <td>{{ item.0 }}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<h3>Translators</h3>
+<table class="table table-hover table-striped table-borderless">
+    <thead>
+    <tr>
+        <th style="width: 36.66%">Name</th>
+        <th>Hours spent</th>
+    </tr>
+    </thead>
+    {% for item in project_stats.translators %}
+        <tr>
+            <td>
+                {% if item.1 == 'None' %}
+                    UNASSIGNED
+                {% else %}
+                    {{ item.1 }}
+                {% endif %}
+            </td>
+            <td>{{ item.0 }}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<h3>Directors</h3>
+<table class="table table-hover table-striped table-borderless">
+    <thead>
+    <tr>
+        <th style="width: 36.66%">Name</th>
+        <th>Hours spent</th>
+    </tr>
+    </thead>
+    {% for item in project_stats.directors %}
+        <tr>
+            <td>
+                {% if item.1 == 'None' %}
+                    UNASSIGNED
+                {% else %}
+                    {{ item.1 }}
+                {% endif %}
+            </td>
+            <td>{{ item.0 }}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

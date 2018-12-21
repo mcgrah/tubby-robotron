@@ -115,6 +115,11 @@ def calendar_view(request):
     context['navbar_data'] = get_navbar_data()
     return render(request, 'calendar.html',context=context)
 
+@login_required
+@user_passes_test(is_roboto,login_url='403',redirect_field_name=None)
+def stats_view(request):
+    return render(request, 'stats.html')
+
 
 def password_modal(request):
     if request.method == 'POST':

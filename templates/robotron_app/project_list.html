@@ -35,7 +35,7 @@
         <div class="list-group">
             {% for project in project_list %}
                 <div class="row align-items-center">
-                    <div class="col-sm-8">
+                    <div class="col-sm-7">
                         <a href="{{ project.get_absolute_url }}" class="list-group-item list-group-item-action">
                             {% if project.num_batches > 0 %}
                                 <span class="badge badge-primary">{{ project.num_batches }}</span>
@@ -61,6 +61,10 @@
                                    href="{% url "project_calendar" pk=project.id %}">View Calendar</a>
                                 <a role=button class="btn btn-outline-primary"
                                    href="{% url "export_project" pk=project.id %}">Export</a>
+                                {% if request.user|isRoboto %}
+                                    <a role=button class="btn btn-outline-primary"
+                                       href="{% url "project_stats" pk=project.id %}">Stats</a>
+                                {% endif %}
                             {% endif %}
                         </div>
                     </div>
