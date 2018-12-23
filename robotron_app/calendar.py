@@ -425,7 +425,7 @@ def generate_weekday_events(weekday, event_list, rare_hours=True):
 
             if old_end_block < start_block:
                 column += generate_empty_block(start_block - old_end_block)
-                old_end_block = end_block
+            old_end_block = end_block
 
             column += generate_event_column(w['colliding_events'], start_block, end_block)
 
