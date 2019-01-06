@@ -21,6 +21,7 @@ from robotron_app.forms import *
 # autocomplete
 from dal import autocomplete
 import json
+from robotron_app.logger import log
 
 from django.forms.models import modelform_factory
 from django.core.files.storage import FileSystemStorage
@@ -515,7 +516,7 @@ def batch_detail_view(request, pk):
     # form handling for adding single character
     if request.method == 'POST':
         if 'single_form' in request.POST:
-            print('single_form_key called')
+            log('single_form_key called')
             file_form = UploadCSVForm()  #  clearing file form
             new_char_form = AddCharacterForm(request.POST)
             if new_char_form.is_valid():
@@ -532,10 +533,10 @@ def batch_detail_view(request, pk):
         # form handling for session generation
         elif 'session_char_ids' in request.POST:
             session_form = AddSessionForm(request.POST)
-            print('sessions called')
+            log('sessions called')
             if session_form.is_valid():
                 char_ids = request.POST['session_char_ids'].split(',')
-                print('RECEIVED: ', char_ids)
+                log('RECEIVED: ', char_ids)
                 bulk_sessions = []
                 for char in char_ids:
                     if int(char) >= 0:
@@ -555,7 +556,7 @@ def batch_detail_view(request, pk):
 
         # form handling for csv import
         elif 'csv_import_form' in request.POST:
-            print('csv_form_key_called')
+            log('csv_form_key_called')
             file_form = UploadCSVForm(request.POST, request.FILES)
             if file_form.is_valid():
                 try:
@@ -592,10 +593,10 @@ def batch_detail_view(request, pk):
                     for c in tmp_actor_list:
                         try:
                             if Actor.objects.get(name=c):
-                                print('actor found: ', c)
+                                log('actor found: ', c)
                         except ObjectDoesNotExist:
                             tmp_actor = Actor(name=c)
-                            print('actor will be created: ', tmp_actor)
+                            log('actor will be created: ', tmp_actor)
                             bulk_actors.append(tmp_actor)
 
                     # create new actors before dependant characters
@@ -628,7 +629,7 @@ def batch_detail_view(request, pk):
                         Character.objects.bulk_create(bulk_chars)
 
                 except Exception as e:
-                    print(e)
+                    log(e)
 
                 return HttpResponseRedirect(request.path_info)
 
@@ -1020,7 +1021,7 @@ def manage_asset(request):
                 context['form_error_id'] = type(e).__name__
                 context['form_errors'] = 'error_attachment'
         else:
-            print('WTF')
+            log('WTF')
 
     context['navbar_data'] = get_navbar_data()
     context['deleted_sessions'] = Session.objects.filter(marked_delete=True)
@@ -1092,14 +1093,14 @@ def delete_selected_chars(request):
     # get list of ids from url and del all char records
     ids = request.GET.get('ids', '')
     id_list = ids.split(',')
-    print(id_list)
+    log(id_list)
     marked_for_del = Character.objects.filter(id__in=id_list)
     for m in marked_for_del:
         # call delete
         try:
             m.delete()
         except Exception as e:
-            print(e)
+            log(e)
             pass
 
     return HttpResponse()
@@ -1111,7 +1112,7 @@ def delete_selected_sessions(request):
     # get list of ids from url and del all char records
     ids = request.GET.get('ids', '')
     id_list = ids.split(',')
-    print(id_list)
+    log(id_list)
     marked_for_del = Session.active.filter(id__in=id_list)
     for m in marked_for_del:
         # call delete
@@ -1120,7 +1121,7 @@ def delete_selected_sessions(request):
             m.marked_delete = True
             m.save()
         except Exception as e:
-            print(e)
+            log(e)
             pass
 
     return HttpResponse()
@@ -1132,14 +1133,14 @@ def delete_selected_batches(request):
     # get list of ids from url and del all char records
     ids = request.GET.get('ids', '')
     id_list = ids.split(',')
-    print(id_list)
+    log(id_list)
     marked_for_del = Batch.objects.filter(id__in=id_list)
     for m in marked_for_del:
         # call delete
         try:
             m.delete()
         except Exception as e:
-            print(e)
+            log(e)
             pass
 
     return HttpResponse()
@@ -1151,7 +1152,7 @@ def delete_selected_attachments(request):
     # get list of ids from url and del all char records
     ids = request.GET.get('ids', '')
     id_list = ids.split(',')
-    print(id_list)
+    log(id_list)
     marked_for_del = Attachment.objects.filter(id__in=id_list)
     for m in marked_for_del:
         # call delete
@@ -1159,15 +1160,16 @@ def delete_selected_attachments(request):
         try:
             m.delete()
         except Exception as e:
-            print(e)
+            log(e)
             pass
         finally:
             # delete file for real not just database
-            print(filename)
-            # try:
-            #     os.remove(f'{filename}')
-            # except OSError:
-            #     pass
+            # log(filename)
+            try:
+                os.remove(os.path.join(os.getcwd(), 'media', filename))
+                # f'{os.getcwd()}\media\documents\{filename}')
+            except OSError:
+                pass
             pass
 
     return HttpResponse()
@@ -1202,7 +1204,7 @@ def delete_studio(request, pk):
     try:
         marked.delete()
     except Exception as e:
-        print(e)
+        log(e)
         pass
 
     return HttpResponseRedirect(reverse('studios'))
@@ -1215,7 +1217,7 @@ def delete_project(request, pk):
     try:
         marked.delete()
     except Exception as e:
-        print(e)
+        log(e)
         pass
 
     return HttpResponseRedirect(reverse('projects'))
@@ -1229,7 +1231,7 @@ def deactivate_user(request, pk):
         marked.is_active = False
         marked.save()
     except Exception as e:
-        print(e)
+        log(e)
         messages.error(request,'some errors occurred: '+str(e))
         pass
     return HttpResponseRedirect(reverse('users'))
@@ -1243,7 +1245,7 @@ def activate_user(request, pk):
         marked.is_active = True
         marked.save()
     except Exception as e:
-        print(e)
+        log(e)
         messages.error(request,'some errors occurred: '+str(e))
         pass
     return HttpResponseRedirect(reverse('users'))
@@ -1257,7 +1259,7 @@ def delete_user(request, pk):
         marked.delete()
         messages.success(request,'User deleted.')
     except Exception as e:
-        print(e)
+        log(e)
         messages.error(request, 'some errors occurred: ' + str(e))
         pass
     return HttpResponseRedirect(reverse('users'))
@@ -1267,28 +1269,28 @@ def error404(request, exception=''):
     context = {
         'code':'404'
     }
-    print('hit 404')
+    log('hit 404')
     return render(request,'base_error.html',context=context)
 
 def error403(request, exception=''):
     context = {
         'code': '403'
     }
-    print('hit 403')
+    log('hit 403')
     return render(request, 'base_error.html', context=context)
 
 def error400(request, exception=''):
     context = {
         'code': '400'
     }
-    print('hit 400')
+    log('hit 400')
     return render(request, 'base_error.html', context=context)
 
 def error500(request, exception=''):
     context = {
         'code': '500'
     }
-    print('hit 500')
+    log('hit 500')
     return render(request, 'base_error.html', context=context)
 
 

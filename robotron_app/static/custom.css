@@ -205,7 +205,6 @@ body {
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);
 }
 
-
 .btn-t-2 {
   color: #00C000;
   background-color: transparent;
@@ -1536,7 +1535,6 @@ body {
     /*grey*/
     background-color: #c4c5c6 !important;
     border-color: red;
-
 }
 
 .t-1 {
@@ -1712,6 +1710,27 @@ body {
     /*Xereus Purple*/
 	background-color: #471F5F !important;
     color: #fff;
+}
+
+.cal-pill {
+    /*grey*/
+  background-color: #c4c5c6 !important;
+  font-size: 10px !important;
+  pointer-events: none !important;
+}
+
+.cal-pill-transparent {
+    /*grey*/
+  background-color: transparent !important;
+  font-size: 10px !important;
+  pointer-events: none !important;
+}
+
+.hide_event {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  font-size: 0px !important;
+  pointer-events: none !important;
 }
 
 input[type=checkbox] {
