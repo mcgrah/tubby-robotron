@@ -32,8 +32,7 @@
             <a class="navbar-brand" href='{% url "index" %}'>
                 <img src="{% static "logo_square.png" %}" width="30" height="30" alt="">
             </a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
-                    aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
         </div>
@@ -44,9 +43,7 @@
                     {% if request.user|isRoboto and not request.user|isTranslator %}
                         <li class="nav-item"><a class="nav-link" href='{% url "studios" %}'>Studios</a></li>
                         <li class="nav-item dropdown">
-                            <button type="button" id="navbarDropdown"
-                                    class="btn  btn-dark dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"
-                                    aria-haspopup="true" aria-expanded="false">
+                            <button type="button" id="navbarDropdown" class="btn  btn-dark dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="sr-only">Toggle Dropdown</span>
                             </button>
                             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -60,9 +57,7 @@
                     {% endif %}
                     {% if request.user|isRoboto and not request.user|isTranslator %}
                         <li class="nav-item dropdown">
-                            <button type="button" id="navbarDropdown2"
-                                    class="btn  btn-dark dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"
-                                    aria-haspopup="true" aria-expanded="false">
+                            <button type="button" id="navbarDropdown2" class="btn  btn-dark dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="sr-only">Toggle Dropdown</span>
                             </button>
                             <div class="dropdown-menu" aria-labelledby="navbarDropdown2">
@@ -70,8 +65,7 @@
                                 <a class="dropdown-item" href="{% url "create_project" %}">Add New Project</a>
                                 <hr>
                                 {% for p in navbar_data.all_projects %}
-                                    <a class="dropdown-item"
-                                       href="{% url "project" pk=p.id %}">{{ p.name }}</a>
+                                    <a class="dropdown-item" href="{% url "project" pk=p.id %}">{{ p.name }}</a>
                                 {% endfor %}
                             </div>
 
@@ -80,60 +74,48 @@
                     {% if request.user|isRoboto %}
                         <li class="nav-item"><a class="nav-link" href='{% url "calendar" %}'>Project Calendars</a></li>
                         <li class="nav-item dropdown">
-                            <button type="button" id="navbarDropdown3"
-                                    class="btn  btn-dark dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"
-                                    aria-haspopup="true" aria-expanded="false">
+                            <button type="button" id="navbarDropdown3" class="btn  btn-dark dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="sr-only">Toggle Dropdown</span>
                             </button>
-
                             <div class="dropdown-menu" aria-labelledby="navbarDropdown3">
                                 <a class="dropdown-item" href="{% url "calendar" %}">All Calendars</a>
                                 <hr>
                                 {% for p in navbar_data.all_projects %}
-                                    <a class="dropdown-item"
-                                       href="{% url "project_calendar" pk=p.id %}">{{ p.name }}</a>
+                                    <a class="dropdown-item" href="{% url "project_calendar" pk=p.id %}">{{ p.name }}</a>
                                 {% endfor %}
                             </div>
                         </li>
                     {% endif %}
                     <li class="nav-item">
-                        <button type="button" class="btn btn-outline-warning" data-toggle="modal"
-                                data-target="#changelogModal">CHANGELOG
+                        <button type="button" class="btn btn-outline-warning" data-toggle="modal" data-target="#changelogModal">CHANGELOG
                         </button>
                     </li>
-                    {#                <li class="nav-item"><button type="button" class="btn btn-outline-secondary" id="just_load_please">DEBUG Loader</button></li>#}
-                </ul>
+{#                <li class="nav-item"><button type="button" class="btn btn-outline-secondary" id="just_load_please">DEBUG Loader</button></li>#}
+            </ul>
             </div>
         </div>
         <div class="col-md-2">
             <div class="float-right btn-group" role="group">
-                {% if user.is_authenticated %}
-                    {% if request.user.is_staff %}
-                        <a role="button" class="btn btn-outline-success " id="staff"
-                           href="{% url "profile" %}?next={{ request.path|urlencode }}">USER: {{ user.get_username }}
-                            [STAFF]</a>
-                    {% elif request.user|isTranslator %}
-                        <a role="button" class="btn btn-outline-info"
-                           href="{% url "profile" %}?next={{ request.path|urlencode }}">USER: {{ user.get_username }}
-                            [ROBOTO_TR]</a>
-                    {% elif request.user|isRoboto %}
-                        <a role="button" class="btn btn-outline-info"
-                           href="{% url "profile" %}?next={{ request.path|urlencode }}">USER: {{ user.get_username }}
-                            [ROBOTO]</a>
-                    {% else %}
-                        <a role="button" class="btn btn-outline-danger"
-                           href="{% url "profile" %}?next={{ request.path|urlencode }}">USER: {{ user.get_username }}
-                            [STUDIO]</a>
-                    {% endif %}
-                    <a role="button" class="btn btn-outline-danger" href="{% url "logout" %}">LOGOUT</a>
+            {% if user.is_authenticated %}
+                {% if request.user.is_staff %}
+                    <a role="button" class="btn btn-outline-success " id="staff" href="{% url "profile" %}?next={{ request.path|urlencode }}">USER: {{ user.get_username }} [STAFF]</a>
+                {% elif request.user|isTranslator %}
+                    <a role="button" class="btn btn-outline-info" href="{% url "profile" %}?next={{ request.path|urlencode }}">USER: {{ user.get_username }} [ROBOTO_TR]</a>
+                {% elif request.user|isRoboto %}
+                    <a role="button" class="btn btn-outline-info" href="{% url "profile" %}?next={{ request.path|urlencode }}">USER: {{ user.get_username }} [ROBOTO]</a>
                 {% else %}
-                    <a role="button" class="btn btn-outline-danger" href="{% url "login" %}">LOGIN</a>
+                    <a role="button" class="btn btn-outline-danger" href="{% url "profile" %}?next={{ request.path|urlencode }}">USER: {{ user.get_username }} [STUDIO]</a>
                 {% endif %}
+                    <a role="button" class="btn btn-outline-danger" href="{% url "logout" %}">LOGOUT</a>
+            {% else %}
+                <a role="button" class="btn btn-outline-danger" href="{% url "login" %}">LOGIN</a>
+            {% endif %}
             </div>
         </div>
     </div>
-</nav>
-<div class="container">
+    </nav>
+
+    <div class="container">
     {% block breadcrumb %}
         <div aria-label="breadcrumb">
             <ol class="breadcrumb">
@@ -147,7 +129,7 @@
     {% if messages %}
         <ul class="messages">
             {% for message in messages %}
-                <li class="alert alert-{{ message.tags }}">{{ message }}</li>
+            <li class="alert alert-{{ message.tags }}">{{ message }}</li>
             {% endfor %}
         </ul>
     {% endif %}
@@ -166,143 +148,136 @@
     {% else %}
         {% block login_prompt %}
             <div class="jumbotron jumbotron-fluid">
-                <div class="container">
-                    <h4>Not Authorised</h4>
-                    <p class="lead">You need to be logged in: <a href="{% url "login" %}">LOGIN</a></p>
-                </div>
+              <div class="container">
+                <h4>Not Authorised</h4>
+                <p class="lead">You need to be logged in: <a href="{% url "login" %}">LOGIN</a></p>
+              </div>
             </div>
         {% endblock %}
     {% endif %}
     {% block pagination %}
-        {% if is_paginated %}
-            <div class="pagination">
+      {% if is_paginated %}
+        <div class="pagination">
           <span class="page-links">
             {% if page_obj.has_previous %}
-                <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">previous</a>
+              <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">previous</a>
             {% endif %}
-              <span class="page-current">
+            <span class="page-current">
               <p>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.</p>
             </span>
-              {% if page_obj.has_next %}
-                  <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">next</a>
-              {% endif %}
+            {% if page_obj.has_next %}
+              <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">next</a>
+            {% endif %}
           </span>
-            </div>
-        {% endif %}
+        </div>
+      {% endif %}
     {% endblock %}
 
-</div>
+    </div>
 {#   loader modal things  #}
-<div class="modal fade" id="loadMe" tabindex="-1" role="dialog" aria-labelledby="loadMeLabel">
-    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+    <div class="modal fade" id="loadMe" tabindex="-1" role="dialog" aria-labelledby="loadMeLabel">
+      <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
         <div class="modal-content">
-            <div class="modal-body text-center">
-                <!--<div class="spin" id="spin"> !-->
-                <div class="text-center">
-                    <img src="{% static "robotron.gif" %}" class="rounded">
-                    <div class="loader-txt">
-                        <p><em>RoboTRON is working...</em></p>
-                    </div>
+          <div class="modal-body text-center">
+            <!--<div class="spin" id="spin"> !-->
+            <div class="text-center">
+                <img src="{% static "robotron.gif" %}" class="rounded">
+                <div class="loader-txt">
+                    <p><em>RoboTRON is working...</em></p>
                 </div>
             </div>
+          </div>
         </div>
+      </div>
     </div>
-</div>
 
 {#   changelog modal things  #}
-<div class="modal fade" id="changelogModal" tabindex="-1" role="dialog" aria-labelledby="changelogModal"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLongTitle">Demo Changelog</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <h6>19 November 2018</h6>
-                <ul class="small">
-                    <li>added Stats tab to Exported Projects</li>
-                    <li>fixed overflowing text in Calendar event cards</li>
-                    <li>added Users management functionality</li>
-                    <li>deleted Sessions are now archived instead of permanently removed</li>
-                    <li>[WIP] deleted Sessions can be viewed under Assets tab</li>
-                    <li>[WIP] tweaked views and permissions per User category (Studio, Roboto, Translators)</li>
-                </ul>
-                <hr class="slim-hr">
-                <h6>04 November 2018</h6>
-                <ul class="small">
-                    <li>added Export Project functionality</li>
-                    <li>added Attach File to Project functionality</li>
-                    <li>added navbar menu for all Project Calendars</li>
-                    <li>changed Session duration to allow 15min intervals</li>
-                    <li>changed Calendar View to auto-hide weekends and early hours if no sessions present</li>
-                </ul>
-                <hr class="slim-hr">
-                <h6>28 October 2018</h6>
-                <ul class="small">
-                    <li>fixed wrong field type for Delivery Time</li>
-                    <li>fixed landing at the top of the page after Quick Edit</li>
-                    <li>changed 'Char count' label to 'Character number'</li>
-                    <li>added Comments field to Characters</li>
-                </ul>
-                <hr class="slim-hr">
-                <h6>21 October 2018</h6>
-                <ul class="small">
-                    <li>fixed newlines in TC / SFX fields</li>
-                    <li>fixed datepicker formats and set Monday as day-1</li>
-                    <li>fixed overlapping footer in Create New Studio view</li>
-                    <li>fixed Quick Edit selections for Director / Translator / Character fields</li>
-                    <li>added alert on Batch Detail view if number of files doesn't match declared amount</li>
-                    <li>added initial deadline to Add New Batch form</li>
-                    <li>added initial delivery date to Add Character form (matching batch deadline); same will apply to
-                        characters imported from CSV
-                    </li>
-                    <li>added button to Edit All Characters in Batch Detail view</li>
-                    <li>added tooltips with full text to calendar events as a <strong>temporary</strong> solution for
-                        unreadable text
-                    </li>
-                    <li>changed styling for UNASSIGNED calendar events as a <strong>temporary</strong> solution for
-                        unreadable text
-                    </li>
-                </ul>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
+<div class="modal fade" id="changelogModal" tabindex="-1" role="dialog" aria-labelledby="changelogModal" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Demo Changelog</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <h6>19 November 2018</h6>
+          <ul class="small">
+              <li>added Stats tab to Exported Projects</li>
+              <li>fixed overflowing text in Calendar event cards</li>
+              <li>added Users management functionality</li>
+              <li>deleted Sessions are now archived instead of permanently removed</li>
+              <li>[WIP] deleted Sessions can be viewed under Assets tab</li>
+              <li>[WIP] tweaked views and permissions per User category (Studio, Roboto, Translators)</li>
+          </ul>
+          <hr class="slim-hr">
+          <h6>04 November 2018</h6>
+          <ul class="small">
+              <li>added Export Project functionality</li>
+              <li>added Attach File to Project functionality</li>
+              <li>added navbar menu for all Project Calendars</li>
+              <li>changed Session duration to allow 15min intervals</li>
+              <li>changed Calendar View to auto-hide weekends and early hours if no sessions present</li>
+          </ul>
+          <hr class="slim-hr">
+          <h6>28 October 2018</h6>
+          <ul class="small">
+              <li>fixed wrong field type for Delivery Time</li>
+              <li>fixed landing at the top of the page after Quick Edit</li>
+              <li>changed 'Char count' label to 'Character number'</li>
+              <li>added Comments field to Characters</li>
+          </ul>
+          <hr class="slim-hr">
+          <h6>21 October 2018</h6>
+          <ul class="small">
+              <li>fixed newlines in TC / SFX fields</li>
+              <li>fixed datepicker formats and set Monday as day-1</li>
+              <li>fixed overlapping footer in Create New Studio view</li>
+              <li>fixed Quick Edit selections for Director / Translator / Character fields</li>
+              <li>added alert on Batch Detail view if number of files doesn't match declared amount</li>
+              <li>added initial deadline to Add New Batch form</li>
+              <li>added initial delivery date to Add Character form (matching batch deadline); same will apply to characters imported from CSV</li>
+              <li>added button to Edit All Characters in Batch Detail view</li>
+              <li>added tooltips with full text to calendar events as a <strong>temporary</strong> solution for unreadable text</li>
+              <li>changed styling for UNASSIGNED calendar events as a <strong>temporary</strong> solution for unreadable text</li>
+          </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
     </div>
+  </div>
 </div>
 
-{# bootstrap things #}
-<script src="{% static "popper.min.js" %}"></script>
+    {# bootstrap things #}
+    <script src="{% static "popper.min.js"%}"></script>
 
-{% block custom_script_end %}
-{% endblock %}
+    {% block custom_script_end %}
+    {% endblock %}
 
-<script src="{% static "jquery-ui-1.12.1/jquery-ui.js" %}"></script>
-<script src="{% static "jquery-ui-1.12.1/jquery.timepicker.js" %}"></script>
-<script src="{% static "bootstrap-4.1.3-dist/js/bootstrap.js" %}"></script>
+    <script src="{% static "jquery-ui-1.12.1/jquery-ui.js" %}"></script>
+    <script src="{% static "jquery-ui-1.12.1/jquery.timepicker.js" %}"></script>
+    <script src="{% static "bootstrap-4.1.3-dist/js/bootstrap.js" %}"></script>
 
-{% block after_bootstrap %}
-{% endblock %}
-<link href="{% static "admin/css/vendor/select2/select2.css" %}" type="text/css" media="screen" rel="stylesheet">
-<link href="{% static "admin/css/autocomplete.css" %}" type="text/css" media="screen" rel="stylesheet">
-<link href="{% static "autocomplete_light/select2.css" %}" type="text/css" media="screen" rel="stylesheet">
+    {% block after_bootstrap %}
+    {% endblock %}
+    <link href="{% static "admin/css/vendor/select2/select2.css" %}" type="text/css" media="screen" rel="stylesheet">
+    <link href="{% static "admin/css/autocomplete.css"%}" type="text/css" media="screen" rel="stylesheet">
+    <link href="{% static "autocomplete_light/select2.css"%}" type="text/css" media="screen" rel="stylesheet">
 
-<script type="text/javascript" src="{% static "admin/js/vendor/select2/select2.full.js" %}"></script>
-<script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
-<script type="text/javascript" src="{% static "autocomplete_light/jquery.init.js" %}"></script>
-<script type="text/javascript" src="{% static "autocomplete_light/autocomplete.init.js" %}"></script>
-<script type="text/javascript" src="{% static "admin/js/autocomplete.js" %}"></script>
-<script type="text/javascript" src="{% static "autocomplete_light/forward.js" %}"></script>
-<script type="text/javascript" src="{% static "autocomplete_light/select2.js" %}"></script>
+    <script type="text/javascript" src="{% static "admin/js/vendor/select2/select2.full.js"%}"></script>
+    <script type="text/javascript" src="{% static "admin/js/jquery.init.js"%}"></script>
+    <script type="text/javascript" src="{% static "autocomplete_light/jquery.init.js"%}"></script>
+    <script type="text/javascript" src="{% static "autocomplete_light/autocomplete.init.js"%}"></script>
+    <script type="text/javascript" src="{% static "admin/js/autocomplete.js"%}"></script>
+    <script type="text/javascript" src="{% static "autocomplete_light/forward.js"%}"></script>
+    <script type="text/javascript" src="{% static "autocomplete_light/select2.js"%}"></script>
 </body>
 
 <footer>
     <div class="footer text-center text-monospace fixed-bottom">
-        powered by T.U.B.by, Thiev's Unfriendly Bot
+    powered by T.U.B.by, Thiev's Unfriendly Bot
     </div>
 </footer>
 </html>
