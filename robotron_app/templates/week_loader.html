@@ -2,22 +2,18 @@
 {% load filters %}
 
 <div class="row flex-nowrap" id="calendar_week">
-    <div class="col-1 border-right" id="hour_column" style="background-color: rgba(108, 117, 125, 0.15)">
+    <div id="hour_column" style="background-color: rgba(108, 117, 125, 0.15); width: 50px; align-content: right">
         <div class="row h6 justify-content-center m-0 pb-1"></div>
         <div class="row h6 justify-content-center m-0 pb-1"></div>
         {% for val in 24|get_range %}
             {% if val < 7 %}
                 {% if rare_hours %}
-                    <div class="row rare-hours">{{ val }}:00</div>
-                    <div class="row small rare-hours">{{ val }}:15</div>
-                    <div class="row small rare-hours">{{ val }}:30</div>
-                    <div class="row small rare-hours">{{ val }}:45</div>
+                    <div class="rare_hours" style="height: 17px; font-size:17px; align-content: right">&nbsp{{ val }}:00</div>
+                    <div class="rare_hours" style="height: 15px; font-size:13px; align-content: right"></div>
                 {% endif %}
             {% else %}
-                <div class="row">{{ val }}:00</div>
-                <div class="row small">{{ val }}:15</div>
-                <div class="row small">{{ val }}:30</div>
-                <div class="row small">{{ val }}:45</div>
+                    <div style="height: 17px; font-size:17px; align-content: right">&nbsp{{ val }}:00</div>
+                    <div style="height: 15px; font-size:13px; align-content: right"></div>
             {% endif %}
         {% endfor %}
 
@@ -60,9 +56,11 @@
 </div>
 
 <script>
-$(document).ready(function() {
-    $('[data-toggle="tooltip"]').tooltip({
-        html: true
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip({
+            html: true
+        })
+        $('[data-toggle="popover"]').popover();
     })
-})
+
 </script>

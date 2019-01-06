@@ -8,6 +8,7 @@ from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _
 from robotron_app.models import Actor, Studio, Director, Translator, Session, UserProfile
 from dal import autocomplete
+from robotron_app.logger import log
 
 
 class UserForm(forms.ModelForm):
@@ -46,12 +47,12 @@ class TimeInput(forms.TimeInput):
 def validate_csv(file):
     if not file.name.endswith('.csv'):
         error_msg = 'file is not CSV type'
-        print(error_msg)
+        log(error_msg)
         raise ValidationError(error_msg)
 
     if file.multiple_chunks():
         error_msg = 'file is too large'
-        print(error_msg)
+        log(error_msg)
         raise ValidationError(error_msg)
 
 

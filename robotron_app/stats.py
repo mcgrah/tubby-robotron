@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render
 from robotron_app.models import Session, Project, Batch
-
+from robotron_app.logger import log
 
 def is_roboto(user):
     if user.is_superuser:

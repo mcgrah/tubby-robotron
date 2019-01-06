@@ -74,7 +74,6 @@
                                        href="{% url "project" pk=p.id %}">{{ p.name }}</a>
                                 {% endfor %}
                             </div>
-
                         </li>
                     {% endif %}
                     {% if request.user|isRoboto %}
@@ -85,10 +84,9 @@
                                     aria-haspopup="true" aria-expanded="false">
                                 <span class="sr-only">Toggle Dropdown</span>
                             </button>
-
                             <div class="dropdown-menu" aria-labelledby="navbarDropdown3">
-                                <a class="dropdown-item" href="{% url "calendar" %}">All Calendars</a>
-                                <hr>
+                            <a class="dropdown-item" href="{% url "calendar" %}">All Calendars</a>
+                            <hr>
                                 {% for p in navbar_data.all_projects %}
                                     <a class="dropdown-item"
                                        href="{% url "project_calendar" pk=p.id %}">{{ p.name }}</a>
@@ -133,7 +131,8 @@
         </div>
     </div>
 </nav>
-<div class="container">
+<div>
+{#<div class="container">#}
     {% block breadcrumb %}
         <div aria-label="breadcrumb">
             <ol class="breadcrumb">
@@ -143,7 +142,6 @@
             </ol>
         </div>
     {% endblock %}
-
     {% if messages %}
         <ul class="messages">
             {% for message in messages %}
@@ -173,6 +171,7 @@
             </div>
         {% endblock %}
     {% endif %}
+
     {% block pagination %}
         {% if is_paginated %}
             <div class="pagination">
@@ -190,7 +189,6 @@
             </div>
         {% endif %}
     {% endblock %}
-
 </div>
 {#   loader modal things  #}
 <div class="modal fade" id="loadMe" tabindex="-1" role="dialog" aria-labelledby="loadMeLabel">

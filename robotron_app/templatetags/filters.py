@@ -40,10 +40,10 @@ def isTranslator(user):
 def hasStudio(user):
     try:
         studio = Studio.objects.get(user=user)
-        # print(f'found: {studio}')
+        # log(f'found: {studio}')
         return studio
     except Exception as e:
-        # print(e)
+        # log(e)
         pass
     return None
 

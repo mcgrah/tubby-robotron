@@ -5,8 +5,7 @@ from datetime import date, datetime, timedelta
 from django.shortcuts import render
 from robotron_app.models import Session, Translator, Project
 from robotron_app.views import get_navbar_data
-import json
-
+from robotron_app.logger import log
 
 # SOON™- replace ordinary copy-paste with proper classes
 
@@ -35,7 +34,7 @@ def get_sessions_for_range(start_date, end_date, pk=None):
     range_sessions = range_sessions.filter(character__actor__isnull=False).filter(duration_blocks__gt=0)
 
     test_hours = range_sessions.filter(hour__hour__lt=7).count()
-    print(f'EARLY SESSIONS COUNT: {test_hours}')
+    log(f'EARLY SESSIONS COUNT: {test_hours}')
 
     if(test_hours > 0):
         has_rare = True
@@ -53,7 +52,7 @@ def get_sessions_for_range(start_date, end_date, pk=None):
         7: {}
     }
 
-    print(f'[DEBUG]: found {range_sessions.count()} sessions')
+    log(f'[DEBUG]: found {range_sessions.count()} sessions')
     for m in range_sessions:
         # day = m.day.day
         weekday = m.day.isoweekday()
@@ -95,7 +94,7 @@ def get_sessions_for_range(start_date, end_date, pk=None):
             events_dict[weekday] = {}
             events_dict[weekday][1] = content
             pass
-    # print(json.dumps(events_dict, indent=4, sort_keys=True))
+    # log(json.dumps(events_dict, indent=4, sort_keys=True))
 
     result = {
         'events_dict': events_dict,
@@ -145,28 +144,45 @@ def get_sessions_for_month(month, pk=None):
 
         try:
             elem = len(events_dict[day].keys())
-            # print(len(elem))
+            # log(len(elem))
             events_dict[day][elem + 1] = content
 
         except KeyError:
-            # print(f'adding first event for day: {day}')
+            # log(f'adding first event for day: {day}')
             events_dict[day] = {}
             events_dict[day][1] = content
             pass
 
-    # print(events_dict)
-    # print(json.dumps(events_dict, indent=4, sort_keys=True))
+    # log(events_dict)
+    # log(json.dumps(events_dict, indent=4, sort_keys=True))
 
     return events_dict
 
 
 def color_pill(int):
+    return 'badge-secondary'
+
+
+def generate_day_events(day, event_list):
+    #     content that goes inside event-container
+    event_text = ''
+    if day in event_list.keys():
+        #     iterate over list
+        for k in event_list[day].values():
+            event_text = f'<a tabindex="0" class="badge badge-pill cal-pill"> </a>'
+            break
+    if len(event_text) == 0:
+        event_text = f'<a tabindex="0" class="badge badge-pill cal-pill-transparent"> </a>'
+    return event_text
+
+
+def color_pill_t(int):
     if int == 0:
         return 'badge-secondary'
     return 'badge-dark'
 
 
-def generate_day_events(day, event_list):
+def generate_day_events_t(day, event_list):
     #     content that goes inside event-container
     event_text = ''
     if day in event_list.keys():
@@ -176,18 +192,16 @@ def generate_day_events(day, event_list):
             title = k['event_duration'] + ' ' + k['event_title']
             body = k['event_body']
 
-            # link = k['event_link']
-            link = '#'
-            # event_text += f'<a href="{link}" class="m-0 badge badge-pill {category}"> </a>\n'
             event_text += f'<a tabindex="0" data-html="true" data-toggle="popover" data-placement="bottom" data-trigger="focus"' \
                           f' title="{title}" data-content="{body}" class="m-0 event-pill badge badge-pill {category}"> </a>\n'
 
     return event_text
 
-
 def generate_weekday_events(weekday, event_list, rare_hours=True):
     # generate column of event and dummy blocks
 
+    # 8 fits for 1080p screens
+    block_height = 8
     # ==== HELPERS
     def get_start_block(start_hour):
         minutes = (start_hour.hour * 60) + start_hour.minute
@@ -198,7 +212,7 @@ def generate_weekday_events(weekday, event_list, rare_hours=True):
             start_block = blocks #- 28
         else:
             start_block = blocks - 28
-        # print(f'start: {start_hour}, minutes: {minutes}, blocks: {blocks}, start_block: {start_block}')
+        # log(f'start: {start_hour}, minutes: {minutes}, blocks: {blocks}, start_block: {start_block}')
         return start_block
 
     def generate_event_padded(column_start, column_end, event):
@@ -214,7 +228,7 @@ def generate_weekday_events(weekday, event_list, rare_hours=True):
             column_blocks_left = column_blocks_left - event_blocks
         elif diff < 0:
             # should not happen
-            print('[ERROR] wrong event order in column')
+            log('[ERROR] wrong event order in column')
             raise KeyError
         else:
             text += generate_empty_block(diff)
@@ -229,33 +243,33 @@ def generate_weekday_events(weekday, event_list, rare_hours=True):
 
     def generate_empty_block(time_blocks):
         text = ''
-        height = time_blocks * 20
+        height = time_blocks * block_height
         text += f'<div class="card bg-transparent border-0" style="height:{height}px"></div>\n'
-        print(f'[BUILDER] making empty card of {int(time_blocks)} blocks')
+        log(f'[BUILDER] making empty card of {int(time_blocks)} blocks')
         return text
 
     def generate_event_block(event):
         text = ''
-        height = event['event_timeblocks'] * 20
+        height = event['event_timeblocks'] * block_height
         time = event['event_duration']
         translator = event['event_translator']
         character = event['event_character']
         actor = event['event_actor']
         category = 't-' + str(event['event_category'])
         sid = event['event_id']
+        project = event['event_project']
 
-        tooltip_text = f'<p><strong>{time}</strong></p><p>Translator: {translator}</p><p>Actor: {actor}<br>Character: {character}</p>'
-        # tooltip_text = mark_safe(tooltip_text)
-        text += f'<div class="card text-center small {category}" data-session="{sid}" onclick="sess_quickedit({sid})" data-html="true" data-toggle="tooltip" title="{tooltip_text}" style="height:{height}px">\n'
+        tooltip_text = mark_safe(f'<p>Translator: {translator}</p><p>Project: {project}<br>Actor: {actor}<br>Character: {character}</p>')
+        text += f'<div class="card text-center small event-container {category}" data-session="{sid}" onclick="sess_quickedit({sid})" data-html="true" data-toggle="popover" data-trigger="hover" title="{time}" data-content="{tooltip_text}" style="height:{height}px">\n'
         text += '<div class="card-body event-body">\n'
-        text += f'<p class="b" style="height:{str(height*0.8)}px; overflow: hidden;">{time}<br><br>Translator: <strong>{translator}</strong><br>Actor: <strong>{actor}</strong><br>Character: <strong>{character}</strong></p></div></div>\n'
-        print(f'[BUILDER] making event card of {int(event["event_timeblocks"])} blocks')
+        text += f'<p style="height:{str(height*0.8)}px; overflow: hidden;">{time}<br><br>Translator: <strong>{translator}</strong><br>Actor: <strong>{actor}</strong><br>Character: <strong>{character}</strong></p></div></div>\n'
+        log(f'[BUILDER] making event card of {int(event["event_timeblocks"])} blocks')
         return text
 
     def generate_event_column(events, startblock, endblock):
         # generate column split into num parts, for listed events
         text = ''
-        height = (endblock - startblock) * 20
+        height = (endblock - startblock) * block_height
         text += f'<div class="row flex-nowrap pl-3 pr-3" style="height{height}:px">\n'
         for event in events:
             # make column, generate padded content
@@ -282,7 +296,7 @@ def generate_weekday_events(weekday, event_list, rare_hours=True):
                                   'colliding_events': []})
 
         global_event_start, global_event_stop, min_global_event_start = 0, 0, 0
-        print(events)
+        log(events)
         for e in events:
 
             local_event_start = int(get_start_block(events[e]['event_hour']))
@@ -375,7 +389,7 @@ def generate_weekday_events(weekday, event_list, rare_hours=True):
     column = ''
     weekday_events = event_list[weekday]
     event_num = len(weekday_events.keys())
-    print(f'[DEBUG] found {event_num} events for day-{weekday}')
+    log(f'[DEBUG] found {event_num} events for day-{weekday}')
 
     # 56 for 7-20, 96 for 0-23
     if rare_hours:
@@ -391,7 +405,7 @@ def generate_weekday_events(weekday, event_list, rare_hours=True):
     # case 1: single event, no conflicts
     elif (event_num == 1):
         e = weekday_events[1]
-        # print(e)
+        # log(e)
         pad_block = get_start_block(e['event_hour'])
 
         if pad_block != 0:
@@ -399,6 +413,7 @@ def generate_weekday_events(weekday, event_list, rare_hours=True):
             blocks_left = blocks_left - pad_block
 
         column += generate_event_block(e)
+        # column += generate_event_column([e], get_start_block(e['event_hour']), get_start_block(e['event_hour']) + e['event_timeblocks'])
         blocks_left = blocks_left - e['event_timeblocks']
 
         column += generate_empty_block(blocks_left)
@@ -433,7 +448,7 @@ def generate_weekday_events(weekday, event_list, rare_hours=True):
     else:
         # building the first block
         e = weekday_events[1]
-        # print(f'[DEBUG]: {e}')
+        # log(f'[DEBUG]: {e}')
         pad_block = get_start_block(e['event_hour'])
 
         if pad_block != 0:
@@ -441,6 +456,7 @@ def generate_weekday_events(weekday, event_list, rare_hours=True):
             blocks_left = blocks_left - pad_block
 
         column += generate_event_block(e)
+        # column += generate_event_column([e], get_start_block(e['event_hour']), get_start_block(e['event_hour']) + e['event_timeblocks'])
         blocks_left = blocks_left - e['event_timeblocks']
 
         # checking diff between endblock 1 and startblock
@@ -453,15 +469,17 @@ def generate_weekday_events(weekday, event_list, rare_hours=True):
             if diff == 0:
                 # no padding needed
                 column += generate_event_block(e)
+                # column += generate_event_column([e], get_start_block(e['event_hour']),get_start_block(e['event_hour']) + e['event_timeblocks'])
                 blocks_left = blocks_left - e['event_timeblocks']
             elif diff < 0:
                 # wrong ordering, should not happen
-                print(f'[ERROR]: wrong block order')
+                log(f'[ERROR]: wrong block order')
                 raise KeyError
             else:
                 # padding with empty block then making proper one
                 column += generate_empty_block(diff)
                 blocks_left = blocks_left - diff
+                # column += generate_event_column([e], startblock, startblock+e['event_timeblocks'])
                 column += generate_event_block(e)
                 blocks_left = blocks_left - e['event_timeblocks']
             i = i + 1
@@ -478,9 +496,12 @@ def generate_month_manual(year_number=(datetime.now().year), month_number=(datet
         1: 'January', 2: 'February', 3: 'March', 4: 'April', 5: 'May', 6: 'June',
         7: 'July', 8: 'August', 9: 'September', 10: 'October', 11: 'November', 12: 'December'
     }
-    day_titles = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    day_titles = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+    # day_titles = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
     month_text = ''
+    month_text += '<div id="collapse1" class="panel-collapse show">'
+
     month_text += '<table class="table table-hover table-responsive" id="calendar_month"><thead class="thead-light">' + '\n'
     month_text += '<tr class="text-center align-middle">' + '\n'
     month_text += '<th colspan="1"><a role="button" id="nav_prev" class="btn btn-sm btn-outline-secondary" href="#"> << </a></th>' + '\n'
@@ -510,8 +531,7 @@ def generate_month_manual(year_number=(datetime.now().year), month_number=(datet
     for i in range(start_day, 7):
         day_id = str(year_number) + '-' + str(month_number) + '-' + str(day)
         event_text = generate_day_events(day, events_list)
-        month_text += '<td class="day day-clickable" id="' + day_id + '">\n<div>' + str(day) + '</div>\n' \
-                                                                                               '<div class="event-container justify-content-start m-0">\n' + event_text + '\n</div>\n</td>\n'
+        month_text += '<td class="day day-clickable" id="' + day_id + '">\n<div>' + str(day) + '</div>\n<div class="event-container justify-content-start m-0">\n' + event_text + '\n</div>\n</td>\n'
 
         day += 1
 
@@ -533,10 +553,12 @@ def generate_month_manual(year_number=(datetime.now().year), month_number=(datet
                 month_text += '<td class="day"></td>' + '\n'
 
         month_text += '</tr>' + '\n'
-
     month_text += '</tbody></table>' + '\n'
+    month_text += '</div>'
+    month_text += '</div>'
 
-    # print(month_text)
+    # log(month_text)
+
     return month_text
 
 
@@ -608,7 +630,7 @@ def calendar_week(request, pk=None):
         week_events = week_events_result['events_dict']
         rare = week_events_result["has_rare"]
         # check if early sessions exists for given week
-        print(f'early hours check: {rare}')
+        log(f'early hours check: {rare}')
 
         context = {
             'start': monday,
@@ -628,7 +650,7 @@ def calendar_week(request, pk=None):
             project = Project.objects.get(id=pk)
             context['project'] = project
 
-    print('week loader called')
+    log('week loader called')
     # one_time_gencss()
     return render(request, 'week_loader.html', context=context)
 
@@ -711,5 +733,5 @@ def one_time_gencss():
         base += '.show > .btn-' + code + '.dropdown-toggle:focus {\n'
         base += '  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);\n'
         base += '}\n'
-        print(f'===PRINTING CSS FOR {code}')
-        print(base)
+        log(f'===PRINTING CSS FOR {code}')
+        log(base)
