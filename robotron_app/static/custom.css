@@ -1714,7 +1714,8 @@ body {
 
 .cal-pill {
     /*grey*/
-  background-color: #c4c5c6 !important;
+  /*background-color: #c4c5c6 !important;*/
+  background-color: #58C1CD !important;
   font-size: 10px !important;
   pointer-events: none !important;
 }
