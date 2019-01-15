@@ -127,6 +127,10 @@ body {
     padding-right: 10px;
 }
 
+#main_cal_row {
+    background: #b3e5fc;
+}
+
 #fixed-month th {
     width: 10% !important;
 }

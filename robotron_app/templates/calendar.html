@@ -1,4 +1,4 @@
-{% extends "base_fullscreen.html" %}
+{% extends "base.html" %}
 {% load filters %}
 {% block pageScript %}
     <script>
@@ -143,6 +143,9 @@
                 $(this).on("click", function (e) {
                     var start_day;
                     var end_day;
+                    //clear prev rows
+                    $('#main_cal_row').removeAttr('id');
+                    $(this).attr('id','main_cal_row');
                     //build range from 1st / last cell value
                     for (i = 0; i < 7; i++) {
 //                        console.log(i);
@@ -193,7 +196,9 @@
         Calendar
     {% endif %}
 {% endblock %}
-
+{% block custom_container %}
+    <div class="container-fluid">
+{% endblock custom_container %}
 {% block minicrumbs %}
     {% if project %}
         {% if request.user|isTranslator %}
@@ -208,6 +213,7 @@
         <li class="breadcrumb-item"><a href="{% url 'calendar' %}">Calendar</a></li>
     {% endif %}
 {% endblock %}
+
 {% block content %}
     {% load filters %}
     <table class="table table-hover table-striped table-borderless">
